@@ -79,8 +79,8 @@
         //             rank: ???
         //         };
         //     });
-        d3.csv("rankings.csv").then(ranks => {
-            d3.csv("state_2.csv").then(function (data) {
+        d3.csv("rankings_employment_perc.csv").then(ranks => {
+            d3.csv("employment_perc2.csv").then(function (data) {
                 var slices = data.columns.slice(1).map(function (id) {
                     return {
                         id: id,
@@ -114,16 +114,16 @@
 //----------------------------SCALES----------------------------//
                 const xScale = d3.scaleLinear().range([0, width]);
                 const yScale = d3.scaleLinear().rangeRound([height, 0]);
-                // xScale.domain(d3.extent(data, function(d){
+                //xScale.domain(d3.extent(data, function(d){
                 //     return (d.step)}));
-                xScale.domain([0, 243]);
+                xScale.domain([1, 252]);
                 yScale.domain([d3.min(slices, function (c) {
                     return d3.min(c.values, function (d) {
-                        return d.measurement - 4;
+                        return d.measurement - 2;
                     });
                 }), d3.max(slices, function (c) {
                     return d3.max(c.values, function (d) {
-                        return d.measurement + 4;
+                        return d.measurement + 2;
                     });
                 })
                 ]);
@@ -202,12 +202,13 @@
                     })
                     .attr("transform", function (d) {
                         return "translate(" + (xScale(d.value.step) + 10)
-                            + "," + (yScale(d.value.measurement) + 5) + ")";
+                            + "," + (yScale(d.value.measurement) ) + ")";
                     })
                     .attr("x", 5)
                     .text(function (d) {
                         return d.id;
                     });
+
 
             })
         });
