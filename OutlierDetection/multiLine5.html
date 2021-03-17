@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <title>Multi Line Chart</title>
+    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://unpkg.com/d3-simple-slider"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <style></style>
+    <p style = "font-family:monospace; font-size:18px;" id="value">0</p>
+    <div id="slider"></div>
+
+    <script>
+        var slider = d3
+            .sliderHorizontal()
+            .min(0)
+            .max(53)
+            .step(1)
+            .width(300)
+            .value(0)
+            .displayValue(false)
+            .on('onchange', (val) => {
+                d3.select('#value').text(val.toFixed(0));
+            });
+
+        d3.select('#slider')
+            .append('svg')
+            .attr('width', 500)
+            .attr('height', 100)
+            .append('g')
+            .attr('transform', 'translate(30,30)')
+            .call(slider);
+    </script>
+    <button onclick="update()" type="button" class="filter-btn" id="filter" style = "font-family:monospace; font-size:14px">Highlight Top Outliers</button>
+
+</head>
+<body>
+<div id="line_chart" class="svg-container"></div>
+<div class="bar_chart" ></div>
+<script>
+    // append the svg object to the body of the page
+    // function createHolder() { // [{id: family1, data: loaded from json}]
+    //     let holders = d3.select('#my_dataviz')
+    //         .selectAll('div.svgHolder')
+    //         //.data(listTree,d=>d.id)
+    //         .call(updateHoders);
+    //     holders.exit().remove();
+    //     holders
+    //         .enter()
+    //         .append('div')
+    //         .attr('class','svgHolder')
+    //         .call(updateHoders);
+    //
+    //      function updateHoders(p){
+    //          return p.attr('id',d=>d.id)
+    //              .each(function(d){render('#'+d.id,d.data,graphicOpt)});
+    //     }
+    // }
+
+    function render() {
+        //------------------------1. PREPARATION------------------------//
+        //-----------------------------SVG------------------------------//
+        const width = 960;
+        const height = 500;
+        const margin = 5;
+        const padding = 7;
+        const adj = 30;
+
+        d3.select("div#line_chart").selectAll("svg").remove();
+
+        const svg = d3.select("div#line_chart")
+            .append("svg")
+            .attr("preserveAspectRatio", "xMinYMin meet")
+            .attr("viewBox", "-"
+                + adj + " -"
+                + adj + " "
+                + (width + adj *3) + " "
+                + (height + adj*3))
+            .style("padding", padding)
+            .style("margin", margin)
+            .classed("svg-content", true);
+
+        //-----------------------------DATA-----------------------------//
+        const timeConv = d3.timeParse("%B %Y");
+        d3.csv("rankings_employment_perc.csv").then(ranks => {
+            d3.csv("employment_perc3.csv").then(function (data) {
+                var slices = data.columns.slice(1).map(function (id) {
+                    return {
+                        id: id,
+                        values: data.map(function (d) {
+                            return {
+                                date: timeConv(d.date),
+                                measurement: +d[id]
+                            };
+                        }),
+                        rank: +ranks.find(function (elem) {
+                            return elem.id === id
+                        }).rank
+                    };
+                });
+
+//----------------------------SCALES----------------------------//
+                const xScale = d3.scaleTime().range([0,width]);
+                const yScale = d3.scaleLinear().rangeRound([height, 0]);
+                //xScale.domain(d3.extent(data, function(d){
+                //     return (d.step)}));
+                xScale.domain(d3.extent(data, function(d){
+                    return timeConv(d.date)}));
+                yScale.domain([d3.min(slices, function (c) {
+                    return d3.min(c.values, function (d) {
+                        return d.measurement - 2;
+                    });
+                }), d3.max(slices, function (c) {
+                    return d3.max(c.values, function (d) {
+                        return d.measurement + 2;
+                    });
+                })
+                ]);
+
+//-----------------------------AXES-----------------------------//
+                const yaxis = d3.axisLeft()
+                    //.ticks((slices[0].values).length)
+                    .ticks(Math.round((((slices[0].values).length)) / 8))
+                    //console.log(Math.round((((slices[0].values).length))/4))
+                    .scale(yScale);
+
+                const xaxis = d3.axisBottom()
+                    //.ticks(10)
+                    //.tickFormat(d3.timeFormat('%b %d'))
+                    //.ticks(d3.timeDay.every(6000))
+                    .ticks(120)
+                    .tickFormat(d3.timeFormat('%B %Y'))
+                    .scale(xScale);
+
+//----------------------------LINES-----------------------------//
+                const line = d3.line()
+                    .x(function(d) { return xScale(d.date); })
+                    .y(function (d) {
+                        return yScale(d.measurement);
+                    });
+
+                let id = 0;
+                const ids = function () {
+                    return "line-" + id++;
+                }
+//-------------------------2. DRAWING---------------------------//
+//-----------------------------AXES-----------------------------//
+                svg.append("g")
+                    .attr("class", "axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xaxis)
+                    .selectAll("text")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-.8em")
+                    .attr("dy", ".15em")
+                    .attr("transform", "rotate(-65)");
+
+                svg.append("g")
+                    .attr("class", "axis")
+                    .call(yaxis)
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("dy", ".75em")
+                    .attr("y", 6)
+                    .style("text-anchor", "end");
+                //.text("Frequency");
+
+//----------------------------LINES-----------------------------//
+                const lines = svg.selectAll("lines")
+                    .data(slices)
+                    .enter()
+                    .append("g");
+
+                lines.append("path")
+                    .attr("class", ids)
+                    .attr("fill", 'none')
+                    //.attr("stroke", 'gray')
+                    .attr("stroke", function (d) {
+                        if (d.rank <= document.getElementById("value").innerHTML) {
+                            return 'red'
+                        } else {
+                            return 'gray'
+                        }
+
+                    })
+                    .attr("d", function (d) {
+                        return line(d.values);
+                    });
+
+                lines.append("text")
+                    .attr("class", "serie_label")
+                    .datum(function (d) {
+                        return {
+                            id: d.id,
+                            value: d.values[d.values.length - 1]
+                        };
+                    })
+                    .attr("transform", function (d) {
+                        return "translate(" + (xScale(d.value.date) + 10)
+                            + "," + (yScale(d.value.measurement) ) + ")";
+                    })
+                    .attr("x", 5)
+                    .text(function (d) {
+                        return d.id;
+                    });
+
+
+            })
+        });
+        //barchart();
+    }
+
+    function barchart1() {
+
+        // set the dimensions and margins of the graph
+        var margin = {top: 20, right: 20, bottom: 70, left: 40},
+            width = 500 - margin.left - margin.right,
+            height = 250 - margin.top - margin.bottom;
+
+        // set the ranges
+        var x = d3.scaleBand()
+            .range([0, width])
+            .padding(0.1);
+        var y = d3.scaleLinear()
+            .range([height, 0]);
+
+        // append the svg object to the body of the page
+        // append a 'group' element to 'svg'
+        // moves the 'group' element to the top left margin
+        // d3.select("div#bar_chart").selectAll("svg").remove();
+
+        const svg = d3.select("div.bar_chart")
+            .append("div")
+            .attr('id', 'bar_chartDiv')
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        // get the data
+        d3.csv("rankings_employment_perc.csv").then(ranks => {
+            d3.csv("employment_perc_features.csv").then(function(data) {
+                data.sort(function(a, b) {
+                    return a.lumpiness - b.lumpiness;
+                });
+
+
+
+                // format the data
+                data.forEach(function(d) {
+                    d.lumpiness = +d.lumpiness;
+                    d.rank = +ranks.find(function (elem) {
+                        return elem.id === d.state
+                    }).rank
+                });
+
+                // Scale the range of the data in the domains
+                x.domain(data.map(function(d) { return d.state; }));
+                y.domain([0, d3.max(data, function(d) { return d.lumpiness; })]);
+
+
+
+                // append the rectangles for the bar chart
+                svg.selectAll(".bar")
+                    .data(data)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", function(d) { return x(d.state); })
+                    .attr("width", x.bandwidth())
+                    .attr("y", function(d) { return y(d.lumpiness); })
+                    .attr("height", function(d) { return height - y(d.lumpiness); })
+                    .style("fill",  function (d) {
+                        if (d.rank <= document.getElementById("value").innerHTML) {
+                            return 'red'
+                        } else {
+                            return 'steelblue'
+                        }
+
+                    });
+                // add the x Axis
+                svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x))
+                    .selectAll("text")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-.8em")
+                    .attr("dy", ".15em")
+                    .attr("transform", "rotate(-65)");
+
+
+                // add the y Axis
+                svg.append("g")
+                    .call(d3.axisLeft(y));
+
+                svg.append("text")
+                    .attr("x", (width / 2))
+                    .attr("y", 0 - (margin.top /4))
+                    .attr("text-anchor", "middle")
+                    .style("font-size", "16px")
+                    .style("text-decoration", "underline")
+                    .text("Lumpiness");
+
+
+            });
+        })};
+    function barchart2() {
+
+        // set the dimensions and margins of the graph
+        var margin = {top: 20, right: 20, bottom: 70, left: 40},
+            width = 500 - margin.left - margin.right,
+            height = 250 - margin.top - margin.bottom;
+
+        // set the ranges
+        var x = d3.scaleBand()
+            .range([0, width])
+            .padding(0.1);
+        var y = d3.scaleLinear()
+            .range([height, 0]);
+
+        // append the svg object to the body of the page
+        // append a 'group' element to 'svg'
+        // moves the 'group' element to the top left margin
+        // d3.select("div#bar_chart").selectAll("svg").remove();
+
+        const svg = d3.select("div.bar_chart")
+            .append("div")
+            .attr('id', 'bar_chartDiv')
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        // get the data
+        d3.csv("rankings_employment_perc.csv").then(ranks => {
+            d3.csv("employment_perc_features.csv").then(function(data) {
+                data.sort(function(a, b) {
+                    return a.entropy - b.entropy;
+                });
+
+                // format the data
+                data.forEach(function(d) {
+                    d.entropy = +d.entropy;
+                    d.rank = +ranks.find(function (elem) {
+                        return elem.id === d.state
+                    }).rank
+                });
+
+                // Scale the range of the data in the domains
+                x.domain(data.map(function(d) { return d.state; }));
+                y.domain([0, d3.max(data, function(d) { return d.entropy; })]);
+
+
+
+                // append the rectangles for the bar chart
+                svg.selectAll(".bar")
+                    .data(data)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", function(d) { return x(d.state); })
+                    .attr("width", x.bandwidth())
+                    .attr("y", function(d) { return y(d.entropy); })
+                    .attr("height", function(d) { return height - y(d.entropy); })
+                    .style("fill",  function (d) {
+                        if (d.rank <= document.getElementById("value").innerHTML) {
+                            return 'red'
+                        } else {
+                            return 'steelblue'
+                        }
+
+                    });
+                // add the x Axis
+                svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x))
+                    .selectAll("text")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-.8em")
+                    .attr("dy", ".15em")
+                    .attr("transform", "rotate(-65)");
+
+
+                // add the y Axis
+                svg.append("g")
+                    .call(d3.axisLeft(y));
+
+                svg.append("text")
+                    .attr("x", (width / 2))
+                    .attr("y", 0 - (margin.top /4))
+                    .attr("text-anchor", "middle")
+                    .style("font-size", "16px")
+                    .style("text-decoration", "underline")
+                    .text("Entropy");
+
+
+            });
+        })};
+
+    function barchart3() {
+
+        // set the dimensions and margins of the graph
+        var margin = {top: 20, right: 20, bottom: 70, left: 40},
+            width = 500 - margin.left - margin.right,
+            height = 250 - margin.top - margin.bottom;
+
+        // set the ranges
+        var x = d3.scaleBand()
+            .range([0, width])
+            .padding(0.1);
+        var y = d3.scaleLinear()
+            .range([height, 0]);
+
+        // append the svg object to the body of the page
+        // append a 'group' element to 'svg'
+        // moves the 'group' element to the top left margin
+        // d3.select("div#bar_chart").selectAll("svg").remove();
+
+        const svg = d3.select("div.bar_chart")
+            .append("div")
+            .attr('id', 'bar_chartDiv')
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        // get the data
+        d3.csv("rankings_employment_perc.csv").then(ranks => {
+            d3.csv("employment_perc_features.csv").then(function(data) {
+                data.sort(function(a, b) {
+                    return a.ACF1 - b.ACF1;
+                });
+
+                // format the data
+                data.forEach(function(d) {
+                    d.ACF1 = +d.ACF1;
+                    d.rank = +ranks.find(function (elem) {
+                        return elem.id === d.state
+                    }).rank
+                });
+
+                // Scale the range of the data in the domains
+                x.domain(data.map(function(d) { return d.state; }));
+                y.domain([0, d3.max(data, function(d) { return d.ACF1; })]);
+
+
+
+                // append the rectangles for the bar chart
+                svg.selectAll(".bar")
+                    .data(data)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", function(d) { return x(d.state); })
+                    .attr("width", x.bandwidth())
+                    .attr("y", function(d) { return y(d.ACF1); })
+                    .attr("height", function(d) { return height - y(d.ACF1); })
+                    .style("fill",  function (d) {
+                        if (d.rank <= document.getElementById("value").innerHTML) {
+                            return 'red'
+                        } else {
+                            return 'steelblue'
+                        }
+
+                    });
+                // add the x Axis
+                svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x))
+                    .selectAll("text")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-.8em")
+                    .attr("dy", ".15em")
+                    .attr("transform", "rotate(-65)");
+
+
+                // add the y Axis
+                svg.append("g")
+                    .call(d3.axisLeft(y));
+
+                svg.append("text")
+                    .attr("x", (width / 2))
+                    .attr("y", 0 - (margin.top /4))
+                    .attr("text-anchor", "middle")
+                    .style("font-size", "16px")
+                    .style("text-decoration", "underline")
+                    .text("ACF1");
+
+
+            });
+        })};
+
+    function update() {
+        updateBarCharts();
+        render();
+
+    }
+    function updateBarCharts() {
+        d3.select("div.bar_chart").selectAll("svg").remove();
+        barchart1();
+        barchart2();
+        barchart3();
+
+    }
+    update();
+</script>
+</body>
+
+<!-- https://datawanderings.com/2019/10/28/tutorial-making-a-line-chart-in-d3-js-v-5/ -->
