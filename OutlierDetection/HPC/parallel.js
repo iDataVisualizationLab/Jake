@@ -816,7 +816,7 @@ function render() {
     //-----------------------------DATA-----------------------------//
     //const timeConv = d3version5.timeParse("%B %Y");
     d3version5.csv("cpu1Temps_ranks.csv").then(ranks => {
-        d3version5.csv("cpu1Temps_ts2.csv").then(function (data) {
+        d3version5.csv("cpu1Temps_ts.csv").then(function (data) {
             var slices = data.columns.slice(1).map(function (id) {
                 return {
                     id: id,
