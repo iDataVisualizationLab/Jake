@@ -25,7 +25,7 @@ var m = [60, 0, 10, 0],
 
 var colors = {};
 
-var path_color = '#5A5A5A';
+var path_color = 'black';
 
 var highlight_color = 'red';
 
