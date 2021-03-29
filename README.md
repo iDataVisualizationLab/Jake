@@ -1,6 +1,8 @@
 # Jake
 https://idatavisualizationlab.github.io/Jake/
 
+https://idatavisualizationlab.github.io/Jake/OutlierDetection/life_expectancy/parallel.html
+
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/mortality_rate/parallel.html
 
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/HPC/parallel.html
