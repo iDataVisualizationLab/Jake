@@ -73,7 +73,7 @@ d3.selectAll("canvas")
 foreground = document.getElementById('foreground').getContext('2d');
 foreground.globalCompositeOperation = "destination-over";
 foreground.strokeStyle = "rgba(0,100,160,0.1)";
-foreground.lineWidth = .75;
+foreground.lineWidth = .5;
 foreground.fillText("Loading...",w/2,h/2);
 
 // Highlight canvas for temporary interactions
@@ -84,7 +84,7 @@ highlighted.lineWidth = 4;
 // Background canvas
 background = document.getElementById('background').getContext('2d');
 background.strokeStyle = "rgba(0,100,160,0.1)";
-background.lineWidth = 1.7;
+background.lineWidth = 1;
 
 // SVG for ticks, labels, and interactions
 var svg = d3.select("svg")
@@ -911,7 +911,7 @@ function render() {
             lines.append("path")
                 .attr("class", "ids1")
                 .attr("fill", 'none')
-                .attr("stroke-width", .75)
+                .attr("stroke-width", .5)
                 .attr("stroke", path_color)
                 .attr("d", function (d) {
                     return line(d.values);
@@ -957,14 +957,14 @@ function change_line_color() {
     p.each(function () {
         if (selected_countries.length === 263){
             d3.select(this).attr("stroke", path_color);
-            d3.select(this).attr("stroke-width", .75);
+            d3.select(this).attr("stroke-width", .5);
         }
 
         else if (selected_countries.includes(d3.select(this).data()[0].id)){
             d3.select(this).attr("stroke", highlight_color);
             d3.select(this).attr("stroke-width", 1);
         }
-        else{ d3.select(this).attr("stroke", path_color); d3.select(this).attr("stroke-width", .75); }
+        else{ d3.select(this).attr("stroke", path_color); d3.select(this).attr("stroke-width", .5); }
 
     })
 
