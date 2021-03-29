@@ -958,13 +958,15 @@ function change_line_color() {
         if (selected_countries.length === 263){
             d3.select(this).attr("stroke", path_color);
             d3.select(this).attr("stroke-width", .5);
+            d3.select(this).style("opacity", 1);
         }
 
         else if (selected_countries.includes(d3.select(this).data()[0].id)){
             d3.select(this).attr("stroke", highlight_color);
             d3.select(this).attr("stroke-width", 1);
+            d3.select(this).style("opacity", 1);
         }
-        else{ d3.select(this).attr("stroke", path_color); d3.select(this).attr("stroke-width", .5); }
+        else{ d3.select(this).attr("stroke", path_color); d3.select(this).attr("stroke-width", .5); d3.select(this).style("opacity", 0);}
 
     })
 
