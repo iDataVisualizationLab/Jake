@@ -2,7 +2,7 @@
 https://idatavisualizationlab.github.io/Jake/
 
 
-# Parallel Coordinates
+### Parallel Coordinates
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/emissions/parallel.html
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/unemployment/parallel.html
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/life_expectancy/parallel.html
