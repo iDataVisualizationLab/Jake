@@ -2,6 +2,7 @@
 https://idatavisualizationlab.github.io/Jake/
 
 ### Soil Composition
+https://idatavisualizationlab.github.io/Jake/SoilComposition/index.html
 
 
 ### Parallel Coordinates
