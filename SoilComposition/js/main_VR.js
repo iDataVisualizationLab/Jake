@@ -1,8 +1,8 @@
 import * as THREE from '../lib/threejs/three.module.js';
-import Stats from '../lib/threejs/stats.module.js';
+//import Stats from '../lib/threejs/stats.module.js';
 
-import {GUI} from '../lib/threejs/dat.gui.module.js';
-import { OrbitControls } from '../lib/threejs/OrbitControls2.js';
+//import {GUI} from '../lib/threejs/dat.gui.module.js';
+//import { OrbitControls } from '../lib/threejs/OrbitControls2.js';
 
 import * as p_x from '../data/100/100_pos_x.js';
 import * as p_y from '../data/100/100_pos_y.js';
