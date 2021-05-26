@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>three.js webgl - buffergeometry - particles</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link type="text/css" rel="stylesheet" href="styles/main.css">
+    <script src="lib/aframe/aframe.min.js"></script>
+    <script src="lib/d3/d3.min.js"></script>
+</head>
+<body>
+
+<div id="container"></div>
+<div id="info"><a href="https://threejs.org" target="_blank" rel="noopener">three.js</a></div>
+<script src="js/colors.js"></script>
+<script type="module" src="js/main_3.js"></script>
+<a-scene id="mainScene">
+    <a-assets>
+        <img id="R-image" src="data/R.png">
+    </a-assets>
+    <a-image id="volumeImage" src="#R-image" width="255" height="255" rotation="-90 0 0" position="0 128 0" opacity="0"></a-image>
+
+    <a-entity id="mainCamera" camera look-controls wasd-controls="acceleration: 1000 fly: true" position="0 135 500">
+        <a-entity id="mainCursor"
+                  cursor="fuse: true; fuseTimeout: 500"
+                  position="0 0 -1"
+                  geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.015"
+                  material="color: black; shader: flat">
+        </a-entity>
+
+    </a-entity>
+</a-scene>
+
+</body>
+</html>
