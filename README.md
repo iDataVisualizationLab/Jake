@@ -5,7 +5,7 @@ https://idatavisualizationlab.github.io/Jake/
 https://idatavisualizationlab.github.io/Jake/SoilComposition/index.html
 https://idatavisualizationlab.github.io/Jake/SoilComposition/index_VR.html
 https://idatavisualizationlab.github.io/Jake/SoilComposition/index_3.html
-https://idatavisualizationlab.github.io/Jake/SoilComposition/index_3_2Chemicals.html
+https://idatavisualizationlab.github.io/Jake/SoilComposition/index_3_2Chemicals_overlay.html
 
 
 ### Parallel Coordinates
