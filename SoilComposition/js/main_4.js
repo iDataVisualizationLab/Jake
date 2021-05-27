@@ -220,9 +220,9 @@ function buildVol(){
         // positions
         if (val_t[i] >= valueMin && val_t[i] <= valueMax) {
             if ((Math.pow(pos_x[i] - 50, 2) + Math.pow(pos_z[i] - 50, 2)) < (Math.pow(50, 2))) {
-                const x = (pos_x[i] - 50) * 2.5;
-                const y = (pos_y[i] - 50) * 2.5;
-                const z = (pos_z[i] - 50) * 2.5;
+                const x = (pos_x[i] - 50);
+                const y = (pos_y[i] - 50);
+                const z = (pos_z[i] - 50);
 
                 positions.push(x, y, z);
 
