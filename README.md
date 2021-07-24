@@ -2,6 +2,8 @@
 https://idatavisualizationlab.github.io/Jake/
 
 ### Soil Composition
+https://idatavisualizationlab.github.io/Jake/SoilComposition/PCA/index.html
+
 https://idatavisualizationlab.github.io/Jake/SoilComposition/index.html
 https://idatavisualizationlab.github.io/Jake/SoilComposition/index_VR.html
 https://idatavisualizationlab.github.io/Jake/SoilComposition/index_3.html
