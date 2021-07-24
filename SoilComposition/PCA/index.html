@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PCA</title>
+    <link rel="stylesheet" type="text/css" href="css/parallel.css" />
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+<body>
+<select id="framework" onchange="get_elements(profiles[value])">
+    <option value="0" selected="selected">Range</option>
+    <option value="1">Small</option>
+    <option value="2">Large</option>
+</select>
+<div id="my_dataviz"></div>
+
+<div id="header">
+<!--&lt;!&ndash;    <h1>Feature Explorer</h1>&ndash;&gt;-->
+<!--    <button title="Zoom in on selected data" id="keep-data" disabled="disabled">Keep</button>-->
+<!--    <button title="Remove selected data" id="exclude-data" disabled="disabled">Exclude</button>-->
+<!--    <button title="Export data as CSV" id="export-data">Export</button>-->
+    <div class="controls">
+        <strong id="rendered-count"></strong>/<strong id="selected-count"></strong><!--<strong id="data-count"></strong>-->
+        <div class="fillbar"><div id="selected-bar"><div id="rendered-bar">&nbsp;</div></div></div>
+        Lines at <strong id="opacity"></strong> opacity.
+        <span class="settings">
+        <button id="hide-ticks">Hide Ticks</button>
+        <button id="show-ticks" disabled="disabled">Show Ticks</button>
+        <button id="dark-theme">Dark</button>
+        <button id="light-theme" disabled="disabled">Light</button>
+      </span>
+    </div>
+    <div style="clear:both;"></div>
+</div>
+
+<!--<div class="third">-->
+<!--    <h3>Sample <input type="text" id="search" placeholder="Search State..."></input></h3>-->
+<!--    <p id="states">-->
+<!--    </p>-->
+<!--</div>-->
+
+
+
+<div id="chart">
+    <canvas id="background"></canvas>
+    <canvas id="foreground"></canvas>
+    <canvas id="highlight"></canvas>
+    <svg></svg>
+</div>
+<script src="src/lib/d3.v5.min.js"></script>
+<!--<script src="https://d3js.org/d3.v2.js"></script>-->
+<script>
+    d3v5 = d3
+    window.d3 = null
+</script>
+<!--<script src="src/lib/d3.v4.min.js"></script>-->
+<!--<script src="src/lib/d3.v5.min.js"></script>-->
+<script src="https://d3js.org/d3.v2.js"></script>
+
+<script src="js/PCA.js"></script>
+<script src="js/loadData.js"></script>
+<script src="js/calc.js"></script>
+<script src="https://underscorejs.org/underscore.js"></script>
+<script src="js/parallel.js"></script>
+
+
+<p></p>
+</body>
+</html>
