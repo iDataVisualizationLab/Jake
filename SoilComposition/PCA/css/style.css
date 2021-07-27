@@ -1,0 +1,121 @@
+div#my_dataviz{
+    position: absolute;
+    left: 0%;
+    top: 20%;
+    width: 88%;
+
+}
+
+select#framework{
+    position: absolute;
+    left: 1%;
+    top: 2%;
+    width: 4%;
+
+}
+
+select#packages{
+    position: absolute;
+    left: 5%;
+    top: 1%;
+    width: 8%;
+
+}
+
+/*.test{*/
+/*    position: absolute;*/
+/*    left: 10%;*/
+/*    top: 1%;*/
+/*    width: 8%;*/
+/*}*/
+
+/*.test label{*/
+/*    position: absolute;*/
+/*    left: 14%;*/
+/*    top: 10%;*/
+/*}*/
+
+.Profile0, .Profile1,  .Profile2, .Profile3{
+    position: relative;
+    left: 5%;
+    top: 2%;
+    vertical-align: top;
+    height:auto !important;
+}
+.RCRA_8_metals, .Plant_essentials, .Pedology, .Other {
+    display:none;
+    height:auto;
+    margin:0;
+    float: left;
+}
+.show, .show2, .show3, .show4 {
+    display: none;
+}
+.hide:target + .show, .hide2:target + .show2, .hide3:target + .show3, .hide4:target + .show4 {
+    display: inline;
+}
+.hide:target, .hide2:target, .hide3:target, .hide4:target {
+    display: none;
+}
+.hide:target ~ .RCRA_8_metals, .hide2:target ~ .Plant_essentials, .hide3:target ~ .Pedology, .hide4:target ~ .Other {
+    display:inline;
+}
+
+/*style the (+) and (-) */
+.hide, .show, .hide2, .show2, .hide3, .show3, .hide4, .show4{
+    width: auto;
+    height: 20px;
+    /*border-radius: 30px;*/
+    font-size: 20px;
+    color: indianred;
+    text-shadow: 0 1px 0 #666;
+    text-align: right;
+    text-decoration: none;
+    /*box-shadow: 1px 1px 2px #000;*/
+    /*background: rgba(0, 0, 0, 0.15);*/
+    opacity: .95;
+    margin-right: 0;
+    float: left;
+    margin-bottom: 25px;
+}
+
+.hide:hover, .show:hover, .hide2:hover, .show2:hover, .hide3:hover, .show3:hover, .hide4:hover, .show4:hover {
+    color: indianred;
+    text-shadow: 0 2px 1px #666;
+    text-decoration: none;
+    /*box-shadow: 0 0 4px #222 inset;*/
+    opacity: 1;
+    margin-bottom: 25px;
+}
+
+.RCRA_8_metals input, .Plant_essentials input, .Pedology input, .Other input{
+    height:auto;
+    margin-top: 4px;
+}
+
+.RCRA_8_metals label, .Plant_essentials label, .Pedology label, .Other label{
+    height:auto;
+    /*top: 100%;*/
+    /*margin-bottom: 2px;*/
+    font-size: 16px;
+}
+
+
+.subProfile0, .subProfile1, .subProfile2, .subProfile3 {
+    float: left;
+    height: auto;
+    line-height: 20px;
+    padding-left: 20px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: indianred;
+    font-size: 14px;
+}
+
+
+
+
+
+
+
+
