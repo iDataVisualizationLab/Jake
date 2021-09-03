@@ -1,0 +1,12 @@
+#volume{
+    position: absolute;
+    left: 50vw;
+    top: 40vh;
+    width: 50vw;
+    height: 20vh;
+    z-index: 0;
+}
+#chart{
+    z-index: 2;
+}
+
