@@ -17,7 +17,16 @@ function lasso() {
 
     function lasso(root) {
         // append a <g> with a rect
-        const g = root.append('g').attr('class', 'lasso-group');
+        //const g = root.append('g').attr('class', 'lasso-group');
+        let g = root.select('g.lasso-group')
+
+        if (g.empty()) {
+            g = root.append('g').attr('class','lasso-group')
+        }
+        else{
+            g.selectAll('*').remove();
+        }
+
         const bbox = root.node().getBoundingClientRect();
         const area = g
             .append('rect')

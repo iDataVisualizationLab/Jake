@@ -28,7 +28,7 @@ a {
 svg {
     font-family: Ubuntu, Tahoma, Helvetica, sans-serif;
 }
-canvas, svg {
+#chart canvas, svg {
     position: absolute;
     top: 0;
     left: 0;
@@ -73,7 +73,7 @@ canvas, svg {
 }
 .axis text {
     fill: #111;
-    text-anchor: right;
+    /*text-anchor: right;*/
     font-size: 11px;
     text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
 }
