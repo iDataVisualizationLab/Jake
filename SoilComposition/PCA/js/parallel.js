@@ -1,16 +1,8 @@
-// import * as volume from './main_50.js';
-import {build} from "./main_50.js";
-//import {initVolume} from "./volume.js";
 import {initScene} from "./volume.js";
-
-//let profiles = ["R", "S", "L"];
 
 export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, sel) {
 
     let elem, vMin, vMax;
-
-    // volume.initBuild(_profiles,'Ca', 0, 1);
-    //initVolume(0, 1);
 
     let colors = {
         "R": to_hsl("#8F7C00"),
@@ -23,18 +15,6 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
         "S": "#C20088",
         "L": "#00998F"
     }
-
-    // let colors = {
-    //     "R": to_hsl("red"),
-    //     "S": to_hsl("blue"),
-    //     "L": to_hsl("green")
-    // };
-
-    // let _colors = {
-    //     "R": "red",
-    //     "S": "blue",
-    //     "L": "green"
-    // }
 
     function to_hsl(color){
         let _color = d3v5.color(color);
@@ -127,54 +107,34 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
             case 1:
                 for (let i in data){
                     data[i]["id"] = _profiles[0] + i;
-                    //data[i]["id"] = i;
-                    //data[i]["selected"] = false;
                     data[i]["group"] = _profiles[0];
-                    //data[i]["color"] = color1;
-                    // if (i < data[0].length){
-                    //     data_2[i]["profile"] = profiles[_profiles[0]];
-                    //     data_2[i]["color"] = color1;
-                    // }
-                    // else{
-                    //     data_2[i]["profile"] = profiles[_profiles[1]];
-                    //     data_2[i]["color"] = color2;
-                    // }
                 }
                 break;
             case 2:
                 for (let i in data){
-                    //data[i]["id"] = i;
-                    //data[i]["selected"] = false;
                     if (i < data_passed[0].length){
                         data[i]["id"] = _profiles[0] + i;
                         data[i]["group"] = _profiles[0];
-                        //data[i]["color"] = color1;
                     }
                     else{
                         data[i]["id"] = _profiles[1] + (i - data_passed[0].length);
                         data[i]["group"] = _profiles[1];
-                        //data[i]["color"] = color2;
                     }
                 }
                 break;
             case 3:
                 for (let i in data){
-                    //data[i]["id"] = i;
-                    //data[i]["selected"] = false;
                     if (i < data_passed[0].length){
                         data[i]["id"] = _profiles[0] + i;
                         data[i]["group"] = _profiles[0];
-                        //data[i]["color"] = color1;
                     }
                     else if (i >= data_passed[0].length && i < data_passed[1].length){
                         data[i]["id"] = _profiles[1] + (i - data_passed[0].length);
                         data[i]["group"] = _profiles[1];
-                        //data[i]["color"] = color2;
                     }
                     else{
                         data[i]["id"] = _profiles[2] + (i - (data_passed[0].length + data_passed[1].length));
                         data[i]["group"] = _profiles[2];
-                        //data[i]["color"] = color3;
                     }
                 }
                 break;
@@ -228,7 +188,6 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                     }
                 })
                 .on("dragend", function (d) {
-                    //console.log("dragend");
                     if (!this.__dragged__) {
                         // no movement, invert axis
                         var extent = invert_axis(d);
@@ -253,7 +212,6 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                     d3.select("#foreground").style("opacity", null);
 
                     brush(sel);
-                    //buildVolume();
                     delete this.__dragged__;
                     delete this.__origin__;
                     delete dragging[d];
@@ -267,7 +225,6 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
             .attr("transform", "translate(0,0)")
             .each(function (d) {
                 d3.select(this).call(axis.scale(yscale[d]));
-                // d3.select(this).on("click", console.log("clicked"))
             })
             .append("svg:text")
             .attr("text-anchor", "middle")
@@ -289,8 +246,6 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
             .attr("class", "brush")
             .each(function (d) {
                 d3.select(this).call(yscale[d].brush = d3.svg.brush().y(yscale[d]).on("brush", brush).on("brushend",(sel)=>brush(sel,true)));
-                // console.log(d3.select(this))
-                // d3.select(this).call( d3.svg.brush().on("start end", console.log("pojfoi")))
             })
             .selectAll("rect")
             .style("visibility", null)
@@ -560,23 +515,14 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                 var dimension = d3.select(element).data()[0];
                 if (_.include(actives, dimension)) {
                     var extent = extents[actives.indexOf(dimension)];
-                    //console.log(extent);
 
-                
                     elem = dimension.split(" ")[0]
                     vMin = ((extent[0] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
                     vMax =((extent[1] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
-                    //console.log(vmin);
-                    //console.log(vmax);
 
-                    //initVolume(_profiles, elem, vMin, vMax);
                     if(isEnd)
                         buildVolume(_profiles, elem, vMin, vMax);
 
-
-                    //console.log(dimension)
-
-                    // volume.initBuild(_profiles, elem, vmin, vmax);
                     d3.select(element)
                         .selectAll('text')
                         .style('font-weight', 'bold')
@@ -678,8 +624,6 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
         }
 
         paths(selected, foreground, brush_count, true);
-        //buildVolume();
-
     }
 
 // render a set of polylines on a canvas
@@ -986,64 +930,15 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                 }
             })
         }
-
-
-
-
-        //p.select('circle').style("opacity", "0.25");
-        //p.select('circle').style("fill", "Black");
-        //
-        //
-        // if(!sel.length) {
-        //     p.select('circle').style("opacity", "0.25");
-        //     p.select('circle').style("fill", "Black");
-        // }
-        // else if(sel.length){
-        //     p.select('circle').style("opacity", "0.25");
-        // }
-        // p.each(function () {
-        //     if (!sel.length && selected.length === data.length) {
-        //         d3.select(this).select('circle').style("opacity", "1");
-        //         d3.select(this).select('circle').style("fill", "Black");
-        //
-        //     }
-        //     else if (!sel.length && selected.length != data.length){
-        //         selected.forEach(d => {
-        //             if (d3.select(this).data()[0]["id"] === d.id) {
-        //                 d3.select(this).select('circle').style("opacity", "1");
-        //                 d3.select(this).select('circle').style("fill", "Red");
-        //             }
-        //         })
-        //     }
-        //     else if (sel.length && selected.length === data.length){
-        //         selected.forEach(d => {
-        //             if (d3.select(this).data()[0]["id"] === d.id) {
-        //                 d3.select(this).select('circle').style("opacity", "1");
-        //             }
-        //         })
-        //     }
-        //     else if (sel.length && selected.length != data.length){
-        //         selected.forEach(d => {
-        //             if (d3.select(this).data()[0]["id"] === d.id) {
-        //                 d3.select(this).select('circle').style("opacity", "1");
-        //             }
-        //         })
-        //     }
-        //
-        // })
     }
-    //initVolume(0, 1);
 
 
     function buildVolume(){
-        //console.log(elem);
         if(elem){
             initScene(_profiles, elem, vMin, vMax);
-            //initVolume(_profiles, elem, vMin, vMax);
         }
         else{
             initScene(_profiles, 'Ca', 0, 1);
-            //initVolume(_profiles, 'Ca', 0, 1);
         }
     }
     buildVolume();
