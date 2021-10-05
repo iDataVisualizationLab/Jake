@@ -103,42 +103,55 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
             return d;
         });
 
+        //console.log(data_passed);
+
         switch (_profiles.length){
             case 1:
                 for (let i in data){
-                    data[i]["id"] = _profiles[0] + i;
-                    data[i]["group"] = _profiles[0];
+                    //data[i]["id"] = _profiles[0] + i;
+                    data[i]["id"] = data_passed[i]["id"];
+                    //data[i]["group"] = _profiles[0];
+                    data[i]["group"] = data_passed[i]["profile"];
                 }
                 break;
             case 2:
                 for (let i in data){
+                    data[i]["id"] = data_passed[i]["id"];
                     if (i < data_passed[0].length){
-                        data[i]["id"] = _profiles[0] + i;
-                        data[i]["group"] = _profiles[0];
+                        //data[i]["id"] = _profiles[0] + i;
+                        //data[i]["group"] = _profiles[0];
+                        data[i]["group"] = data_passed[i]["profile"];
                     }
                     else{
-                        data[i]["id"] = _profiles[1] + (i - data_passed[0].length);
-                        data[i]["group"] = _profiles[1];
+                        //data[i]["id"] = _profiles[1] + (i - data_passed[0].length);
+                        //data[i]["group"] = _profiles[1];
+                        data[i]["group"] = data_passed[i]["profile"];
                     }
                 }
                 break;
             case 3:
                 for (let i in data){
+                    data[i]["id"] = data_passed[i]["id"];
                     if (i < data_passed[0].length){
-                        data[i]["id"] = _profiles[0] + i;
-                        data[i]["group"] = _profiles[0];
+                        //data[i]["id"] = _profiles[0] + i;
+                        //data[i]["group"] = _profiles[0];
+                        data[i]["group"] = data_passed[i]["profile"];
                     }
                     else if (i >= data_passed[0].length && i < data_passed[1].length){
-                        data[i]["id"] = _profiles[1] + (i - data_passed[0].length);
-                        data[i]["group"] = _profiles[1];
+                        //data[i]["id"] = _profiles[1] + (i - data_passed[0].length);
+                        //data[i]["group"] = _profiles[1];
+                        data[i]["group"] = data_passed[i]["profile"];
                     }
                     else{
-                        data[i]["id"] = _profiles[2] + (i - (data_passed[0].length + data_passed[1].length));
-                        data[i]["group"] = _profiles[2];
+                        //data[i]["id"] = _profiles[2] + (i - (data_passed[0].length + data_passed[1].length));
+                        //data[i]["group"] = _profiles[2];
+                        data[i]["group"] = data_passed[i]["profile"];
                     }
                 }
                 break;
         }
+
+        //console.log(data)
 
 
         // Extract the list of numerical dimensions and create a scale for each.

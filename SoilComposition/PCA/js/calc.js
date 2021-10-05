@@ -20,15 +20,6 @@ let colors = {
     "L": "#00998F"
 }
 
-// let colors = {
-//     "R": "red",
-//     "S": "blue",
-//     "L": "green"
-// }
-
-// let color1 = "red"
-// let color2 = "blue"
-// let color3 = "green"
 
 init_pca_plot();
 
@@ -113,9 +104,6 @@ export function selectProfiles(){
     get_dimensions_3(selectedIndexes);
 }
 
-
-
-
 export function get_dimensions_3(_profiles){
 
     let dims_3 = {};
@@ -141,7 +129,6 @@ export function get_dimensions_3(_profiles){
             dims_3[i]["color"] = d3v5.color(myColor(count));
             count++;
         }
-
         get_maxmin_3(_profiles, dims_3);
     })
 
@@ -220,7 +207,7 @@ function get_readings_3(_profiles, dims_3){
         }
 
         if(PCA_inputs && PCA_inputs[0][0] && PCA_inputs[0][0].length > 1){
-            draw_pca_plot_3(_profiles, PCA_inputs, files, dims_3, dim_ids);
+            draw_pca_plot_3(_profiles, PCA_inputs, files, dims_3, dim_ids, false);
         }else{
             //TODO add message / clear svg
             //No dimensions selected
@@ -228,60 +215,82 @@ function get_readings_3(_profiles, dims_3){
     });
 }
 
-let lasso_on = false;
-function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids){
-
-    // for (let i in dims_2){
-    //     if(dims_2[i].max == 0){
-    //         dims_2[i].hide = true
-    //         document.getElementById(dims_2[i].name.split(' ')[0]).checked = false;
-    //         document.getElementById(dims_2[i].name.split(' ')[0]).disabled = true;
-    //     }
-    //     else{
-    //         document.getElementById(dims_2[i].name.split(' ')[0]).disabled = false;
-    //     }
-    // }
+async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
 
     let PCA_input = []
+    let PCA_input2 = []
+    let data_2
 
     inputs.forEach(d => PCA_input = PCA_input.concat(d));
 
-    //inputs[0].concat(inputs[1])
+    if (!reCal){
+        data_2 = []
+        data.forEach(d => data_2 = data_2.concat(d));
+        for (let i = 0; i < data_2; i++){
+            data_2[i]["hide"] = false;
+            data_2[i]["index"] = i;
+        }
+    }
+    else{
+        data_2 = data
+    }
 
-    //console.log(inputs);
-    //console.log(PCA_input)
+    for (let i = 0; i < PCA_input.length; i++){
+        if (!data_2[i]["hide"]){
+            PCA_input2.push(PCA_input[i])
+        }
+    }
 
-    // for (let i in dims_3){
-    //     if (dims_3[i].max === 0){
-    //         dims_3[i].hide = true;
-    //         document.getElementById(i.split(' ')[0]).checked = false;
-    //         document.getElementById(i.split(' ')[0]).disabled = true;
-    //     }
-    //     else{
-    //         document.getElementById(i.split(' ')[0]).disabled = false;
-    //     }
-    //
-    // }
 
     let pca = new PCA();
-    let matrix = pca.scale(PCA_input, true, false);
+    let matrix
+
+    if (!reCal){
+        matrix = pca.scale(PCA_input, true, false);
+    }
+    else {matrix = pca.scale(PCA_input2, true, false);}
+
     let pc = pca.pca(matrix, 2);
     let A = pc[0];  // this is the U matrix from SVD
     let B = pc[1];  // this is the dV matrix from SVD
     let chosenPC = pc[2];   // this is the most value of PCA
 
-    var data_2 = []
-    data.forEach(d => data_2 = data_2.concat(d));
-    //data[0].concat(data[1]);
+    let hiddenCount = 0;
 
-    for (let i in A){
-        data_2[i]["PC1"] = A[i][0];
-        data_2[i]["PC2"] = A[i][1];
+    for (let i = 0; i < data_2.length; i++){
+        if (!data_2[i].hide){
+            data_2[i]["PC1"] = A[i - hiddenCount][0];
+            data_2[i]["PC2"] = A[i - hiddenCount][1];
+        }
+        else{
+            hiddenCount++
+            data_2[i]["PC1"] = 0;
+            data_2[i]["PC2"] = 0;
+        }
+
     }
+
+    // for (let i in A){
+    //     data_2[i]["PC1"] = A[i][0];
+    //     data_2[i]["PC2"] = A[i][1];
+    //     // data_2[i]["hide"] = false;
+    //     // data_2[i]["index"] = count++;
+    // }
 
     for (let i in B){
         dims_3[dim_ids[i]]["x"] = B[i][0];
         dims_3[dim_ids[i]]["y"] = B[i][1];
+    }
+
+    for (let i in dims_3){
+        if (dims_3[i]["x"] == 0 & dims_3[i]["y"] == 0){
+            dims_3[i].hide = true;
+        }
+        else{
+            if(dims_3[i].max != 0){
+                dims_3[i].hide = false;
+            }
+        }
     }
 
     let x_list = [];
@@ -307,84 +316,53 @@ function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids){
         sorted_dims.push(_dims[i]["name"])
     }
 
-    // for (let i in data_2){
-    //     data_2[i]["id"] = i;
-    //     data_2[i]["selected"] = false;
-    //     // if (i < data[0].length){
-    //     //     data_2[i]["profile"] = profiles[_profiles[0]];
-    //     //     data_2[i]["color"] = color1;
-    //     // }
-    //     // else{
-    //     //     data_2[i]["profile"] = profiles[_profiles[1]];
-    //     //     data_2[i]["color"] = color2;
-    //     // }
-    // }
-
-    switch (_profiles.length){
-        case 1:
-            for (let i in data_2){
-                data_2[i]["id"] = _profiles[0] + i;
-                data_2[i]["selected"] = false;
-                //data_2[i]["profile"] = profiles[_profiles[0]];
-                data_2[i]["profile"] = _profiles[0];
-                data_2[i]["color"] = colors[_profiles[0]];
-                // if (i < data[0].length){
-                //     data_2[i]["profile"] = profiles[_profiles[0]];
-                //     data_2[i]["color"] = color1;
-                // }
-                // else{
-                //     data_2[i]["profile"] = profiles[_profiles[1]];
-                //     data_2[i]["color"] = color2;
-                // }
-            }
-            break;
-        case 2:
-            for (let i in data_2){
-                //data_2[i]["id"] = i;
-                data_2[i]["selected"] = false;
-                if (i < data[0].length){
+    if (!reCal){
+        switch (_profiles.length){
+            case 1:
+                for (let i in data_2){
                     data_2[i]["id"] = _profiles[0] + i;
-                    //data_2[i]["profile"] = profiles[_profiles[0]];
+                    data_2[i]["selected"] = false;
                     data_2[i]["profile"] = _profiles[0];
                     data_2[i]["color"] = colors[_profiles[0]];
                 }
-                else{
-                    data_2[i]["id"] = _profiles[1] + (i - data[0].length);
-                    // data_2[i]["profile"] = profiles[_profiles[1]];
-                    data_2[i]["profile"] = _profiles[1];
-                    data_2[i]["color"] = colors[_profiles[1]];
+                break;
+            case 2:
+                for (let i in data_2){
+                    data_2[i]["selected"] = false;
+                    if (i < data[0].length){
+                        data_2[i]["id"] = _profiles[0] + i;
+                        data_2[i]["profile"] = _profiles[0];
+                        data_2[i]["color"] = colors[_profiles[0]];
+                    }
+                    else{
+                        data_2[i]["id"] = _profiles[1] + (i - data[0].length);
+                        data_2[i]["profile"] = _profiles[1];
+                        data_2[i]["color"] = colors[_profiles[1]];
+                    }
                 }
-            }
-            break;
-        case 3:
-            for (let i in data_2){
-                //data_2[i]["id"] = i;
-                data_2[i]["selected"] = false;
-                if (i < data[0].length){
-                    data_2[i]["id"] = _profiles[0] + i;
-                    // data_2[i]["profile"] = profiles[_profiles[0]];
-                    data_2[i]["profile"] = _profiles[0];
-                    data_2[i]["color"] = colors[_profiles[0]];
+                break;
+            case 3:
+                for (let i in data_2){
+                    data_2[i]["selected"] = false;
+                    if (i < data[0].length){
+                        data_2[i]["id"] = _profiles[0] + i;
+                        data_2[i]["profile"] = _profiles[0];
+                        data_2[i]["color"] = colors[_profiles[0]];
+                    }
+                    else if (i >= data[0].length && i < (data[1].length + data[0].length)){
+                        data_2[i]["id"] = _profiles[1] + (i - data[0].length);
+                        data_2[i]["profile"] = _profiles[1];
+                        data_2[i]["color"] = colors[_profiles[1]];
+                    }
+                    else{
+                        data_2[i]["id"] = _profiles[2] + (i - (data[0].length + data[1].length));
+                        data_2[i]["profile"] = _profiles[2];
+                        data_2[i]["color"] = colors[_profiles[2]];
+                    }
                 }
-                else if (i >= data[0].length && i < (data[1].length + data[0].length)){
-                    data_2[i]["id"] = _profiles[1] + (i - data[0].length);
-                    // data_2[i]["profile"] = profiles[_profiles[1]];
-                    data_2[i]["profile"] = _profiles[1];
-                    data_2[i]["color"] = colors[_profiles[1]];
-                }
-                else{
-                    data_2[i]["id"] = _profiles[2] + (i - (data[0].length + data[1].length));
-                    // data_2[i]["profile"] = profiles[_profiles[2]];
-                    data_2[i]["profile"] = _profiles[2];
-                    data_2[i]["color"] = colors[_profiles[2]];
-                }
-            }
-            break;
+                break;
+        }
     }
-
-
-
-
 
     var width = graphicPCA.width(),
         height = graphicPCA.height();
@@ -420,9 +398,6 @@ function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids){
     //     //.attr("transform", "rotate(-90)")
     //     .text("PC2");
 
-    // if (lasso_on){
-    //     d3v5.selectAll(".lasso-group").remove()
-    // }
 
 
     var lassoInstance = lasso()
@@ -459,44 +434,17 @@ function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids){
                     })
                     .on("mouseleave", function (){
                         d3v5.select(this).selectAll("text").attr("display", "none");
-                    })
+                    });
 
                 gdot.append("circle")
                     .attr("r", 3)
                     .style("fill", d => d.color)
-                    // .style("fill", function (d){
-                    //     // return "black";
-                    //     if (d.profile == profiles[_profiles[0]]){
-                    //         return "blue";
-                    //     }
-                    //     else if(d.profile == profiles[_profiles[1]]){
-                    //         return "red";
-                    //     }
-                    // })
-                    // .on('mouseover', function(){
-                    //     d3v5.select(this.parentNode).append("text")
-                    //         .attr('text-anchor', 'left')
-                    //         .attr("x", "20")//function(d) {return 20})
-                    //         .attr("y", "0")//function(d) {return 0})
-                    //         .text(function (d) {return 'Location: ' + d["Location"].toString()});
-                    //     d3v5.select(this.parentNode).append("text")
-                    //         .attr('text-anchor', 'left')
-                    //         .attr("x", "20")//function(d) {return 20})
-                    //         .attr("y", "15")//function(d) {return 15})
-                    //         .text(function (d) {return 'Depth: ' + d["Sample ID"].toString()});
-                    //     d3v5.select(this.parentNode).selectAll('text').raise();
-                    // })
-                    // .on('mouseleave', function(){
-                    //     d3v5.select(this.parentNode).selectAll('text').remove();
-                    // });
                 return gdot;
             },
             update => update
                 .call(update => update.transition().duration(graphicPCA.animationTime)
+                    .attr('display', d=> d.hide ? 'none': null)
                     .attr('transform',d=>`translate(${[x(d["PC1"]),y(d["PC2"])]})`)),
-
-                ///.call(update => update.on("mouseover", console.log("yo"))),
-                //.style("fill", d=> d.color),
 
             exit => exit
                 .call(exit => exit.remove())
@@ -504,6 +452,62 @@ function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids){
         );
 
 
+    d3v5.selectAll(".dot_group").on("contextmenu", function (d, i) {
+        d3v5.event.preventDefault();
+
+
+        d["hide"] = true;
+        //getData()
+        // d["hide"] = true;
+        //console.log(data_2)
+        draw_pca_plot_3(_profiles, inputs, data_2, dims_3, dim_ids, true);
+
+    });
+
+    let removedData = [];
+
+    data_2.forEach(d => d.hide ? removedData.push(d) : null)
+
+    let header = document.getElementById("removedHeader");
+    if (removedData.length != 0){
+        header.style.display = null;
+    }else{
+        header.style.display = "none";
+    }
+
+    //tb.style.display = "none";
+
+    var table = d3.select("#removed")
+        .html("")
+        .selectAll(".row")
+        .data(removedData)
+        .enter().append("div")
+        // .on("mouseover", function(){
+        //     d3v5.select(this).select("text").attr("display", null);
+        // })
+        //.on("mouseout", unhighlight);
+        .on("click", function (d, i) {
+            //d3v5.event.preventDefault();
+            d["hide"] = false
+            draw_pca_plot_3(_profiles, inputs, data_2, dims_3, dim_ids, true);
+            })
+    // table
+    //     .append("title")
+    //     .attr('text-anchor', 'left')
+    //     .attr("x", "20")
+    //     .attr("y", "15")
+    //     .text("click to restore")
+    //     //.attr("display", "none");
+
+
+    table
+        .append("span")
+        .attr("class", "color-block")
+        //.style("background", function(d) { return color(d.group,0.85) })
+
+    table
+        .append("span")
+        .text(function(d) { return d.id; })
 
     let defs = svg.select("defs");
 
@@ -523,62 +527,38 @@ function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids){
         return "url(" + color + ")";
     };
 
-    function distance(d){
-        return Math.sqrt((d[2]-d[0])*(d[2]-d[0])+(d[3]-d[1])*(d[3]-d[1]));
-    }
-
     let dimsX = [];
     for (let i in dims_3){
-        if(!(dims_3[i]["noShow"])){
+        if(!(dims_3[i]["noShow"]) && !dims_3[i]["hide"]){
             dimsX.push(dims_3[i]["x"])
         }
     }
-    // dims.forEach(function (d){
-    //     if (!d.noShow){
-    //         dimsX.push(d.x);
-    //     }
-    // })
 
     let dimsY = [];
     for (let i in dims_3){
-        if(!(dims_3[i]["noShow"])){
+        if(!(dims_3[i]["noShow"]) && !dims_3[i]["hide"]){
             dimsY.push(dims_3[i]["y"])
         }
     }
 
-
-    // let dimsY = [];
-    // dims.forEach(function (d){
-    //     if (!d.noShow){
-    //         dimsY.push(d.y);
-    //     }
-    // })
+    function distance(d){
+        return Math.sqrt((d[2]-d[0])*(d[2]-d[0])+(d[3]-d[1])*(d[3]-d[1]));
+    }
 
     let dimsReshape = []
     for (let i in dimsX){
         dimsReshape.push(distance([x(0), y(0), x(dimsX[i]), y(dimsY[i])]))
     }
 
-
-    let multiplyBrands = Math.sqrt(d3.min([
+    let multiplyBrands = Math.sqrt(d3v5.min([
         distance([x(0),y(0),x.range()[0],y.range()[0]]),
         distance([x(0),y(0),x.range()[0],y.range()[1]]),
         distance([x(0),y(0),x.range()[1],y.range()[0]]),
         distance([x(0),y(0),x.range()[1],y.range()[1]]),
-    ])/d3.max(dimsReshape)/2);
-
-
-
-
-    // let dims_2_test = [];
-    // for (let i in dims_2){
-    //     dims_2_test.push(dims_2[i]);
-    // }
-
+    ])/d3v5.max(dimsReshape)/2);
 
     let dim_list = [];//d3.entries(dims_2);
     Object.keys(dims_3).forEach(dim=> dim_list.push(dims_3[dim]));
-
 
     var line_groups = svg.selectAll(".line_group")
         .data(dim_list, d=>d.name)
@@ -617,22 +597,6 @@ function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids){
                         d3v5.select(this.parentNode).select('text').attr("display", null)
                     })
                     .on('mouseleave', function (){d3v5.select(this.parentNode).select('text').attr("display", "none")});
-                    // .on('mouseover', function(){
-                    //     d3v5.select(this.parentNode).append("text")
-                    //         .attr('text-anchor', 'left')
-                    //         .attr("x", function (d){return x(d.x * multiplyBrands)})
-                    //         .attr("y", function (d){return y(d.y * multiplyBrands)})
-                    //         .text(function (d) {return d["name"].toString()});
-                    //     // d3v5.select(this.parentNode).append("text")
-                    //     //     .attr('text-anchor', 'left')
-                    //     //     .attr("x", "20")//function(d) {return 20})
-                    //     //     .attr("y", "15")//function(d) {return 15})
-                    //     //     .text(function (d) {return 'Depth: ' + d["name"].toString()});
-                    //     d3v5.select(this.parentNode).selectAll('text').raise();
-                    // })
-                    // .on('mouseleave', function(){
-                    //     d3v5.select(this.parentNode).selectAll('text').remove();
-                    // });
             },
             update => update
                 .call(update => update.style('display',d=>(d.noShow || d.hide || d.y===undefined || d.x===undefined)?'none':null)
@@ -658,10 +622,7 @@ function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids){
 
         )
 
-
-    parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data, []);
-
-
+    parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data_2, []);
 
     // when a selected.length === data.length is completed, filter to the points within the lasso polygon
     function handleLassoEnd(lassoPolygon) {
@@ -694,13 +655,8 @@ function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids){
                     //.each(d => d.__data__["selected"] = false)
                     .style("opacity", 1);
             }
-            parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data, sel);
+            parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data_2, sel);
         }
-        // else{
-        //     console.log("EMPTY");
-        //     d3.selectAll('.dot_group').select('circle')
-        //         .style("opacity", 1)
-        // }
     }
 
 // reset selected points when starting a new polygon
@@ -708,41 +664,6 @@ function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids){
         updateSelected([]);
     }
 
-    // var lassoInstance = lasso()
-    //     //.on('mouseover', null)
-    //     //.on('mouseleave', null)
-    //     .on('end', handleLassoEnd)
-    //     .on('start', handleLassoStart);
-    //
-    // // svg.call(lassoInstance);
-    //
-    // var firstClick = true;
-    // var lassoOn = false;
-    //
-    // // svg.on("click", function (){console.log("clicked")});
-    // d3v5.select("#my_dataviz").on("click", function (){
-    //     if (!firstClick && !lassoOn){
-    //         svg.call(lassoInstance)
-    //         lassoOn = true;
-    //     }
-    //     firstClick = false});
-    //
-    // d3v5.select("#my_dataviz").on("contextmenu", function (d, i) {
-    //     d3v5.selectAll(".lasso-group").remove()
-    //     parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data, []);
-    //     // lassoing.remove()
-    //     firstClick = true;
-    //     lassoOn = false;
-    // });
-    //svg.call(lassoInstance)
-    // d3v5.select('#lasso-group')
-    //     .on('mouseover', null)
-    //     .on('mouseleave', null);
-
-
-
-
-    //overlay.call(lassoInstance);
 }
 
 
