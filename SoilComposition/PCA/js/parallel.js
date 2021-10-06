@@ -522,6 +522,10 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                 return yscale[p].brush.extent();
             });
 
+        let elms = [];
+        let vMins = [];
+        let vMaxs = [];
+
         // hack to hide ticks beyond extent
         var b = d3.selectAll('.dimension')[0]
             .forEach(function (element, i) {
@@ -529,12 +533,16 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                 if (_.include(actives, dimension)) {
                     var extent = extents[actives.indexOf(dimension)];
 
-                    elem = dimension.split(" ")[0]
-                    vMin = ((extent[0] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
-                    vMax =((extent[1] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
+                    elms.push (dimension.split(" ")[0]);
+                    vMins.push ((extent[0] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
+                    vMaxs.push ((extent[1] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
 
-                    if(isEnd)
-                        buildVolume(_profiles, elem, vMin, vMax);
+                    // elem = dimension.split(" ")[0]
+                    // vMin = ((extent[0] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
+                    // vMax = ((extent[1] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
+
+                    // if(isEnd)
+                    //     buildVolume(_profiles, elem, vMin, vMax);
 
                     d3.select(element)
                         .selectAll('text')
@@ -555,6 +563,12 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                     .selectAll('.label')
                     .style('display', null);
             });
+
+        if(isEnd)
+            if (elms.length != 0 )
+                initScene(_profiles, elms, vMins, vMaxs)//(_profiles, elms, vMins, vMaxs);
+            else
+                initScene(_profiles, ['Ca'], [0], [1])
 
         // bold dimensions with label
         d3.selectAll('.label')
@@ -947,12 +961,15 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
 
 
     function buildVolume(){
-        if(elem){
-            initScene(_profiles, elem, vMin, vMax);
-        }
-        else{
-            initScene(_profiles, 'Ca', 0, 1);
-        }
+        //console.log(_profiles)
+        //if(elem){
+        //    initScene(_profiles, elms, vMins, vMaxs)
+            //initScene(_profiles, elem, vMin, vMax);
+        //}
+        //else{
+            initScene(_profiles, ['Ca'], [0], [1]);
+            //initScene(_profiles, 'Ca', 0, 1);
+        //}
     }
     buildVolume();
 

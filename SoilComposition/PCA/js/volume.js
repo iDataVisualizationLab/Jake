@@ -153,11 +153,17 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
 
     let profile = _profile;
 
-    let filePath = "./data/"+profile+"/50_"+chemical+"_Concentration_t.json"
+    //let filePath = "./data/"+profile+"/50_"+chemical+"_Concentration_t.json"
+
+    let valsArr = []
+
+    for (const i of chemical){
+        let path = "./data/"+profile+"/50_"+i+"_Concentration_t.json"
+        let arr = await fetchData(path)
+        valsArr.push(arr)
+    }
 
     _containerInfo.innerHTML = chemical
-
-    let val_t = await fetchData(filePath);
 
     const particles = 125000;
 
@@ -168,19 +174,23 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
 
     for ( let i = 0; i < particles; i ++ ) {
 
-        if (val_t[i] >= minVal && val_t[i] <= maxVal){
+        for (let j in chemical){
+            if (valsArr[j][i] >= minVal[j] && valsArr[j][i] <= maxVal[j]){
 
-            if ((Math.pow(pos_x[i] - 25, 2) + Math.pow(pos_z[i] - 25, 2)) < (Math.pow(25, 2))) {
-                const x = (pos_x[i] - 25) * 5;
-                const y = (pos_y[i] - 25) * 5;
-                const z = (pos_z[i] - 25) * 5;
+                if ((Math.pow(pos_x[i] - 25, 2) + Math.pow(pos_z[i] - 25, 2)) < (Math.pow(25, 2))) {
+                    const x = (pos_x[i] - 25) * 5;
+                    const y = (pos_y[i] - 25) * 5;
+                    const z = (pos_z[i] - 25) * 5;
 
-                positions.push(x, y, z);
+                    positions.push(x, y, z);
 
-                let color = new THREE.Color(getColor(val_t[i]));
-                colors.push(color.r, color.g, color.b);
+                    let color = new THREE.Color(getColor(valsArr[j][i]));
+                    colors.push(color.r, color.g, color.b);
+                }
             }
         }
+
+
     }
 
     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
