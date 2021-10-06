@@ -14,6 +14,12 @@ let container3 = document.getElementById( 'container3' );
 
 let containerArr = [container, container2, container3];
 
+let containerInfo =  document.getElementById( 'containerInfo' );
+let container2nfo =  document.getElementById( 'container2Info' );
+let container3Info =  document.getElementById( 'container3Info' );
+
+let containerInfoArr = [containerInfo, container2nfo, container3Info]
+
 let scenes = [];
 let scene1,scene2,scene3;
 let renderers = [];
@@ -59,6 +65,20 @@ function createScenes(){
             camera2.position.z = 500;
             cameras.push(camera2)
             controlsArr.push(controls2);
+            controls1.addEventListener( 'change', () => {
+
+                camera2.position.copy( camera1.position );
+                camera2.rotation.copy( camera1.rotation );
+                render();
+
+            } );
+            controls2.addEventListener( 'change', () => {
+
+                camera1.position.copy( camera2.position );
+                camera1.rotation.copy( camera2.rotation );
+                render();
+
+            } );
             break;
         case 2:
             scene3 = new THREE.Scene();
@@ -76,6 +96,34 @@ function createScenes(){
             camera3.position.z = 500;
             cameras.push(camera3)
             controlsArr.push(controls3);
+            controls1.addEventListener( 'change', () => {
+
+                camera3.position.copy( camera1.position );
+                camera3.rotation.copy( camera1.rotation );
+                render();
+
+            } );
+            controls2.addEventListener( 'change', () => {
+
+                camera3.position.copy( camera2.position );
+                camera3.rotation.copy( camera2.rotation );
+                render();
+
+            } );
+            controls3.addEventListener( 'change', () => {
+
+                camera1.position.copy( camera3.position );
+                camera1.rotation.copy( camera3.rotation );
+                render();
+
+            } );
+            controls3.addEventListener( 'change', () => {
+
+                camera2.position.copy( camera3.position );
+                camera2.rotation.copy( camera3.rotation );
+                render();
+
+            } );
             break;
     }
 }
@@ -86,7 +134,8 @@ export function initScene(_profiles, chemical, minVal, maxVal){
         createScenes()
     }
     if(_profiles.length < scenes.length){
-        containerArr[_profiles.length].removeChild(containerArr[_profiles.length].firstChild)
+        containerArr[_profiles.length].removeChild(containerArr[_profiles.length].children[1]);
+        containerArr[_profiles.length].children[0].innerHTML = '';
         scenes.pop();
         cameras.pop();
         controlsArr.pop();
@@ -94,17 +143,19 @@ export function initScene(_profiles, chemical, minVal, maxVal){
     }
 
     for (let i = 0; i < _profiles.length; i++){
-        initVolume2(_profiles[i], chemical, minVal, maxVal, scenes[i], containerArr[i], renderers[i]);
+        initVolume2(_profiles[i], chemical, minVal, maxVal, scenes[i], containerArr[i], renderers[i], containerInfoArr[i]);
     }
 }
 
-export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _container, _renderer) {
+export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _container, _renderer, _containerInfo) {
 
     _scene.remove.apply(_scene, _scene.children);
 
     let profile = _profile;
 
     let filePath = "./data/"+profile+"/50_"+chemical+"_Concentration_t.json"
+
+    _containerInfo.innerHTML = chemical
 
     let val_t = await fetchData(filePath);
 
@@ -158,6 +209,7 @@ function onWindowResize() {
 
 
 function animate() {
+
 
     // setTimeout( function() {
     //

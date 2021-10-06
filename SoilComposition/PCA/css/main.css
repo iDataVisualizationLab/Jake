@@ -43,6 +43,30 @@
 #container canvas {
     position: unset;
 }
+#containerInfo{
+    position: relative;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+    z-index: 100;
+    display:block;
+}
+#container2Info{
+    position: relative;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+    z-index: 100;
+    display:block;
+}
+#container3Info{
+    position: relative;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+    z-index: 100;
+    display:block;
+}
 #container2{
     /*position: absolute;*/
     /*left: 50vw;*/
