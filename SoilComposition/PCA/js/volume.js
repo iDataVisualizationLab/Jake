@@ -173,7 +173,6 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
     const colors = [];
 
     for ( let i = 0; i < particles; i ++ ) {
-
         for (let j in chemical){
             if (valsArr[j][i] >= minVal[j] && valsArr[j][i] <= maxVal[j]){
 
@@ -189,8 +188,6 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
                 }
             }
         }
-
-
     }
 
     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
