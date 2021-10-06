@@ -560,6 +560,15 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
     let dim_list = [];//d3.entries(dims_2);
     Object.keys(dims_3).forEach(dim=> dim_list.push(dims_3[dim]));
 
+    dim_list.forEach(d => {while (
+        d["x"]* multiplyBrands > d3v5.max(x_list) ||
+        d["x"]* multiplyBrands < d3v5.min(x_list) ||
+        d["y"]* multiplyBrands > d3v5.max(y_list) ||
+        d["y"]* multiplyBrands < d3v5.min(y_list)
+        ){
+            multiplyBrands = multiplyBrands * .99;
+    }})
+
     var line_groups = svg.selectAll(".line_group")
         .data(dim_list, d=>d.name)
         .join(
