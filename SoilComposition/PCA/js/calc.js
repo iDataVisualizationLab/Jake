@@ -109,7 +109,8 @@ export function get_dimensions_3(_profiles){
     let dims_3 = {};
 
     Promise.all(
-        Array.from(_profiles, x => d3v5.csv("./data/"+x+"_normalized.csv"))
+        // Array.from(_profiles, x => d3v5.csv("./data/"+x+"_normalized.csv"))
+        Array.from(_profiles, x => d3v5.csv("./data/"+x+".csv"))
     ).then(function(files) {
         for (let i in files){
             for (let j in files[i][0]){
@@ -182,7 +183,9 @@ function get_readings_3(_profiles, dims_3){
         }
     }
 
-    Promise.all(Array.from(_profiles, x => d3v5.csv("./data/"+x+"_normalized.csv"))
+    // Promise.all(Array.from(_profiles, x => d3v5.csv("./data/"+x+"_normalized.csv"))
+    Promise.all(Array.from(_profiles, x => d3v5.csv("./data/"+x+".csv"))
+    // Promise.all(Array.from(_profiles, x => d3v5.csv("./data/"+x+"_normalized2.csv"))
     ).then(function(files) {
         for (let i in dims_3){
             if (dims_3[i].max === 0) {
@@ -246,9 +249,12 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
     let matrix
 
     if (!reCal){
-        matrix = pca.scale(PCA_input, true, false);
+        // matrix = pca.scale(PCA_input, true, false);
+        matrix = pca.scale(PCA_input, true, true);
     }
-    else {matrix = pca.scale(PCA_input2, true, false);}
+    // else {matrix = pca.scale(PCA_input2, true, false);}
+    else {matrix = pca.scale(PCA_input2, true, true);}
+
 
     let pc = pca.pca(matrix, 2);
     let A = pc[0];  // this is the U matrix from SVD
@@ -405,7 +411,6 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
         .on('start', handleLassoStart);
 
     svg.call(lassoInstance);
-    // lasso_on = true;
 
     var dot_groups = svg.selectAll(".dot_group")
         .data(data_2, d=>d.id)
@@ -417,15 +422,15 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
 
                 gdot.append("text")
                     .attr('text-anchor', 'left')
-                    .attr("x", "20")//function(d) {return 20})
-                    .attr("y", "0")//function(d) {return 0})
+                    .attr("x", "20")
+                    .attr("y", "0")
                     .text(function (d) {return 'Location: ' + d["Location"].toString()})
                     .attr("display", "none");
 
                 gdot.append("text")
                     .attr('text-anchor', 'left')
-                    .attr("x", "20")//function(d) {return 20})
-                    .attr("y", "15")//function(d) {return 15})
+                    .attr("x", "20")
+                    .attr("y", "15")
                     .text(function (d) {return 'Depth: ' + d["Sample ID"].toString()})
                     .attr("display", "none");
 
@@ -454,12 +459,7 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
 
     d3v5.selectAll(".dot_group").on("contextmenu", function (d, i) {
         d3v5.event.preventDefault();
-
-
         d["hide"] = true;
-        //getData()
-        // d["hide"] = true;
-        //console.log(data_2)
         draw_pca_plot_3(_profiles, inputs, data_2, dims_3, dim_ids, true);
 
     });
@@ -475,35 +475,19 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
         header.style.display = "none";
     }
 
-    //tb.style.display = "none";
-
     var table = d3.select("#removed")
         .html("")
         .selectAll(".row")
         .data(removedData)
         .enter().append("div")
-        // .on("mouseover", function(){
-        //     d3v5.select(this).select("text").attr("display", null);
-        // })
-        //.on("mouseout", unhighlight);
         .on("click", function (d, i) {
-            //d3v5.event.preventDefault();
             d["hide"] = false
             draw_pca_plot_3(_profiles, inputs, data_2, dims_3, dim_ids, true);
             })
-    // table
-    //     .append("title")
-    //     .attr('text-anchor', 'left')
-    //     .attr("x", "20")
-    //     .attr("y", "15")
-    //     .text("click to restore")
-    //     //.attr("display", "none");
-
 
     table
         .append("span")
         .attr("class", "color-block")
-        //.style("background", function(d) { return color(d.group,0.85) })
 
     table
         .append("span")
@@ -647,21 +631,18 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
     function updateSelected(selected){
         d3.selectAll('.dot_group').select('circle')
             .style("opacity", 1);
-        //.style("fill", 'black');
         if (selected['_groups']){
             d3.selectAll('.dot_group').select('circle')
                 .style("opacity", .25);
             let sel = []
             selected['_groups'][0].forEach(d =>{
                 d3.select(d).select('circle').style("opacity", 1);
-                //d3.select(d).select('circle').style("fill", 'red');
                 d.__data__["selected"] = true;
                 sel.push(d.__data__.id)
             })
             if (!sel.length){
                 d3.selectAll('.dot_group').select('circle')
                     .each(d => d["selected"] = false)
-                    //.each(d => d.__data__["selected"] = false)
                     .style("opacity", 1);
             }
             parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data_2, sel);

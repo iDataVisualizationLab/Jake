@@ -95,15 +95,13 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
         // Convert quantitative scales to floats
         data = raw_data.map(function (d) {
             for (var k in d) {
-                if (k.split(' ')[1] == "Concentration" && !dimObject[k].hide &&!dimObject[k].noShow) {
+                if (k.split(' ')[1] == "Concentration" && !dimObject[k].hide && !dimObject[k].noShow) {
 
                     d[k] = parseFloat(d[k]) || 0;
                 }
             }
             return d;
         });
-
-        //console.log(data_passed);
 
         switch (_profiles.length){
             case 1:
@@ -118,13 +116,9 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                 for (let i in data){
                     data[i]["id"] = data_passed[i]["id"];
                     if (i < data_passed[0].length){
-                        //data[i]["id"] = _profiles[0] + i;
-                        //data[i]["group"] = _profiles[0];
                         data[i]["group"] = data_passed[i]["profile"];
                     }
                     else{
-                        //data[i]["id"] = _profiles[1] + (i - data_passed[0].length);
-                        //data[i]["group"] = _profiles[1];
                         data[i]["group"] = data_passed[i]["profile"];
                     }
                 }
@@ -133,26 +127,17 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                 for (let i in data){
                     data[i]["id"] = data_passed[i]["id"];
                     if (i < data_passed[0].length){
-                        //data[i]["id"] = _profiles[0] + i;
-                        //data[i]["group"] = _profiles[0];
                         data[i]["group"] = data_passed[i]["profile"];
                     }
                     else if (i >= data_passed[0].length && i < data_passed[1].length){
-                        //data[i]["id"] = _profiles[1] + (i - data_passed[0].length);
-                        //data[i]["group"] = _profiles[1];
                         data[i]["group"] = data_passed[i]["profile"];
                     }
                     else{
-                        //data[i]["id"] = _profiles[2] + (i - (data_passed[0].length + data_passed[1].length));
-                        //data[i]["group"] = _profiles[2];
                         data[i]["group"] = data_passed[i]["profile"];
                     }
                 }
                 break;
         }
-
-        //console.log(data)
-
 
         // Extract the list of numerical dimensions and create a scale for each.
         xscale.domain(dimensions = d3.keys(data[0]).filter(function (k) {
@@ -181,7 +166,6 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                     d3.select("#foreground").style("opacity", "0.35");
                 })
                 .on("drag", function (d) {
-                    //console.log("drag");
                     dragging[d] = Math.min(w, Math.max(0, this.__origin__ += d3.event.dx));
                     dimensions.sort(function (a, b) {
                         return position(a) - position(b);
