@@ -12,6 +12,7 @@ var xAxis = d3.axisBottom()
     .scale(x)
     .ticks(6);
 
+
 var yAxis = d3.axisLeft()
     .scale(y)
     .ticks(6);
@@ -21,7 +22,7 @@ var color = d3.scaleOrdinal(d3.schemeCategory10);
 var colorObj = { "r": "setosa", "l": "versicolor"}
 
 // d3.csv("data/flowers.csv", function(error, data) {
-d3.csv("data/test.csv", function(error, data) {
+d3.csv("data/test_all.csv", function(error, data) {
     if (error) throw error;
 
     var domainByTrait = {},
@@ -30,13 +31,12 @@ d3.csv("data/test.csv", function(error, data) {
         n = traits.length;
 
     traits.forEach(function(trait) {
-        domainByTrait[trait] = d3.extent(data, function(d) { return d[trait]; });
+        domainByTrait[trait] = d3.extent(data, function(d) { return +d[trait]; });
 
     });
-    console.log(domainByTrait)
 
-    xAxis.tickSize(size * n);
-    yAxis.tickSize(-size * n);
+    xAxis.tickSize(size * n).tickFormat(d3.format('.2s'));
+    yAxis.tickSize(-size * n).tickFormat(d3.format('.2s'));
 
     var brush = d3.brush()
         .on("start", brushstart)
@@ -56,6 +56,9 @@ d3.csv("data/test.csv", function(error, data) {
         .attr("class", "x axis")
         .attr("transform", function(d, i) { return "translate(" + (n - i - 1) * size + ",0)"; })
         .each(function(d) { x.domain(domainByTrait[d]); d3.select(this).call(xAxis); });
+    svg.selectAll(".x.axis text").attr('y',0)
+        .attr("transform", `translate(0,${size * n})rotate(30)`)
+        .style("text-anchor", "start");
 
     svg.selectAll(".y.axis")
         .data(traits)
