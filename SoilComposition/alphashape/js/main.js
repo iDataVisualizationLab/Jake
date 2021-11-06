@@ -1,8 +1,8 @@
 var width = 960,
-    size = 230,
-    // size = 60,
-    //padding = 2;
-    padding = 40;
+    // size = 230,
+    size = 60,
+    padding = 2;
+    // padding = 40;
 
 var x = d3.scaleLinear()
     .range([padding / 2, size - padding / 2]);
@@ -21,14 +21,14 @@ var yAxis = d3.axisLeft()
 
 var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-var colorObj = { "r": "setosa", "l": "versicolor"}
+var colorObj = { "r": "setosa", "l": "versicolor", "rXl": "virginica"}
 function plot_raw() {
 // d3.csv("data/flowers.csv", function(error, data) {
     d3.csv("data/test_all.csv", function (error, data) {
 
         profiles = d3.map(data, function(d){return d.profile;}).keys()
 
-        console.log(profiles)
+        profiles.push('rXl')
 
         if (error) throw error;
 
@@ -116,9 +116,8 @@ function plot_raw() {
         function plot(p) {
             var cell = d3.select(this);
 
-            x.domain(domainByTrait[p.x]);
-            y.domain(domainByTrait[p.y]);
-
+            let _x = x.copy().domain(domainByTrait[p.x]);
+            let _y = y.copy().domain(domainByTrait[p.y]);
 
             cell.append("rect")
                 .attr("class", "frame")
@@ -131,35 +130,34 @@ function plot_raw() {
                 .data(data)
                 .enter().append("circle")
                 .attr("cx", function (d) {
-                    return x(d[p.x]);
+                    return _x(d[p.x]);
                 })
                 .attr("cy", function (d) {
-                    return y(d[p.y]);
+                    return _y(d[p.y]);
                 })
-                // .attr("r", 1)
-                .attr("r", 4)
-                //.style("fill", function(d) { return color(d.species); });
+                .attr("r", 1)
+                // .attr("r", 4)
                 .style("fill", function (d) {
                     return color(colorObj[d.profile]);
                 });
 
-            profiles.forEach(function(_profile){
-                // if(p.x != p.y){
-                    if(p.x == 'Mg' && p.y == 'Si'){
-                    // d3.csv("alphashapes_"+_profile+"/"+_profile+"_"+p.x+"_"+p.y+"_.csv",function(error, data) {
-                    d3.csv("alphashapes_"+_profile+"/"+_profile+"_Mg_Si_.csv",function(error, data) {
-                    //     d3.csv("alphashapes_r/r_Mg_Si_.csv",function(error, data) {
+            profiles.forEach( async function(_profile){
+                 if(p.x != p.y){
+                    await d3.csv("alphashapes_"+_profile+"/"+_profile+"_"+p.x+"_"+p.y+".csv",function(error, data) {
+
+                            let _x = x.copy().domain(domainByTrait[p.x]);
+                            let _y = y.copy().domain(domainByTrait[p.y]);
 
                             if (error) throw error;
 
-                            cell.selectAll("polygon")
+                            cell.selectAll("polygon"+_profile)
                                 .data([data])
                                 .enter()
                                 .append("polygon")
                                 .attr("points",function(d) {
                                     return d.map(function(d) {
                                         // return [x(d.x),y(d.y)].join(",");
-                                        return [x(+d.x),y(+d.y)].join(",");
+                                        return [_x(+d.x),_y(+d.y)].join(",");
                                     }).join(" ");
                                 })
                                 //.attr("stroke","black")
