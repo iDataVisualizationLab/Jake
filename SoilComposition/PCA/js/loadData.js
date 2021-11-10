@@ -41,7 +41,7 @@ async function fetchData(path) {
 }
 let arr;
 
-async function get(){
+async function get(filePath){
     arr = await fetchData(filePath);
     //console.log(arr);
     return arr

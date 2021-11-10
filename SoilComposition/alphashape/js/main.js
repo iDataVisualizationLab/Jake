@@ -21,10 +21,41 @@ var yAxis = d3.axisLeft()
 
 var color = d3.scaleOrdinal(d3.schemeCategory10);
 
+async function fetchData(path) {
+    try {
+        const response = await fetch(path, {
+            method: 'GET',
+            //credentials: 'same-origin'
+        });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 var colorObj = { "r": "setosa", "l": "versicolor", "rXl": "virginica"}
-function plot_raw() {
+
+
+async function plot_raw(ordering) {
+    if (d3.selectAll('.plots')){
+        d3.selectAll('.plots').remove();
+    }
+
+
+
+    let intersection_areas = await fetchData('data/intersection_areas.json')
+    let paths = await fetchData('data/paths.json')
+    let paths_ = paths.paths
+    let separation = await fetchData('data/sorted_separations.json')
+    // let each_separation = await fetchData('data/each_separations.json')
+    // let each_intersection = await fetchData('data/each_intersection_areas.json')
+
+    // each_separation.then(d=> slider_separation(d3.min(Object.values(d)),d3.max(Object.values(d))))
+
 // d3.csv("data/flowers.csv", function(error, data) {
     d3.csv("data/test_all.csv", function (error, data) {
+
 
         profiles = d3.map(data, function(d){return d.profile;}).keys()
 
@@ -32,12 +63,21 @@ function plot_raw() {
 
         if (error) throw error;
 
-        var domainByTrait = {},
-            traits = d3.keys(data[0]).filter(function (d) {
-                return d !== "profile";
-            }),
-            //traits = d3.keys(data[0]).filter(function(d) { return d !== "species"; }),
-            n = traits.length;
+        let domainByTrait = {}
+        let traits;
+
+        switch(ordering) {
+            case 'default':
+                traits = d3.keys(data[0]).filter(function (d) {return d !== "profile";})
+                break;
+            case 'intersection':
+                traits = Object.keys(intersection_areas).reverse()
+                break;
+            case 'separation':
+                traits = Object.keys(separation).reverse()
+                break;}
+
+        let n = traits.length;
 
         traits.forEach(function (trait) {
             domainByTrait[trait] = d3.extent(data, function (d) {
@@ -55,6 +95,7 @@ function plot_raw() {
             .extent([[0, 0], [size, size]]);
 
         var svg = d3.select("body").append("svg")
+            .attr("class", "plots")
             .attr("width", size * n + padding)
             .attr("height", size * n + padding)
             .append("g")
@@ -93,7 +134,7 @@ function plot_raw() {
         var cell = svg.selectAll(".cell")
             .data(cross(traits, traits))
             .enter().append("g")
-            .attr("class", "cell")
+            //.attr("class", "cell")
             .attr("transform", function (d) {
                 return "translate(" + d.i * size + "," + d.j * size + ")";
             })
@@ -119,6 +160,8 @@ function plot_raw() {
             let _x = x.copy().domain(domainByTrait[p.x]);
             let _y = y.copy().domain(domainByTrait[p.y]);
 
+            cell.attr('class' , `cell ${p.x}${p.y}`)
+
             cell.append("rect")
                 .attr("class", "frame")
                 .attr("x", padding / 2)
@@ -142,13 +185,14 @@ function plot_raw() {
                 });
 
             profiles.forEach( async function(_profile){
-                 if(p.x != p.y){
-                    await d3.csv("alphashapes_"+_profile+"/"+_profile+"_"+p.x+"_"+p.y+".csv",function(error, data) {
+                let _path = "alphashapes_"+_profile+"/"+_profile+"_"+p.x+"_"+p.y+".csv"
+                 if(p.x != p.y && paths_.includes(_path)){
+                    await d3.csv(_path,function(error, data) {
 
                             let _x = x.copy().domain(domainByTrait[p.x]);
                             let _y = y.copy().domain(domainByTrait[p.y]);
 
-                            if (error) throw error;
+                            if (error) return ;
 
                             cell.selectAll("polygon"+_profile)
                                 .data([data])
@@ -219,5 +263,120 @@ function plot_raw() {
         //console.log(c)
         return c;
     }
+    slider_separation(0, 0.2593955834802844);
+    slider_intersection(0, 393695090.2041057);
 }
-plot_raw()
+plot_raw('default')
+
+
+async function _filter_separation(val){
+    let each_separation = await fetchData('data/each_separations.json')
+
+    const asArray = Object.entries(each_separation);
+
+    const filtered = asArray.filter(([key, value]) => value >= val);
+
+    const filtered_obj = Object.fromEntries(filtered);
+
+    return Object.keys(filtered_obj);
+
+}
+
+function filter_separation(val){
+    d3.selectAll('.cell').attr('opacity', .25)
+    if (val > 0){
+        _filter_separation(val).then(function (d){
+            d.forEach(d=> d3.selectAll(`.cell.${d}`).attr('opacity', 1))
+        })
+    }
+    else{d3.selectAll('.cell').attr('opacity', 1)}
+}
+
+async function _filter_intersection(val){
+    let each_separation = await fetchData('data/each_intersection_areas.json')
+
+    const asArray = Object.entries(each_separation);
+
+    const filtered = asArray.filter(([key, value]) => value >= val);
+
+    const filtered_obj = Object.fromEntries(filtered);
+
+    return Object.keys(filtered_obj);
+
+}
+
+function filter_intersection(val){
+    d3.selectAll('.cell').attr('opacity', .25)
+    if (val > 0){
+        _filter_intersection(val).then(function (d){
+            d.forEach(d=> d3.selectAll(`.cell.${d}`).attr('opacity', 1))
+        })
+    }
+    else{d3.selectAll('.cell').attr('opacity', 1)}
+}
+
+function slider_separation(min, max){
+
+    if (d3.select('div#slider-separation svg')){
+        d3.select('div#slider-separation svg').remove();
+    }
+    //var data = [0, 0.05];
+
+    var sliderSimple = d3v6
+        .sliderBottom()
+        .min(min)
+        .max(max)
+        .width(300)
+        //.tickFormat(d3v6.format('.2%'))
+        .ticks(5)
+        .default(0)
+        .on('onchange', val => {
+            filter_separation(val)
+            d3.select('p#value-separation').text(d3v6.format('.3')(val));
+        });
+
+    var gSimple = d3v6
+        .select('div#slider-separation')
+        .append('svg')
+        .attr('width', 500)
+        .attr('height', 100)
+        .append('g')
+        .attr('transform', 'translate(30,30)');
+
+    gSimple.call(sliderSimple);
+    d3.select('p#value-separation').text((sliderSimple.value()));
+}
+
+function slider_intersection(min, max){
+    //var data = [0, 0.05];
+    if (d3.select('div#slider-intersection svg')){
+        d3.select('div#slider-intersection svg').remove();
+    }
+
+    var sliderSimple = d3v6
+        .sliderBottom()
+        .min(min)
+        .max(max)
+        .width(300)
+        //.tickFormat(d3v6.format('.2%'))
+        .ticks(5)
+        .default(0)
+        .on('onchange', val => {
+            filter_intersection(val)
+            d3.select('p#value-intersection').text(d3v6.format('.3')(val));
+        });
+
+    var gSimple = d3v6
+        .select('div#slider-intersection')
+        .append('svg')
+        .attr('width', 500)
+        .attr('height', 100)
+        .append('g')
+        .attr('transform', 'translate(30,30)');
+
+    gSimple.call(sliderSimple);
+    d3.select('p#value-intersection').text((sliderSimple.value()));
+}
+
+
+

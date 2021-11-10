@@ -2,7 +2,29 @@
 <meta charset="utf-8">
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <body>
-<script src="//d3js.org/d3.v4.min.js"></script>
+<h3>Separation Filter</h3>
+<div class="row align-items-center">
+    <div class="col-sm-2"><p id="value-separation"></p></div>
+    <div class="col-sm"><div id="slider-separation"></div></div>
+</div>
+<h3>Intersection Filter</h3>
+<div class="row align-items-center">
+    <div class="col-sm-2"><p id="value-intersection"></p></div>
+    <div class="col-sm"><div id="slider-intersection"></div></div>
+</div>
+<p>Orderings:</p>
+<button type="button" onclick="plot_raw('default')">Default</button>
+<button type="button" onclick="plot_raw('separation')">Separation</button>
+<button type="button" onclick="plot_raw('intersection')">Intersection</button>
+
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script src="https://unpkg.com/d3-simple-slider"></script>
+<script>
+    d3v6 = d3
+    window.d3 = null
+</script>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="js/main.js"></script>
 </body>
 
