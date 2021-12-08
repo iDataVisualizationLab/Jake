@@ -256,9 +256,7 @@ async function plot_raw(ordering) {
                 brushCell = this;
                 x.domain(domainByTrait[p.x]);
                 y.domain(domainByTrait[p.y]);
-                //initScene(['R'], 'Ca', 0, 1)
-                //console.log(p.x,p.y)
-                initScene(['R'], [p.x], 0, 1)
+                //initScene(['R'], [p.x], 0, 1)
             }
 
         }
@@ -302,6 +300,7 @@ async function plot_raw(ordering) {
     slider_intersection(0, 393695090.2041057);
 }
 plot_raw('default')
+initScene(['R'], ['Ca'], 0, 1)
 
 
 async function _filter_separation(val){
