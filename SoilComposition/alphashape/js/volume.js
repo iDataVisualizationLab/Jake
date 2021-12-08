@@ -1,10 +1,21 @@
-import * as p_x from '../data/50/50_pos_x.js';
-import * as p_y from '../data/50/50_pos_y.js';
-import * as p_z from '../data/50/50_pos_z.js';
+// import * as p_x from '../data/50/50_pos_x.js';
+// import * as p_y from '../data/50/50_pos_y.js';
+// import * as p_z from '../data/50/50_pos_z.js';
+//
+// const pos_x = p_x.default;
+// const pos_y = p_y.default;
+// const pos_z = p_z.default;
+let pos_x
+let pos_y
+let pos_z
 
-const pos_x = p_x.default;
-const pos_y = p_y.default;
-const pos_z = p_z.default;
+async function init_data(){
+    pos_x = await fetchData('data/50/50_pos_x.json')
+    pos_y = await fetchData('data/50/50_pos_y.json')
+    pos_z = await fetchData('data/50/50_pos_z.json')
+}
+init_data()
+
 
 let points;
 
@@ -128,7 +139,7 @@ function createScenes(){
     }
 }
 
-export function initScene(_profiles, chemical, minVal, maxVal){
+function initScene(_profiles, chemical, minVal, maxVal){
 
     if (_profiles.length > scenes.length){
         createScenes()
@@ -147,9 +158,10 @@ export function initScene(_profiles, chemical, minVal, maxVal){
     }
 }
 
-export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _container, _renderer, _containerInfo) {
+async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _container, _renderer, _containerInfo) {
 
-    _scene.remove.apply(_scene, _scene.children);
+    //_scene.remove.apply(_scene, _scene.children);
+
 
     let profile = _profile;
 
@@ -158,7 +170,7 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
     let valsArr = []
 
     for (const i of chemical){
-        let path = "./data/"+profile+"/50_"+i+"_Concentration_t.json"
+        let path = "data/"+profile+"/50_"+i+"_Concentration_t.json"
         let arr = await fetchData(path)
         valsArr.push(arr)
     }

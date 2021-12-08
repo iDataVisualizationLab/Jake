@@ -1,21 +1,45 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <link rel="stylesheet" type="text/css" href="css/style.css" />
+<link rel="stylesheet" type="text/css" href="css/volume.css" />
 <body>
-<h3>Separation Filter</h3>
-<div class="row align-items-center">
+<!--<h3>Separation Filter</h3>-->
+<div id="separation_filter" class="row align-items-center">
+    <h3>Separation Filter</h3>
     <div class="col-sm-2"><p id="value-separation"></p></div>
     <div class="col-sm"><div id="slider-separation"></div></div>
 </div>
-<h3>Intersection Filter</h3>
-<div class="row align-items-center">
+<!--<h3>Intersection Filter</h3>-->
+<div id="intersection_filter" class="row align-items-center">
+    <h3>Intersection Filter</h3>
     <div class="col-sm-2"><p id="value-intersection"></p></div>
     <div class="col-sm"><div id="slider-intersection"></div></div>
 </div>
-<p>Orderings:</p>
-<button type="button" onclick="plot_raw('default')">Default</button>
-<button type="button" onclick="plot_raw('separation')">Separation</button>
-<button type="button" onclick="plot_raw('intersection')">Intersection</button>
+<div id="ordering_buttons">
+    <p class="button_title">Orderings:</p>
+    <button type="button" onclick="plot_raw('default')">Default</button>
+    <button type="button" onclick="plot_raw('separation')">Separation</button>
+    <button type="button" onclick="plot_raw('intersection')">Intersection</button>
+</div>
+
+<div style="display: flex;flex-direction: row">
+    <div id="my_dataviz"></div>
+    <div id="container">
+        <div id="containerInfo"></div>
+    </div>
+    <div id="container2">
+        <div id="container2Info"></div>
+    </div>
+    <div id="container3">
+        <div id="container3Info"></div>
+    </div>
+<!--    <div class="third">-->
+<!--        <h3 id="removedHeader" style="display: none ">Removed Data</h3>-->
+<!--        <p id="removed">-->
+<!--        </p>-->
+<!--    </div>-->
+</div>
+
 
 <script src="https://d3js.org/d3.v6.min.js"></script>
 <script src="https://unpkg.com/d3-simple-slider"></script>
@@ -23,8 +47,12 @@
     d3v6 = d3
     window.d3 = null
 </script>
+<script src="lib/threejs/three.js"></script>
+<script src="lib/threejs/OrbitControls.js"></script>
 
 <script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="js/fetch.js"></script>
+<script src="js/volume.js"></script>
 <script src="js/main.js"></script>
 </body>
 

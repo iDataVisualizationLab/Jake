@@ -45,3 +45,27 @@ circle.hidden {
 /*    position: absolute;*/
 /*    left: 50vw;*/
 /*}*/
+
+#ordering_buttons{
+    position: fixed;
+    align-self: self-start;
+    right: 12vw;
+}
+.button_title{
+    text-align: left;
+}
+
+#intersection_filter{
+    position: fixed;
+    top: 8vh;
+    right: 1vw;
+    align-self: self-end;
+}
+
+#separation_filter{
+    position: fixed;
+    top: 28vh;
+    right: 1vw;
+    align-self: self-end;
+}
+

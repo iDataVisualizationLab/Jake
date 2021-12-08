@@ -1,3 +1,5 @@
+//import {initScene} from "./volume";
+
 var width = 960,
     // size = 230,
     size = 60,
@@ -21,19 +23,20 @@ var yAxis = d3.axisLeft()
 
 var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-async function fetchData(path) {
-    try {
-        const response = await fetch(path, {
-            method: 'GET',
-            //credentials: 'same-origin'
-        });
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error(error);
-    }
-}
+// async function fetchData(path) {
+//     try {
+//         const response = await fetch(path, {
+//             method: 'GET',
+//             //credentials: 'same-origin'
+//         });
+//         const data = await response.json();
+//         return data;
+//     } catch (error) {
+//         console.error(error);
+//     }
+// }
 
+// var colorObj = { "r": "setosa", "l": "versicolor", "rXl": "virginica"}
 var colorObj = { "r": "setosa", "l": "versicolor", "rXl": "virginica"}
 
 
@@ -50,7 +53,7 @@ async function plot_raw(ordering) {
     let separation = await fetchData('data/sorted_separations.json')
     // let each_separation = await fetchData('data/each_separations.json')
     // let each_intersection = await fetchData('data/each_intersection_areas.json')
-
+1
     // each_separation.then(d=> slider_separation(d3.min(Object.values(d)),d3.max(Object.values(d))))
 
 // d3.csv("data/flowers.csv", function(error, data) {
@@ -59,7 +62,7 @@ async function plot_raw(ordering) {
 
         profiles = d3.map(data, function(d){return d.profile;}).keys()
 
-        profiles.push('rXl')
+        //profiles.push('rXl')
 
         if (error) throw error;
 
@@ -160,7 +163,7 @@ async function plot_raw(ordering) {
             let _x = x.copy().domain(domainByTrait[p.x]);
             let _y = y.copy().domain(domainByTrait[p.y]);
 
-            cell.attr('class' , `cell ${p.x}${p.y}`)
+            cell.attr('class' , `cell ${p.x}_${p.y}`)
 
             cell.append("rect")
                 .attr("class", "frame")
@@ -186,7 +189,7 @@ async function plot_raw(ordering) {
 
             profiles.forEach( async function(_profile){
                 let _path = "alphashapes_"+_profile+"/"+_profile+"_"+p.x+"_"+p.y+".csv"
-                 if(p.x != p.y && paths_.includes(_path)){
+                if(p.x != p.y && paths_.includes(_path)){
                     await d3.csv(_path,function(error, data) {
 
                             let _x = x.copy().domain(domainByTrait[p.x]);
@@ -213,6 +216,34 @@ async function plot_raw(ordering) {
                         }
                     )
                 }
+                let _path2 = "alphashapes_"+_profile+"/"+_profile+"_"+p.y+"_"+p.x+".csv"
+                if(p.x != p.y && paths_.includes(_path2)){
+                    await d3.csv(_path2,function(error, data) {
+
+                            let _x = x.copy().domain(domainByTrait[p.x]);
+                            let _y = y.copy().domain(domainByTrait[p.y]);
+
+                            if (error) return ;
+
+                            cell.selectAll("polygon"+_profile)
+                                .data([data])
+                                .enter()
+                                .append("polygon")
+                                .attr("points",function(d) {
+                                    return d.map(function(d) {
+                                        // return [x(d.x),y(d.y)].join(",");
+                                        return [_x(+d.y),_y(+d.x)].join(",");
+                                    }).join(" ");
+                                })
+                                //.attr("stroke","black")
+                                .attr("stroke", function(d){return color(colorObj[_profile])})
+                                .style("opacity", 0.5)
+                                .style("fill", function(d){return color(colorObj[_profile]);})
+                                .attr("stroke-width",2);
+
+                        }
+                    )
+                }
             })
         }
 
@@ -225,7 +256,11 @@ async function plot_raw(ordering) {
                 brushCell = this;
                 x.domain(domainByTrait[p.x]);
                 y.domain(domainByTrait[p.y]);
+                //initScene(['R'], 'Ca', 0, 1)
+                //console.log(p.x,p.y)
+                initScene(['R'], [p.x], 0, 1)
             }
+
         }
 
         // Highlight the selected circles.
@@ -270,7 +305,7 @@ plot_raw('default')
 
 
 async function _filter_separation(val){
-    let each_separation = await fetchData('data/each_separations.json')
+    let each_separation = await fetchData('data/each_separations_2.json')
 
     const asArray = Object.entries(each_separation);
 
@@ -278,7 +313,11 @@ async function _filter_separation(val){
 
     const filtered_obj = Object.fromEntries(filtered);
 
-    return Object.keys(filtered_obj);
+    let arr =  Object.keys(filtered_obj)
+
+    arr.forEach(d=> arr.push(`${d.toString().split('_')[1]}_${d.toString().split('_')[0]}`))
+
+    return arr;
 
 }
 
@@ -286,14 +325,17 @@ function filter_separation(val){
     d3.selectAll('.cell').attr('opacity', .25)
     if (val > 0){
         _filter_separation(val).then(function (d){
-            d.forEach(d=> d3.selectAll(`.cell.${d}`).attr('opacity', 1))
+            d.forEach(d=>
+                // console.log(`${d.toString().split('_')[1]}_${d.toString().split('_')[0]}`),
+                d3.selectAll(`.cell.${d}`).attr('opacity', 1))
+                // d3.selectAll(`.cell.${d.toString().split('_')[1]}_${d.toString().split('_')[0]}`).attr('opacity', 1))
         })
     }
     else{d3.selectAll('.cell').attr('opacity', 1)}
 }
 
 async function _filter_intersection(val){
-    let each_separation = await fetchData('data/each_intersection_areas.json')
+    let each_separation = await fetchData('data/each_intersection_areas_2.json')
 
     const asArray = Object.entries(each_separation);
 
@@ -301,7 +343,11 @@ async function _filter_intersection(val){
 
     const filtered_obj = Object.fromEntries(filtered);
 
-    return Object.keys(filtered_obj);
+    let arr =  Object.keys(filtered_obj)
+
+    arr.forEach(d=> arr.push(`${d.toString().split('_')[1]}_${d.toString().split('_')[0]}`))
+
+    return arr;
 
 }
 
@@ -309,7 +355,10 @@ function filter_intersection(val){
     d3.selectAll('.cell').attr('opacity', .25)
     if (val > 0){
         _filter_intersection(val).then(function (d){
-            d.forEach(d=> d3.selectAll(`.cell.${d}`).attr('opacity', 1))
+            d.forEach(d=>
+                d3.selectAll(`.cell.${d}`).attr('opacity', 1),
+                // d3.selectAll(`.cell.${d.toString().split('_')[1]}_${d.toString().split('_')[0]}`).attr('opacity', 1)
+            )
         })
     }
     else{d3.selectAll('.cell').attr('opacity', 1)}
@@ -338,8 +387,8 @@ function slider_separation(min, max){
     var gSimple = d3v6
         .select('div#slider-separation')
         .append('svg')
-        .attr('width', 500)
-        .attr('height', 100)
+        .attr('width', 400)
+        .attr('height', 75)
         .append('g')
         .attr('transform', 'translate(30,30)');
 
@@ -369,14 +418,13 @@ function slider_intersection(min, max){
     var gSimple = d3v6
         .select('div#slider-intersection')
         .append('svg')
-        .attr('width', 500)
-        .attr('height', 100)
+        .attr('width', 400)
+        .attr('height', 75)
         .append('g')
         .attr('transform', 'translate(30,30)');
 
     gSimple.call(sliderSimple);
     d3.select('p#value-intersection').text((sliderSimple.value()));
 }
-
 
 
