@@ -6,13 +6,13 @@
 <!--<h3>Separation Filter</h3>-->
 <div id="separation_filter" class="row align-items-center">
     <h3>Separation Filter</h3>
-    <div class="col-sm-2"><p id="value-separation"></p></div>
+<!--    <div class="col-sm-2"><p id="value-separation"></p></div>-->
     <div class="col-sm"><div id="slider-separation"></div></div>
 </div>
 <!--<h3>Intersection Filter</h3>-->
 <div id="intersection_filter" class="row align-items-center">
     <h3>Intersection Filter</h3>
-    <div class="col-sm-2"><p id="value-intersection"></p></div>
+<!--    <div class="col-sm-2"><p id="value-intersection"></p></div>-->
     <div class="col-sm"><div id="slider-intersection"></div></div>
 </div>
 <div id="ordering_buttons">
@@ -22,16 +22,25 @@
     <button type="button" onclick="plot_raw('intersection')">Intersection</button>
 </div>
 
-<div style="display: flex;flex-direction: row">
-    <div id="my_dataviz"></div>
+<div id="volumes_1">
     <div id="container">
         <div id="containerInfo"></div>
+        <div id="containerInfo_2"></div>
     </div>
     <div id="container2">
         <div id="container2Info"></div>
+        <div id="container2Info_2"></div>
     </div>
+</div>
+<div id="volumes_2">
     <div id="container3">
         <div id="container3Info"></div>
+        <div id="container3Info_2"></div>
+
+    </div>
+    <div id="container4">
+        <div id="container4Info"></div>
+        <div id="container4Info_2"></div>
     </div>
 <!--    <div class="third">-->
 <!--        <h3 id="removedHeader" style="display: none ">Removed Data</h3>-->
@@ -52,6 +61,7 @@
 
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="js/fetch.js"></script>
+<script src="js/colors.js"></script>
 <script src="js/volume.js"></script>
 <script src="js/main.js"></script>
 </body>

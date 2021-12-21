@@ -53,11 +53,9 @@ async function plot_raw(ordering) {
     let separation = await fetchData('data/sorted_separations.json')
     // let each_separation = await fetchData('data/each_separations.json')
     // let each_intersection = await fetchData('data/each_intersection_areas.json')
-1
     // each_separation.then(d=> slider_separation(d3.min(Object.values(d)),d3.max(Object.values(d))))
 
-// d3.csv("data/flowers.csv", function(error, data) {
-    d3.csv("data/test_all.csv", function (error, data) {
+    d3.csv("data/plot_data_all.csv", function (error, data) {
 
 
         profiles = d3.map(data, function(d){return d.profile;}).keys()
@@ -256,7 +254,7 @@ async function plot_raw(ordering) {
                 brushCell = this;
                 x.domain(domainByTrait[p.x]);
                 y.domain(domainByTrait[p.y]);
-                //initScene(['R'], [p.x], 0, 1)
+                initScene(['R','R','L','L'], [p.x,p.y], 0, 1)
             }
 
         }
@@ -300,7 +298,7 @@ async function plot_raw(ordering) {
     slider_intersection(0, 393695090.2041057);
 }
 plot_raw('default')
-initScene(['R'], ['Ca'], 0, 1)
+// initScene(['R'], ['Ca'], 0, 1)
 
 
 async function _filter_separation(val){
@@ -380,7 +378,7 @@ function slider_separation(min, max){
         .default(0)
         .on('onchange', val => {
             filter_separation(val)
-            d3.select('p#value-separation').text(d3v6.format('.3')(val));
+            // d3.select('p#value-separation').text(d3v6.format('.3')(val));
         });
 
     var gSimple = d3v6
@@ -392,7 +390,7 @@ function slider_separation(min, max){
         .attr('transform', 'translate(30,30)');
 
     gSimple.call(sliderSimple);
-    d3.select('p#value-separation').text((sliderSimple.value()));
+    // d3.select('p#value-separation').text((sliderSimple.value()));
 }
 
 function slider_intersection(min, max){
@@ -411,7 +409,7 @@ function slider_intersection(min, max){
         .default(0)
         .on('onchange', val => {
             filter_intersection(val)
-            d3.select('p#value-intersection').text(d3v6.format('.3')(val));
+            // d3.select('p#value-intersection').text(d3v6.format('.3')(val));
         });
 
     var gSimple = d3v6
@@ -423,7 +421,7 @@ function slider_intersection(min, max){
         .attr('transform', 'translate(30,30)');
 
     gSimple.call(sliderSimple);
-    d3.select('p#value-intersection').text((sliderSimple.value()));
+    // d3.select('p#value-intersection').text((sliderSimple.value()));
 }
 
 
