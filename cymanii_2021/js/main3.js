@@ -414,11 +414,11 @@ create_slider('T2')
 
 function calculate_values(){
     valt1 = parseFloat(d3.select('#valuet1').text());
-    valt2 = parseFloat(d3.select('#valuet1').text());
+    valt2 = parseFloat(d3.select('#valuet2').text());
     valT1 = parseFloat(d3.select('#valueT1').text());
     valT2 = parseFloat(d3.select('#valueT2').text());
 
-    let result = ((valT1 - valt2) - (valT2 - valT1) /( Math.log( (valT1 - valt2) / (valT2 - valt1) )))
+    let result = ((valT1 - valt2) - (valT2 - valt1) /( Math.log( (valT1 - valt2) / (valT2 - valt1) )))
 
     d3.select('#deltaTemp').text(d3v6.format('.3')(result))
 
