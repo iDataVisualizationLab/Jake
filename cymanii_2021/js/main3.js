@@ -12,12 +12,6 @@ var formatNumber = d3.format(",.0f"),    // zero decimal places
 
 let optimum = {t1:120,t2:113,T1:264,T2:188}
 
-// function getColor(n){
-//     return d3.schemeCategory10[n]
-// }
-// let linkColors = d3.scaleOrdinal()
-//     .domain(["thermal", "steam", "fuel", "electricity", "product", "loss"])
-//     .range(['#D81B60','#1976D2','#388E3C','#FBC02D','#E64A19','#000']);
 
 let linkColors = d3.scaleOrdinal()
     .domain(["thermal", "steam", "fuel", "electricity", "loss"])
@@ -32,197 +26,175 @@ let nodeColors = {"Onsite Steam Generation" : '#1976D2',
 
 }
 
-// let types = ["thermal", "steam", "fuel", "electricity", "product", "loss"]
 let types = ["thermal", "steam", "fuel", "electricity", "loss"]
 
+function draw_sankey(){
 
-// let linkColor2 = {thermal: "#D81B60",
-//     steam:'#1976D2', fuel:'#388E3C', electricity:'#FBC02D'}
-    // .range(['#D81B60','#1976D2','#388E3C','#FBC02D','#E64A19','#455A64']);
-//
-// let colors =   [{name:"Steam", color:getColor(0)},
-//     {name:"Natural Gas", color:getColor(1)},
-//     {name:"Recovered Thermal", color:getColor(1)},
-//     {name:"Fuel Gas", color:getColor(1)},
-//     {name:"Electricity", color:getColor(1)},
-//     {name:"Air Blower", color:getColor(1)},
-//     {name:"Heat Exchanger", color:getColor(1)},
-//     {name:"Charge Heater", color:getColor(1)},
-//     {name:"Pumps", color:getColor(1)},
-//     {name:"Regenerator", color:getColor(1)},
-//     {name:"Reactor", color:getColor(1)},
-//     {name:"CO Burner", color:getColor(1)},
-//     {name:"Main Fractionator", color:getColor(1)},
-//     {name:"Produced Steam", color:getColor(1)},
-//     {name:"Unrecovered Thermal", color:getColor(1)},
-//     {name:"Process Consumption", color:getColor(1)},
-//     {name:"Recovered Thermal ", color:getColor(1)},
-//     {name:"Produced Fuel Gas", color:getColor(1)}
-//
-// ]
+    var header = d3.select("div#sankey").append("rect")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", 20 + margin.top + margin.bottom)
+        //.append("rect")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")")
+        .attr("fill", "black");
 
-var header = d3.select("div#sankey").append("rect")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", 20 + margin.top + margin.bottom)
-    //.append("rect")
-    .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")")
-    .attr("fill", "black");
+    d3.select('div#sankey svg').remove();
 
 // append the svg object to the body of the page
-var svg = d3.select("div#sankey").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")");
+    var svg = d3.select("div#sankey").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
 
 // Set the sankey diagram properties
-var sankey = d3.sankey()
-    // .nodeWidth(46)
-    .nodeWidth(12)
-    .nodePadding(40)
-    .size([width, height]);
+    var sankey = d3.sankey()
+        // .nodeWidth(46)
+        .nodeWidth(12)
+        .nodePadding(40)
+        .size([width, height]);
 
-var path = sankey.link();
+    var path = sankey.link();
 
-// load the data
-d3.csv("./data/test_file.csv", function(error, data) {
+    d3.csv("./data/test_file.csv", function(error, data) {
 
-    //set up graph in same style as original example but empty
-    graph = {"nodes" : [], "links" : []};
+        data = update_data(data)
 
-    data.forEach(function (d) {
-        graph.nodes.push({ "name": d.source });
-        graph.nodes.push({ "name": d.target });
-        graph.links.push({ "source": d.source,
-            "target": d.target,
-            "value": +d.value,
-            "type": d.type});
+        //set up graph in same style as original example but empty
+        graph = {"nodes" : [], "links" : []};
 
-    });
+        data.forEach(function (d) {
+            graph.nodes.push({ "name": d.source });
+            graph.nodes.push({ "name": d.target });
+            graph.links.push({ "source": d.source,
+                "target": d.target,
+                "value": +d.value,
+                "type": d.type});
 
-    // return only the distinct / unique nodes
-    graph.nodes = d3.keys(d3.nest()
-        .key(function (d) { return d.name; })
-        .object(graph.nodes));
+        });
 
-    // loop through each link replacing the text with its index from node
-    graph.links.forEach(function (d, i) {
-        graph.links[i].source = graph.nodes.indexOf(graph.links[i].source);
-        graph.links[i].target = graph.nodes.indexOf(graph.links[i].target);
-    });
+        // return only the distinct / unique nodes
+        graph.nodes = d3.keys(d3.nest()
+            .key(function (d) { return d.name; })
+            .object(graph.nodes));
 
-    // now loop through each nodes to make nodes an array of objects
-    // rather than an array of strings
-    graph.nodes.forEach(function (d, i) {
-        graph.nodes[i] = { "name": d };
-    });
+        // loop through each link replacing the text with its index from node
+        graph.links.forEach(function (d, i) {
+            graph.links[i].source = graph.nodes.indexOf(graph.links[i].source);
+            graph.links[i].target = graph.nodes.indexOf(graph.links[i].target);
+        });
 
-    sankey
-        .nodes(graph.nodes)
-        .links(graph.links)
-        .layout(32);
+        // now loop through each nodes to make nodes an array of objects
+        // rather than an array of strings
+        graph.nodes.forEach(function (d, i) {
+            graph.nodes[i] = { "name": d };
+        });
 
-    // add in the links
-    var link = svg.append("g").selectAll(".link")
-        .data(graph.links)
-        .enter().append("path")
-        .attr("class", "link")
-        .attr("d", path)
-        .style("stroke-width", function(d) { return Math.max(1, d.dy); })
-        .style("stroke", function (d){ return linkColors(d.type)} )
-        //.style("stroke", function (d){ return '#000'} )
-        .style("fill", "none")
-        .style("stroke-opacity", .2)
-        .on("mouseover",function() {d3.select(this).style("stroke-opacity", .5)})
-        .on("mouseleave",function() {d3.select(this).style("stroke-opacity", .2)})
+        sankey
+            .nodes(graph.nodes)
+            .links(graph.links)
+            .layout(32);
 
-        .sort(function(a, b) { return b.dy - a.dy; });
+        // add in the links
+        var link = svg.append("g").selectAll(".link")
+            .data(graph.links)
+            .enter().append("path")
+            .attr("class", "link")
+            .attr("d", path)
+            .style("stroke-width", function(d) { return Math.max(1, d.dy); })
+            .style("stroke", function (d){ return linkColors(d.type)} )
+            //.style("stroke", function (d){ return '#000'} )
+            .style("fill", "none")
+            .style("stroke-opacity", .2)
+            .on("mouseover",function() {d3.select(this).style("stroke-opacity", .5)})
+            .on("mouseleave",function() {d3.select(this).style("stroke-opacity", .2)})
 
-    // add the link titles
-    link.append("title")
-        .text(function(d) {
-            return d.source.name + " → " +
-                d.target.name + "\n" + format(d.value); });
+            .sort(function(a, b) { return b.dy - a.dy; });
 
-    // add in the nodes
-    var node = svg.append("g").selectAll(".node")
-        .data(graph.nodes)
-        .enter().append("g")
-        .attr("class", "node")
-        .attr("transform", function(d) {
-            return "translate(" + d.x + "," + d.y + ")"; })
-        .call(d3.drag()
-            .subject(function(d) {
-                return d;
-            })
-            .on("start", function() {
-                this.parentNode.appendChild(this);
-            })
-            .on("drag", dragmove));
+        // add the link titles
+        link.append("title")
+            .text(function(d) {
+                return d.source.name + " → " +
+                    d.target.name + "\n" + format(d.value); });
 
-    // add the rectangles for the nodes
-    node.append("rect")
-        .attr("height", function(d) { return d.dy; })
-        .attr("width", sankey.nodeWidth())
-        // .style("fill", function(d) {
-        //     return d.color = color(d.name.replace(/ .*/, "")); })
-        .style("fill", function(d) { return '#FFFFFF'})
-        //     if (Object.keys(nodeColors).includes(d.name)){
-        //         return nodeColors[d.name];
-        //     }
-        //     else{return d.color = color(d.name.replace(/ .*/, "")); }}
-        // )
+        // add in the nodes
+        var node = svg.append("g").selectAll(".node")
+            .data(graph.nodes)
+            .enter().append("g")
+            .attr("class", "node")
+            .attr("transform", function(d) {
+                return "translate(" + d.x + "," + d.y + ")"; })
+            .call(d3.drag()
+                .subject(function(d) {
+                    return d;
+                })
+                .on("start", function() {
+                    this.parentNode.appendChild(this);
+                })
+                .on("drag", dragmove));
+
+        // add the rectangles for the nodes
+        node.append("rect")
+            .attr("height", function(d) { return d.dy; })
+            .attr("width", sankey.nodeWidth())
+            // .style("fill", function(d) {
+            //     return d.color = color(d.name.replace(/ .*/, "")); })
+            .style("fill", function(d) { return '#FFFFFF'})
+            //     if (Object.keys(nodeColors).includes(d.name)){
+            //         return nodeColors[d.name];
+            //     }
+            //     else{return d.color = color(d.name.replace(/ .*/, "")); }}
+            // )
             // return d.color = color(d.name.replace(/ .*/, "")); })
-        // .style("fill", function(d) {
-        //     colors.filter(obj => {
-        //         return obj.name == d.name ? obj.color : null})})
+            // .style("fill", function(d) {
+            //     colors.filter(obj => {
+            //         return obj.name == d.name ? obj.color : null})})
             //return d.color = colors.name == (d.name.replace(/ .*/, "")); })
-        .style("stroke", function(d) {
-            return d3.rgb(d.color).darker(2); })
-        .append("title")
-        .text(function(d) {
-            return d.name + "\n" + format(d.value); });
+            .style("stroke", function(d) {
+                return d3.rgb(d.color).darker(2); })
+            .append("title")
+            .text(function(d) {
+                return d.name + "\n" + format(d.value); });
 
-    // add in the title for the nodes
-    node.append("text")
-        .attr("x", -6)
-        .attr("y", function(d) { return d.dy / 2; })
+        // add in the title for the nodes
+        node.append("text")
+            .attr("x", -6)
+            .attr("y", function(d) { return d.dy / 2; })
 
-        .attr("dy", ".35em")
-        .attr("text-anchor", "end")
-        .attr("transform", null)
-        .text(function(d) { return d.name; })
-        .filter(function(d) { return d.x < width / 2; })
-        .attr("x", 6 + sankey.nodeWidth())
-        .attr("text-anchor", "start");
+            .attr("dy", ".35em")
+            .attr("text-anchor", "end")
+            .attr("transform", null)
+            .text(function(d) { return d.name; })
+            .filter(function(d) { return d.x < width / 2; })
+            .attr("x", 6 + sankey.nodeWidth())
+            .attr("text-anchor", "start");
 //Percentage Text
-    // node.append("text")
-    //     .attr("x", sankey.nodeWidth()/2)
-    //     // .attr("y", function(d) {
-    //     //     if(d.dy < 16){
-    //     //         return d.dy * 2;
-    //     //     }
-    //     //     else return d.dy / 2;
-    //     // })
-    //     .attr("y", function(d) { return d.dy / 2; })
-    //     //.attr("dy", ".35em")
-    //     .attr("dy", function(d) {
-    //         if(d.dy < 16){
-    //             return  "-.175em";
-    //         }
-    //         else return ".35em";
-    //     })
-    //     .text(function(d) { return parseFloat(d.value/6.5).toFixed(2)*100 + "%"; })
-    //     .attr("text-anchor", "middle");
-    //
-    var legend = svg.append("g").selectAll(".legend")
-        .data(types)
-        .enter().append("g")
-        .attr("class", "legend")
-        .attr("transform", function(d) {
-            return "translate(" + types.indexOf(d)*150  + "," + (height+20) + ")"; })
+        // node.append("text")
+        //     .attr("x", sankey.nodeWidth()/2)
+        //     // .attr("y", function(d) {
+        //     //     if(d.dy < 16){
+        //     //         return d.dy * 2;
+        //     //     }
+        //     //     else return d.dy / 2;
+        //     // })
+        //     .attr("y", function(d) { return d.dy / 2; })
+        //     //.attr("dy", ".35em")
+        //     .attr("dy", function(d) {
+        //         if(d.dy < 16){
+        //             return  "-.175em";
+        //         }
+        //         else return ".35em";
+        //     })
+        //     .text(function(d) { return parseFloat(d.value/6.5).toFixed(2)*100 + "%"; })
+        //     .attr("text-anchor", "middle");
+        //
+        var legend = svg.append("g").selectAll(".legend")
+            .data(types)
+            .enter().append("g")
+            .attr("class", "legend")
+            .attr("transform", function(d) {
+                return "translate(" + types.indexOf(d)*150  + "," + (height+20) + ")"; })
 
         legend.append("rect")
             .attr("width", 20)
@@ -241,110 +213,23 @@ d3.csv("./data/test_file.csv", function(error, data) {
 
 
 
-    // the function for moving the nodes
-    function dragmove(d) {
-        d3.select(this)
-            .attr("transform",
-                "translate("
-                + d.x + ","
-                + (d.y = Math.max(
-                    0, Math.min(height - d.dy, d3.event.y))
-                ) + ")");
-        sankey.relayout();
-        link.attr("d", path);
-    }
+        // the function for moving the nodes
+        function dragmove(d) {
+            d3.select(this)
+                .attr("transform",
+                    "translate("
+                    + d.x + ","
+                    + (d.y = Math.max(
+                            0, Math.min(height - d.dy, d3.event.y))
+                    ) + ")");
+            sankey.relayout();
+            link.attr("d", path);
+        }
 
 
-});
+    });
+}
 
-// function slider_intersection(min, max){
-//     //var data = [0, 0.05];
-//     if (d3.select('div#slider-intersection svg')){
-//         d3.select('div#slider-intersection svg').remove();
-//     }
-//
-//     var sliderSimple = d3v6
-//         .sliderBottom()
-//         .min(min)
-//         .max(max)
-//         .width(300)
-//         //.tickFormat(d3v6.format('.2%'))
-//         .ticks(5)
-//         .default(0)
-//         .on('onchange', val => {
-//             #filter_intersection(val)
-//             d3.select('p#value-intersection').text(d3v6.format('.3')(val));
-//         });
-//
-//     var gSimple = d3v6
-//         .select('div#slider-intersection')
-//         .append('svg')
-//         .attr('width', 400)
-//         .attr('height', 75)
-//         .append('g')
-//         .attr('transform', 'translate(30,30)');
-//
-//     gSimple.call(sliderSimple);
-//     // d3.select('p#value-intersection').text((sliderSimple.value()));
-// }
-
-// var slider1Value = d3
-//     .select('#sliders')
-//     .append('p')
-//     .attr("id","value1")
-//     .text('0');
-//
-// var sliderSimple = d3v6
-//     .sliderBottom()
-//     .min(0)
-//     .max(100)
-//     .width(300)
-//     //.tickFormat(d3v6.format('.2%'))
-//     .ticks(5)
-//     .default(0)
-//     .on('onchange', val => {
-//         //filter_intersection(val)
-//         d3.select('#value1').text(d3v6.format('.3')(val));
-//     });
-//
-// var gSimple = d3v6
-//     .select('#sliders')
-//     .append('svg')
-//     .attr("id", "slider1")
-//     .attr('width', 400)
-//     .attr('height', 75)
-//     .append('g')
-//     .attr('transform', 'translate(30,30)');
-//
-// gSimple.call(sliderSimple);
-//
-// var slider1Value = d3
-//     .select('#sliders')
-//     .append('p')
-//     .attr("id","value"+num)
-//     .text('0');
-//
-// var sliderSimple = d3v6
-//     .sliderBottom()
-//     .min(0)
-//     .max(100)
-//     .width(300)
-//     //.tickFormat(d3v6.format('.2%'))
-//     .ticks(5)
-//     .default(0)
-//     .on('onchange', val => {
-//         //filter_intersection(val)
-//         d3.select('#value'+num).text(d3v6.format('.3')(val));
-//     });
-//
-// var gSimple = d3v6
-//     .select('#sliders')
-//     .append('svg')
-//     .attr("id", "slider"+num)
-//     .attr('width', 400)
-//     .attr('height', 75)
-//     .append('g')
-//     .attr('transform', 'translate(30,30)');
 
 function delta_display(){
     let delta = d3.select('div#optimization_result')
@@ -356,7 +241,6 @@ function delta_display(){
         .attr('id', 'deltaTemp')
         .text('0')
 }
-delta_display()
 
 
 function create_slider(num){
@@ -388,7 +272,7 @@ function create_slider(num){
         .on('onchange', val => {
             //filter_intersection(val)
             d3.select('#value'+num).text(d3v6.format('.3')(val));
-            calculate_values()
+            adjust(calculate_values())
         });
 
     let gSimple = d3v6
@@ -404,14 +288,6 @@ function create_slider(num){
 }
 
 
-
-
-
-create_slider('t1')
-create_slider('t2')
-create_slider('T1')
-create_slider('T2')
-
 function calculate_values(){
     valt1 = parseFloat(d3.select('#valuet1').text());
     valt2 = parseFloat(d3.select('#valuet2').text());
@@ -422,7 +298,101 @@ function calculate_values(){
 
     d3.select('#deltaTemp').text(d3v6.format('.3')(result))
 
+    return result
+
+    //adjust(result)
+
+    //console.log(result / 45.8)
+
+
+
     // console.log((valT1 - valt2) - (valT2 - valT1) /( Math.log( (valT1 - valt2) / (valT2 - valt1) )));
 }
+let dict_perc = {}
+let total_dict = {}
+let total_dict_2 = {}
+init_info()
+recalc()
+draw_sankey();
+
+
+
+
+create_slider('t1')
+create_slider('t2')
+create_slider('T1')
+create_slider('T2')
+
+
+
+delta_display()
 calculate_values()
+function init_info(){
+    dict_perc['Electricity'] = {}
+    dict_perc['Electricity']['Process Heating'] = .3
+    dict_perc['Electricity']['Machine Drive'] = .4
+    dict_perc['Electricity']['Non-process energy'] = .15
+    dict_perc['Electricity']['Non-FCC process'] = .15
+    dict_perc['Onsite Steam Generation'] = {}
+    dict_perc['Onsite Steam Generation']['Thermal-Chemical'] = .8
+    dict_perc['Onsite Steam Generation']['Non-FCC process'] = .2
+    dict_perc['Fuel'] = {}
+    dict_perc['Fuel']['Process Heating'] = 1
+    dict_perc['Thermal-Chemical'] = {}
+    dict_perc['Thermal-Chemical']['Applied Energy'] = 0.63
+    dict_perc['Thermal-Chemical']['Steam'] = 0.30
+    dict_perc['Thermal-Chemical']['Loss Energy'] = 0.07
+    dict_perc['Process Heating'] = {}
+    dict_perc['Process Heating']['Thermal-Chemical'] = 0.8
+    dict_perc['Process Heating']['Loss Energy'] = 0.2
+    dict_perc['Machine Drive'] = {}
+    dict_perc['Machine Drive']['Loss Energy'] = .25
+    dict_perc['Machine Drive']['Applied Energy'] = .75
+    dict_perc['Non-FCC process'] = {}
+    dict_perc['Non-FCC process']['Loss Energy'] = 1
+    dict_perc['Non-process energy'] = {}
+    dict_perc['Non-process energy']['Loss Energy'] = 1
+    total_dict['Electricity'] = 0.06
+    total_dict['Fuel'] = 0.774
+    total_dict['Onsite Steam Generation'] = 0.166
+}
+
+function recalc(){
+
+    Object.keys(dict_perc).forEach(d => total_dict_2[d] = 0)
+    Object.keys(total_dict).forEach(d => total_dict_2[d] = total_dict[d])
+
+    Object.keys(dict_perc).forEach(d => {
+        Object.keys(dict_perc[d]).forEach(e => {
+            if (Object.keys(total_dict_2).includes(e) && Object.keys(total_dict).includes(d)){
+                total_dict_2[e] += total_dict[d]*dict_perc[d][e]
+            }})
+    })
+    total_dict_2['Process Heating'] = total_dict['Fuel']*dict_perc['Fuel']['Process Heating'] + total_dict['Electricity']*dict_perc['Electricity']['Process Heating']
+    total_dict_2['Thermal-Chemical'] = (total_dict['Onsite Steam Generation']*dict_perc['Onsite Steam Generation']['Thermal-Chemical']) + (total_dict_2['Process Heating']*dict_perc['Process Heating']['Thermal-Chemical'])
+
+    console.log(total_dict_2)
+
+}
+
+
+function update_data(data){
+    data.forEach(d => d.value = total_dict_2[d.source] * dict_perc[d.source][d.target])
+    return data
+}
+
+
+function adjust(result){
+    total_dict['Fuel'] = .774 / (result / 45.8)
+    // dict_perc['Process Heating']['Thermal-Chemical'] = 0.8 * (result / 45.8)
+    // dict_perc['Process Heating']['Loss Energy'] = 0.2 * (result / 45.8)
+    if (result > 0){
+        recalc();
+        draw_sankey()
+    }
+
+}
+
+
+
 
