@@ -2,7 +2,7 @@ source,target,value,type
 Onsite Steam Generation,Thermal-Chemical,0.1328,steam
 Onsite Steam Generation,Non-FCC process,0.0332,steam
 Fuel,Process Heating,0.774,fuel
-Thermal-Chemical,Applied Energy,0.48283200000000004,none
+Thermal-Chemical,Applied Energy,0.48283200000000004,thermal
 Thermal-Chemical,Steam,0.22992,steam
 Thermal-Chemical,Loss Energy,0.05364800000000001,loss
 Process Heating,Thermal-Chemical,0.6336,thermal

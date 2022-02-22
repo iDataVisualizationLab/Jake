@@ -14,19 +14,19 @@ let optimum = {t1:120,t2:113,T1:264,T2:188}
 
 
 let linkColors = d3.scaleOrdinal()
-    .domain(["thermal", "steam", "fuel", "electricity", "loss"])
-    .range(['#D81B60','#1976D2','#388E3C','#FBC02D','#000']);
+    .domain(["fuel", "steam",  "electricity", "thermal", "loss"])
+    .range(['#8047ab', '#809641','#03adf7','#D81B60','#000']);
 
-let nodeColors = {"Onsite Steam Generation" : '#1976D2',
-    "Electricity": '#FBC02D',
-    "Fuel" : '#388E3C',
-    "Steam" : '#1976D2',
-    " Steam" : '#1976D2',
-    "Loss Energy" : '#000'
+// let nodeColors = {"Onsite Steam Generation" : '#1976D2',
+//     "Electricity": '#03adf7',
+//     "Fuel" : '#8047ab',
+//     "Steam" : '#809641',
+//     " Steam" : '#809641',
+//     "Loss Energy" : '#000'
+//
+// }
 
-}
-
-let types = ["thermal", "steam", "fuel", "electricity", "loss"]
+let types = ["fuel", "steam", "electricity", "thermal", "loss"]
 
 function draw_sankey(){
 
