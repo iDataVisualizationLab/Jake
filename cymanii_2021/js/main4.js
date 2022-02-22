@@ -246,12 +246,23 @@ function delta_display(){
         .append('p')
         .attr('class', "_result")
         .append('span')
-        .text('Delta Temperature Result: ')
+        .attr('id', 'formula');
+    let resutl = d3.select('._result')
+        //.text('Delta Temperature Result: ')
         .append("span")
         .attr('id', 'deltaTemp')
-        .text('0')
-}
 
+    let html = MathJax.tex2chtml('\\Delta T_m = {  (T_1-t_2)-(T_2-t_1) \\over \\ln{T_1-t_2 \\over T_2-t_1}}');
+    let text = html.outerHTML;
+    // //d3.select('#deltaTemp').text(html);
+    document.getElementById("formula").innerHTML = text;
+
+}
+let values = {}
+values["T1"] = optimum['T1'].toString()
+values["T2"] = optimum['T2'].toString()
+values["t1"] = optimum['t1'].toString()
+values["t2"] = optimum['t2'].toString()
 
 function create_slider(num){
 
@@ -282,6 +293,7 @@ function create_slider(num){
         .on('onchange', val => {
             //filter_intersection(val)
             d3.select('#value'+num).text(d3v6.format('.3')(val));
+            values[num] = d3v6.format('.3')(val)
             adjust(calculate_values())
         });
 
@@ -305,13 +317,19 @@ function calculate_values(){
     valT2 = parseFloat(d3.select('#valueT2').text());
 
     let result = ((valT1 - valt2) - (valT2 - valt1) /( Math.log( (valT1 - valt2) / (valT2 - valt1) )))
+    let result_ = d3v6.format('.3')(result)
 
-    d3.select('#deltaTemp').text(d3v6.format('.3')(result))
+    let formula_array = [result_,' = {  (', values["T1"], '-',values["t2"],')-(',values['T2'],'-',values['t1'],') \\over \\ln{',values['T1'],'-',values['t2'],' \\over ',values['T2'],'-',values['t1'],'}}']
+    let formula_string = formula_array.join('')
+    update_formula(formula_string)
+
+    MathJax.typeset(() => {
+        const math = document.querySelector('#deltaTemp');
+        math.innerHTML = '';
+        return math;
+    });
 
     return result
-    //adjust(result)
-    //console.log(result / 45.8)
-    // console.log((valT1 - valt2) - (valT2 - valT1) /( Math.log( (valT1 - valt2) / (valT2 - valt1) )));
 }
 let dict_perc = {}
 let total_dict = {}
@@ -320,8 +338,12 @@ init_info()
 recalc()
 // draw_sankey();
 
+function update_formula(string){
+    let html = MathJax.tex2chtml(string);
+    let text = html.outerHTML;
+    document.getElementById("deltaTemp").innerHTML = text;
 
-
+}
 
 create_slider('t1')
 create_slider('t2')
@@ -363,7 +385,6 @@ function init_info(){
 }
 
 function recalc(){
-
     Object.keys(dict_perc).forEach(d => total_dict_2[d] = 0)
     Object.keys(total_dict).forEach(d => total_dict_2[d] = total_dict[d])
 
@@ -377,24 +398,23 @@ function recalc(){
     total_dict_2['Thermal-Chemical'] = (total_dict['Onsite Steam Generation']*dict_perc['Onsite Steam Generation']['Thermal-Chemical']) + (total_dict_2['Process Heating']*dict_perc['Process Heating']['Thermal-Chemical'])
 }
 
-
 function update_data(data){
     data.forEach(d => d.value = total_dict_2[d.source] * dict_perc[d.source][d.target])
     return data
 }
 
-
 function adjust(result){
     total_dict['Fuel'] = .774 / (result / 45.8)
-    // dict_perc['Process Heating']['Thermal-Chemical'] = 0.8 * (result / 45.8)
-    // dict_perc['Process Heating']['Loss Energy'] = 0.2 * (result / 45.8)
     if (result > 0){
         recalc();
         update_data(data_)
         draw_sankey(update_data(data_))
     }
-
 }
+
+
+
+
 
 
 
