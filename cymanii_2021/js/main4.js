@@ -399,7 +399,8 @@ function recalc(){
 }
 
 function update_data(data){
-    data.forEach(d => d.value = total_dict_2[d.source] * dict_perc[d.source][d.target])
+    let scalar = 1405.5568947058375
+    data.forEach(d => d.value = total_dict_2[d.source] * dict_perc[d.source][d.target] * scalar)
     return data
 }
 
