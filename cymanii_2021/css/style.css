@@ -17,7 +17,7 @@
 
 #optimization{
     position: absolute;
-    top: 0vh;
+    top: 5vh;
     left:-2.5vw;
 }
 
@@ -32,6 +32,21 @@
     /*width: auto;*/
     /*height: auto;*/
     left: 4vw;
+}
+
+#percentage_button{
+    position: relative;
+    /*width: auto;*/
+    /*height: auto;*/
+    top: 1vh;
+    left: 1vw;
+}
+.percentage{
+    position: relative;
+    /*width: auto;*/
+    /*height: auto;*/
+    top: 3vh;
+    left: 0vw;
 }
 
 

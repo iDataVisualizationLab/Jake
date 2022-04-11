@@ -30,6 +30,8 @@ let types = ["fuel", "steam", "electricity", "thermal", "loss"]
 
 let data_
 
+let perc_toggle = false;
+
 async function load_data(){
     d3.csv("./data/test_file.csv", function(error, data) {
         data_ = update_data(data)
@@ -264,7 +266,9 @@ values["T2"] = optimum['T2'].toString()
 values["t1"] = optimum['t1'].toString()
 values["t2"] = optimum['t2'].toString()
 
-function create_slider(num){
+values['Percentage'] = 0
+
+function create_slider(num, _min, _max, _default, _class){
 
     let sliderContainer = d3
         .select('#sliders')
@@ -276,31 +280,46 @@ function create_slider(num){
     let sliderValue = d3.select('#slider'+num)
         .append('p')
         .attr('id', "heading"+num)
+        .attr('class', _class)
         .append('span')
-        .text(num+': ')
+        .text(function(){
+            if (num === 'Percentage'){
+                return num+' Saved : '
+            }
+            else{ return num+ ': ' }
+        })
+        //.text(num+': ')
         .append('span')
         .attr("id","value"+num)
-        .text(optimum[num]);
+        .text(function(){
+            if (num === 'Percentage'){
+                return _default+' %'
+            }
+            else{ return _default }
+        });
 
     let sliderSimple = d3v6
         .sliderBottom()
-        .min(100)
-        .max(500)
+        .min(_min)
+        .max(_max)
         .width(300)
         //.tickFormat(d3v6.format('.2%'))
         .ticks(5)
-        .default(optimum[num])
+        .default(_default)
         .on('onchange', val => {
             //filter_intersection(val)
-            d3.select('#value'+num).text(d3v6.format('.3')(val));
+            num == 'Percentage' ? d3.select('#value'+num).text(d3v6.format('.3')(val)+' %'): d3.select('#value'+num).text(d3v6.format('.3')(val));
+
             values[num] = d3v6.format('.3')(val)
-            adjust(calculate_values())
+            perc_toggle ? adjust_perc(val) : adjust(calculate_values())
+            //adjust(calculate_values())
         });
 
     let gSimple = d3v6
         .select('#slider'+num)
         .append('svg')
         .attr("id", "slider"+num+'svg')
+        .attr('class', _class)
         .attr('width', 400)
         .attr('height', 75)
         .append('g')
@@ -345,10 +364,10 @@ function update_formula(string){
 
 }
 
-create_slider('t1')
-create_slider('t2')
-create_slider('T1')
-create_slider('T2')
+create_slider('t1', 100, 500, optimum['t1'], 'temperatures')
+create_slider('t2',100, 500, optimum['t2'], 'temperatures')
+create_slider('T1',100, 500, optimum['T1'], 'temperatures')
+create_slider('T2',100, 500, optimum['T2'], 'temperatures')
 
 
 
@@ -413,7 +432,38 @@ function adjust(result){
     }
 }
 
+function adjust_perc(perc){
 
+    if (perc > 0 && perc < 100){
+        total_dict['Fuel'] = .774 * (1-(perc/100))
+        recalc();
+        update_data(data_)
+        draw_sankey(update_data(data_))
+    }
+}
+
+create_slider('Percentage', 0, 100, 0, 'percentage')
+d3.selectAll('.percentage').style('display', 'none')
+
+
+function toggle_percentage(){
+    if (perc_toggle===false){
+        document.getElementById('percentage_button').textContent = 'Temperatures'
+        document.getElementById("formula").style.display = 'none'
+        document.getElementById("deltaTemp").style.display = 'none'
+        d3.selectAll('.temperatures').style('display', 'none')
+        d3.selectAll('.percentage').style('display', null)
+        perc_toggle = true
+    }
+    else{
+        document.getElementById("formula").style.display = null
+        document.getElementById("deltaTemp").style.display = null
+        document.getElementById('percentage_button').textContent = 'Percentage'
+        d3.selectAll('.temperatures').style('display', null)
+        d3.selectAll('.percentage').style('display', 'none')
+        perc_toggle = false
+    }
+}
 
 
 
