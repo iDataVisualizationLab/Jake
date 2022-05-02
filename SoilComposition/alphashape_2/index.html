@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Alpha-Shape</title>
+</head>
+<body>
+<!--<script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js"></script>-->
+<!--<script src="https://cdn.jsdelivr.net/npm/alpha-shape@1.0.0"></script>-->
+<!--<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>-->
+<!--<script src="js/main.js" type="module"></script>-->
+<!--<canvas id="myCanvas" width="200" height="100"></canvas>-->
+<script type="module">
+
+    import * as d3 from "https://cdn.skypack.dev/d3@7";
+
+    const w = window.innerWidth;
+    const h = (w * 9) / 16;
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d"); // DOM.context2d(width, height);
+    const context2 = canvas.getContext("2d"); // DOM.context2d(width, height);
+
+    canvas.width = w;
+    canvas.height = h;
+
+    const data = Array(100)
+        .fill()
+        .map((_, i) => ({ x: (i * w) / 100, y: Math.random() * h }));
+
+    // const voronoi = d3.Delaunay.from(
+    //     data,
+    //     (d) => d.x,
+    //     (d) => d.y
+    // ).voronoi([0, 0, w, h]);
+
+    const delaunay = d3.Delaunay.from(
+        data,
+        (d) => d.x,
+        (d) => d.y
+    )
+
+    context.clearRect(0, 0, w, h);
+
+    context.fillStyle = "black";
+    context.beginPath();
+    delaunay.renderPoints(context,2)
+    // delaunay.trianglePolygon(delaunay.triangles[0])
+
+    //delaunay.triangles.forEach(i=> delaunay.renderTriangle(i,context))
+    delaunay.render(context)
+
+    // voronoi.delaunay.renderPoints(context, 1);
+
+    context2.stroke();
+
+    //context.beginPath()
+    context.strokeStyle = "red"
+    //context.stroke(new Path2D([0,0], [5,5]));
+    // delaunay.renderTriangle(delaunay.triangles[0], context)
+    //context.fill()
+
+    context.lineWidth = 1.5;
+
+    console.log(d3.polygonArea(delaunay.trianglePolygon(delaunay.triangles[0])))
+    console.log(delaunay.trianglePolygon(delaunay.triangles[0]))
+
+
+    // const segments = delaunay.triangles.slice(1);
+    // let i = 0;
+    // for (const e of segments) {
+    //     context.beginPath();
+    //     context.strokeStyle = d3.hsl(360 * Math.random(), 0.7, 0.5);
+    //     context.stroke(new Path2D("M" + e));
+    // }
+
+
+    //delaunay.render(delaunay.trianglePolygon(delaunay.triangles[0]))
+    // const segments = voronoi.render().split(/M/).slice(1);
+    // let i = 0;
+    // for (const e of segments) {
+    //     context.beginPath();
+    //     context.strokeStyle = d3.hsl(360 * Math.random(), 0.7, 0.5);
+    //     context.stroke(new Path2D("M" + e));
+    // }
+    // no yield context.canvas; as we're not on a generator
+
+    document.querySelector("#app").appendChild(canvas);
+
+
+</script>
+<div id="app"></div>
+</body>
+</html>

@@ -33,7 +33,7 @@ let data_
 let perc_toggle = false;
 
 async function load_data(){
-    d3.csv("./data/test_file.csv", function(error, data) {
+    d3.csv("./data/sankey_data.csv", function(error, data) {
         data_ = update_data(data)
         draw_sankey(data)
         return (data)
@@ -284,7 +284,7 @@ function create_slider(num, _min, _max, _default, _class){
         .append('span')
         .text(function(){
             if (num === 'Percentage'){
-                return num+' Saved : '
+                return 'Heat Exchanger '+num+' Increase : '
             }
             else{ return num+ ': ' }
         })
@@ -398,9 +398,9 @@ function init_info(){
     dict_perc['Non-FCC process']['Loss Energy'] = 1
     dict_perc['Non-process energy'] = {}
     dict_perc['Non-process energy']['Loss Energy'] = 1
-    total_dict['Electricity'] = 0.06
-    total_dict['Fuel'] = 0.774
-    total_dict['Onsite Steam Generation'] = 0.166
+    total_dict['Electricity'] = 0.06947
+    total_dict['Fuel'] = 0.769265
+    total_dict['Onsite Steam Generation'] = 0.15653
 }
 
 function recalc(){
@@ -432,15 +432,44 @@ function adjust(result){
     }
 }
 
+// function adjust_perc(perc){
+//
+//     if (perc > 0 && perc < 100){
+//         total_dict['Fuel'] = .774 * (1-(perc/100))
+//         recalc();
+//         update_data(data_)
+//         draw_sankey(update_data(data_))
+//     }
+// }
+
 function adjust_perc(perc){
 
     if (perc > 0 && perc < 100){
-        total_dict['Fuel'] = .774 * (1-(perc/100))
+
+        // 0.769265 = 32211.68scf
+
+        delta_temp_increase = 314.81 * (perc/100)
+        //console.log(delta_temp_increase)
+
+        scf_saved = (delta_temp_increase-21.309604301425622) / 0.00316688
+
+
+        //console.log(delta_temp_increase-21.309604301425622)
+
+        //console.log(scf_saved)
+
+        //scf_saved / 32211.68
+        if (scf_saved > 0 && scf_saved < 32211.68) {
+            //total_dict['Fuel'] = .774 * (1-(perc/100))
+            total_dict['Fuel'] = (32211.68 - scf_saved) / 32211.68
+        }
         recalc();
         update_data(data_)
         draw_sankey(update_data(data_))
     }
 }
+
+
 
 create_slider('Percentage', 0, 100, 0, 'percentage')
 d3.selectAll('.percentage').style('display', 'none')
