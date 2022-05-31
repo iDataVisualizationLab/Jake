@@ -10,7 +10,7 @@ var formatNumber = d3.format(",.0f"),    // zero decimal places
     format = function(d) { return formatNumber(d) + " " + units; },
     color = d3.scaleOrdinal(d3.schemeCategory10);
 
-let optimum = {t1:120,t2:113,T1:264,T2:188}
+let optimum = {t1:180,t2:215,T1:494,T2:246}
 
 
 let linkColors = d3.scaleOrdinal()
