@@ -335,7 +335,7 @@ function calculate_values(){
     valT1 = parseFloat(d3.select('#valueT1').text());
     valT2 = parseFloat(d3.select('#valueT2').text());
 
-    let result = ((valT1 - valt2) - (valT2 - valt1) /( Math.log( (valT1 - valt2) / (valT2 - valt1) )))
+    let result = (((valT1 - valt2) - (valT2 - valt1)) /( Math.log( (valT1 - valt2) / (valT2 - valt1) )))
     let result_ = d3v6.format('.3')(result)
 
     let formula_array = [result_,' = {  (', values["T1"], '-',values["t2"],')-(',values['T2'],'-',values['t1'],') \\over \\ln{',values['T1'],'-',values['t2'],' \\over ',values['T2'],'-',values['t1'],'}}']
