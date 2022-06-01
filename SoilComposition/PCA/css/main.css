@@ -37,8 +37,8 @@
     /*position: absolute;*/
     /*left: 50vw;*/
     /*top: 50vh;*/
-    width: 25vw;
-    height: 25vh;
+    width: 30vw;
+    height: 30vh;
 }
 #container canvas {
     position: unset;
@@ -71,8 +71,8 @@
     /*position: absolute;*/
     /*left: 50vw;*/
     /*top: 50vh;*/
-    width: 25vw;
-    height: 25vh;
+    width: 30vw;
+    height: 30vh;
 }
 #container2 canvas {
     position: unset;
@@ -81,8 +81,8 @@
     /*position: absolute;*/
     /*left: 50vw;*/
     /*top: 50vh;*/
-    width: 25vw;
-    height: 25vh;
+    width: 30vw;
+    height: 30vh;
 }
 #container3 canvas {
     position: unset;
