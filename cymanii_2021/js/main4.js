@@ -33,7 +33,7 @@ let data_
 let perc_toggle = false;
 
 async function load_data(){
-    d3.csv("./data/sankey_data.csv", function(error, data) {
+    d3.csv("./data/sankey_data_2.csv", function(error, data) {
         data_ = update_data(data)
         draw_sankey(data)
         return (data)
@@ -180,30 +180,31 @@ function draw_sankey(data){
             .attr("dy", ".35em")
             .attr("text-anchor", "end")
             .attr("transform", null)
-            .text(function(d) { return d.name; })
+            .text(function(d) {
+                return `${d.name} ${Math.round(d.value)}`; })
             .filter(function(d) { return d.x < width / 2; })
             .attr("x", 6 + sankey.nodeWidth())
             .attr("text-anchor", "start");
 //Percentage Text
-        // node.append("text")
-        //     .attr("x", sankey.nodeWidth()/2)
-        //     // .attr("y", function(d) {
-        //     //     if(d.dy < 16){
-        //     //         return d.dy * 2;
-        //     //     }
-        //     //     else return d.dy / 2;
-        //     // })
-        //     .attr("y", function(d) { return d.dy / 2; })
-        //     //.attr("dy", ".35em")
-        //     .attr("dy", function(d) {
-        //         if(d.dy < 16){
-        //             return  "-.175em";
-        //         }
-        //         else return ".35em";
-        //     })
-        //     .text(function(d) { return parseFloat(d.value/6.5).toFixed(2)*100 + "%"; })
-        //     .attr("text-anchor", "middle");
-        //
+//         node.append("text")
+//             .attr("x", sankey.nodeWidth()/2)
+//             // .attr("y", function(d) {
+//             //     if(d.dy < 16){
+//             //         return d.dy * 2;
+//             //     }
+//             //     else return d.dy / 2;
+//             // })
+//             .attr("y", function(d) { return d.dy / 2; })
+//             //.attr("dy", ".35em")
+//             .attr("dy", function(d) {
+//                 if(d.dy < 16){
+//                     return  "-.175em";
+//                 }
+//                 else return ".35em";
+//             })
+//             .text(function(d) { return parseFloat(d.value/6.5).toFixed(2)*100 + "%"; })
+//             .attr("text-anchor", "middle");
+
         var legend = svg.append("g").selectAll(".legend")
             .data(types)
             .enter().append("g")
@@ -398,9 +399,9 @@ function init_info(){
     dict_perc['Non-FCC process']['Loss Energy'] = 1
     dict_perc['Non-process energy'] = {}
     dict_perc['Non-process energy']['Loss Energy'] = 1
-    total_dict['Electricity'] = 0.06947
-    total_dict['Fuel'] = 0.769265
-    total_dict['Onsite Steam Generation'] = 0.15653
+    total_dict['Electricity'] = 0.059999999999999915
+    total_dict['Fuel'] = 0.594184899196003
+    total_dict['Onsite Steam Generation'] = 0.3458151008039971
 }
 
 function recalc(){
