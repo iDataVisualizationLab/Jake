@@ -181,7 +181,7 @@ function draw_sankey(data){
             .attr("text-anchor", "end")
             .attr("transform", null)
             .text(function(d) {
-                return `${d.name} ${Math.round(d.value)}`; })
+                return `${d.name}: ${Math.round(d.value)}`; })
             .filter(function(d) { return d.x < width / 2; })
             .attr("x", 6 + sankey.nodeWidth())
             .attr("text-anchor", "start");
@@ -425,12 +425,12 @@ function update_data(data){
 }
 
 function adjust(result){
-    total_dict['Fuel'] = .774 / (result / 45.8)
-    if (result > 0){
-        recalc();
-        update_data(data_)
-        draw_sankey(update_data(data_))
-    }
+    // total_dict['Fuel'] = 0.594184899196003 / (result / 45.8)
+    // if (result > 0){
+    //     recalc();
+    //     update_data(data_)
+    //     draw_sankey(update_data(data_))
+    // }
 }
 
 // function adjust_perc(perc){
@@ -443,36 +443,97 @@ function adjust(result){
 //     }
 // }
 
+// function adjust_perc(perc){
+//
+//     if (perc > 0 && perc < 100){
+//
+//         // 0.769265 = 32211.68scf
+//
+//         delta_temp_increase = 314.81 * (perc/100)
+//         //console.log(delta_temp_increase)
+//
+//         scf_saved = (delta_temp_increase-21.309604301425622) / 0.00316688
+//
+//
+//         //console.log(delta_temp_increase-21.309604301425622)
+//
+//         //console.log(scf_saved)
+//
+//         //scf_saved / 32211.68
+//         if (scf_saved > 0 && scf_saved < 32211.68) {
+//             //total_dict['Fuel'] = .774 * (1-(perc/100))
+//             total_dict['Fuel'] = (32211.68 - scf_saved) / 32211.68
+//         }
+//         recalc();
+//         update_data(data_)
+//         draw_sankey(update_data(data_))
+//     }
+// }
 function adjust_perc(perc){
 
-    if (perc > 0 && perc < 100){
+    // if (perc > 0 && perc < 100){
 
         // 0.769265 = 32211.68scf
 
-        delta_temp_increase = 314.81 * (perc/100)
+        let HE_delta = 315
+        let HE_input = 180
+
+        let HE_delta_result = HE_delta * (1 + (perc/100))
         //console.log(delta_temp_increase)
 
-        scf_saved = (delta_temp_increase-21.309604301425622) / 0.00316688
+        let CH_delta_result = 620 - (HE_input + HE_delta_result)
+        let CH_scf_result = (CH_delta_result-21.309604301425622) / 0.00316688
+        let CH_scf = ((620 - (HE_input+HE_delta))-21.309604301425622) / 0.00316688
+
+        let CH_scf_diff = CH_scf - CH_scf_result
+        let CH_scf_diff_perc = CH_scf_diff / CH_scf
+
+        console.log(CH_scf_diff_perc)
+
+        let mbtu_day_result = 835 * (1 - CH_scf_diff_perc)
+
+        console.log(mbtu_day_result)
+
+        total_dict['Fuel'] = mbtu_day_result / 1405
 
 
-        //console.log(delta_temp_increase-21.309604301425622)
 
-        //console.log(scf_saved)
+        // if(perc == 0){
+        //     total_dict['Fuel'] = 0.594184899196003
+        //     console.log("here")
+        // }
+        // else{
+        //     total_dict['Fuel'] = mbtu_day_result / 1405
+        // }
 
-        //scf_saved / 32211.68
-        if (scf_saved > 0 && scf_saved < 32211.68) {
-            //total_dict['Fuel'] = .774 * (1-(perc/100))
-            total_dict['Fuel'] = (32211.68 - scf_saved) / 32211.68
-        }
         recalc();
         update_data(data_)
         draw_sankey(update_data(data_))
-    }
+
+
+
+
+        console.log(CH_scf)
+        console.log(CH_scf_result)
+
+
+        //console.log(delta_temp_increase-21.309604301425622)
+        //console.log(scf_saved)
+
+        //scf_saved / 32211.68
+        // if (scf_saved > 0 && scf_saved < 32211.68) {
+        //     //total_dict['Fuel'] = .774 * (1-(perc/100))
+        //     total_dict['Fuel'] = (32211.68 - scf_saved) / 32211.68
+        // }
+        // recalc();
+        // update_data(data_)
+        // draw_sankey(update_data(data_))
+    // }
 }
 
 
 
-create_slider('Percentage', 0, 100, 0, 'percentage')
+create_slider('Percentage', 0, 32, 0, 'percentage')
 d3.selectAll('.percentage').style('display', 'none')
 
 
