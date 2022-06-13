@@ -488,6 +488,7 @@ function adjust_perc(perc){
         let CH_scf_diff = CH_scf - CH_scf_result
         let CH_scf_diff_perc = CH_scf_diff / CH_scf
 
+<<<<<<< Updated upstream
         console.log(CH_scf_diff_perc)
 
         let mbtu_day_result = 835 * (1 - CH_scf_diff_perc)
@@ -520,6 +521,15 @@ function adjust_perc(perc){
         //console.log(delta_temp_increase-21.309604301425622)
         //console.log(scf_saved)
 
+=======
+        console.log(CH_scf)
+        console.log(CH_scf_result)
+
+
+        //console.log(delta_temp_increase-21.309604301425622)
+        //console.log(scf_saved)
+
+>>>>>>> Stashed changes
         //scf_saved / 32211.68
         // if (scf_saved > 0 && scf_saved < 32211.68) {
         //     //total_dict['Fuel'] = .774 * (1-(perc/100))
@@ -528,7 +538,11 @@ function adjust_perc(perc){
         // recalc();
         // update_data(data_)
         // draw_sankey(update_data(data_))
+<<<<<<< Updated upstream
     // }
+=======
+    }
+>>>>>>> Stashed changes
 }
 
 
