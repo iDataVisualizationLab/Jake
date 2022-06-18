@@ -1,0 +1,53 @@
+:root {
+    --blue: #1e90ff;
+    --white: #ffffff;
+    --bg: var(--white);
+    --loading_circle: var(--blue);
+}
+
+body{background-color: var(--bg);}
+
+#loading{
+    background-color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#loading_svg{
+    width: 400px;
+    height: 400px;
+    transform-origin:center center;
+    transform: translateY(50%);
+}
+
+#circle1{
+    r: 110px;
+    fill: var(--loading_circle);
+    cy: 200px;
+    cx: 200px;
+    opacity: 25%;
+}
+#circle2{
+    r: 90px;
+    fill: var(--bg);
+    cy: 200px;
+    cx: 200px;
+}
+#arc{
+    stroke: var(--loading_circle);
+    stroke-width: 20px;
+    animation-name: spin;
+    animation-duration: 2000ms;
+    animation-iteration-count: infinite;
+    transform-origin: center center;
+}
+
+@keyframes spin {
+    from{
+        transform: rotate(0deg);
+    }
+    to{
+        transform: rotate(360deg);
+    }
+}

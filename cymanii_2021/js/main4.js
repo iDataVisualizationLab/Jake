@@ -452,7 +452,11 @@ function adjust_perc(perc){
         delta_temp_increase = 314.81 * (perc/100)
         //console.log(delta_temp_increase)
 
+        charge_heater_delta = 121 - delta_temp_increase
+
         scf_saved = (delta_temp_increase-21.309604301425622) / 0.00316688
+
+        //scf_saved = (charge_heater_delta-21.309604301425622) / 0.00316688
 
 
         //console.log(delta_temp_increase-21.309604301425622)
@@ -461,7 +465,7 @@ function adjust_perc(perc){
 
         //scf_saved / 32211.68
         if (scf_saved > 0 && scf_saved < 32211.68) {
-            //total_dict['Fuel'] = .774 * (1-(perc/100))
+            //total_dict['Fuel'] = 0.594184899196003 * (1 - (scf_saved / 37813.61978))
             total_dict['Fuel'] = (32211.68 - scf_saved) / 32211.68
         }
         recalc();
