@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width">
+
+  <title>Simulation with Web Workers</title>
+
+<!--  <link rel="stylesheet" href="style.css">-->
+<!--  &lt;!&ndash;[if lt IE 9]>-->
+<!--  <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>-->
+<!--  <![endif]&ndash;&gt;-->
+</head>
+
+<body>
+
+<div id="sliders"></div>
+<div style="display: inline-flex">
+  <div id="worker_container" style="padding-right: 8px; padding-left: 8px">
+    <button id="start_simulation_workers" onclick="start_simulation_workers()">Simulation (Workers)</button>
+    <p>
+      <span>A Success Rate: </span>
+      <span id="worker_span_a">0%</span>
+    </p>
+    <p>
+      <span>B Success Rate: </span>
+      <span id="worker_span_b">0%</span>
+    </p>
+    <p>
+      <span>Runtime: </span>
+      <span id="worker_span_rt">0 Seconds</span>
+    </p>
+  </div>
+  <div id="original_container"style="padding-right: 8px; padding-left: 8px">
+    <button id="start_simulation_no_workers" onclick="start_simulation()">Simulation (Original)</button>
+    <p>
+      <span>A Success Rate: </span>
+      <span id="original_span_a">0%</span>
+    </p>
+    <p>
+      <span>B Success Rate: </span>
+      <span id="original_span_b">0%</span>
+    </p>
+    <p>
+      <span>Runtime: </span>
+      <span id="original_span_rt">0 Seconds</span>
+    </p>
+  </div>
+</div>
+
+<!--<button id="start_simulation_workers" onclick="start_simulation_workers()">Simulation (Workers)</button>-->
+<!--<button id="start_simulation_no_workers" onclick="start_simulation()">Simulation (Original)</button>-->
+<!--<h1>Web<br>Workers<br>basic<br>example</h1>-->
+
+<!--<div class="controls" tabindex="0">-->
+<!--  <form>-->
+<!--    <div>-->
+<!--      <label for="number1">Multiply number 1: </label>-->
+<!--      <input type="text" id="number1" value="0">-->
+<!--    </div>-->
+<!--    <div>-->
+<!--      <label for="number2">Multiply number 2: </label>-->
+<!--      <input type="text" id="number2" value="0">-->
+<!--    </div>-->
+<!--  </form>-->
+
+<!--  <p class="result">Result: 0</p>-->
+<!--</div>-->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
