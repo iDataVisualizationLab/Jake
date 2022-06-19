@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>Loading Screen</title>
+</head>
+<body>
+<div id="loading">
+    <svg id='loading_svg'>
+        <circle id="circle1"></circle>
+        <circle id="circle2"></circle>
+        <circle id="circle3"></circle>
+        <circle id="circle4"></circle>
+    </svg>
+</div>
+
+<script>
+    setTimeout(() => {
+        document.getElementById('loading').style.display= 'none';
+    }, "5000")
+    setTimeout(() => {
+        document.getElementById('loading').style.display= null;
+    }, "10000")
+</script>
+
+</body>
+</html>

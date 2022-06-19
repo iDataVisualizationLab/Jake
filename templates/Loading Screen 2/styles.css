@@ -1,0 +1,105 @@
+:root {
+    --blue: #1e90ff;
+    --white: #ffffff;
+    --bg: var(--white);
+    --loading_circle: var(--blue);
+}
+
+body{background-color: var(--bg);}
+
+#loading{
+    background-color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#loading_svg{
+    width: 400px;
+    height: 400px;
+    transform-origin:center center;
+    transform: translateY(50%);
+}
+
+#circle1{
+    r: 100px;
+    fill: var(--loading_circle);
+    cy: 200px;
+    cx: 200px;
+    opacity: 25%;
+    animation-name: enlarge1;
+    animation-duration: 1500ms;
+    animation-iteration-count: infinite;
+    transform-origin: center center;
+}
+#circle2{
+    r: 70px;
+    fill: var(--bg);
+    cy: 200px;
+    cx: 200px;
+    animation-name: enlarge2;
+    animation-duration: 1500ms;
+    animation-iteration-count: infinite;
+    transform-origin: center center;
+}
+
+#circle3{
+    r: 30px;
+    fill: var(--loading_circle);
+    cy: 200px;
+    cx: 200px;
+    opacity: 25%;
+    animation-name: enlarge1-2;
+    animation-duration: 1500ms;
+    animation-iteration-count: infinite;
+    transform-origin: center center;
+}
+#circle4{
+    r: 0px;
+    fill: var(--bg);
+    cy: 200px;
+    cx: 200px;
+    animation-name: enlarge2-2;
+    animation-duration: 1500ms;
+    animation-iteration-count: infinite;
+    transform-origin: center center;
+}
+
+@keyframes enlarge1 {
+    from{
+        r: 100px;
+        opacity: 75%;
+    }
+    to{
+        r: 200px;
+        opacity: 25%;
+    }
+}
+
+@keyframes enlarge2 {
+    from{
+        r: 70px;
+    }
+    to{
+        r: 170px;
+    }
+}
+@keyframes enlarge1-2 {
+    from{
+        r: 30px;
+        opacity: 75%;
+    }
+    to{
+        r: 100px;
+        opacity: 25%;
+    }
+}
+
+@keyframes enlarge2-2 {
+    from{
+        r: 0px;
+    }
+    to{
+        r: 70px;
+    }
+}
