@@ -11,22 +11,16 @@ const h = (w * 9) / 16;
 //     (d) => d.y
 // )
 
-let profile_color = {
-    'L': d3.schemeCategory10[0],
-    'R': d3.schemeCategory10[1],
-}
-console.log(profile_color)
-
 let margin = {top: 20, right: 20, bottom: 50, left: 70},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
+
+
 
 let delaunay
 let dots
 
 function find_max_dist(delaunay){
-
-
     function dist_squ(a, b) {
         let dx = a[0] - b[0]
         let dy = a[1] - b[1]
@@ -36,8 +30,6 @@ function find_max_dist(delaunay){
     let dists = []
 
     const {points, triangles} = delaunay;
-
-    //console.log(delaunay)
 
     for (let i = 0; i < triangles.length; i++) {
         const t0 = triangles[i * 3 + 0];
@@ -71,7 +63,6 @@ function adjust_values(min, range, input, input_range){
 
 
 function alphashpae_filter(delaunay, alpha) {
-
     let alpha_squ = alpha * alpha
 
     function dist_squ(a, b) {
@@ -80,56 +71,28 @@ function alphashpae_filter(delaunay, alpha) {
         return dx * dx + dy * dy
     }
 
-    let paths_container = {}
+    let paths = []
+    const {points, triangles} = delaunay;
 
-    Object.keys(delaunay).forEach(d=>{
+    for (let i = 0; i < triangles.length; i++) {
+        const t0 = triangles[i * 3 + 0];
+        const t1 = triangles[i * 3 + 1];
+        const t2 = triangles[i * 3 + 2];
 
-        let paths = []
-        const {points, triangles} = delaunay[d];
+        const p0 = [points[t0 * 2], points[t0 * 2 + 1]]
+        const p1 = [points[t1 * 2], points[t1 * 2 + 1]]
+        const p2 = [points[t2 * 2], points[t2 * 2 + 1]]
 
-        for (let i = 0; i < triangles.length; i++) {
-            const t0 = triangles[i * 3 + 0];
-            const t1 = triangles[i * 3 + 1];
-            const t2 = triangles[i * 3 + 2];
-
-            const p0 = [points[t0 * 2], points[t0 * 2 + 1]]
-            const p1 = [points[t1 * 2], points[t1 * 2 + 1]]
-            const p2 = [points[t2 * 2], points[t2 * 2 + 1]]
-
-            if (dist_squ(p0, p1) < alpha_squ && dist_squ(p1, p2) < alpha_squ && dist_squ(p2, p0) < alpha_squ) {
-                paths.push(`M ${p0[0]} ${p0[1]} L ${p1[0]} ${p1[1]} L ${p2[0]} ${p2[1]} Z`)
-            }
+        if (dist_squ(p0, p1) < alpha_squ && dist_squ(p1, p2) < alpha_squ && dist_squ(p2, p0) < alpha_squ) {
+            paths.push(`M ${p0[0]} ${p0[1]} L ${p1[0]} ${p1[1]} L ${p2[0]} ${p2[1]} Z`)
         }
-        paths_container[d] = (paths);
-    })
-
-    return paths_container
-
-
-
-    // let paths = []
-    // const {points, triangles} = delaunay;
-    //
-    // for (let i = 0; i < triangles.length; i++) {
-    //     const t0 = triangles[i * 3 + 0];
-    //     const t1 = triangles[i * 3 + 1];
-    //     const t2 = triangles[i * 3 + 2];
-    //
-    //     const p0 = [points[t0 * 2], points[t0 * 2 + 1]]
-    //     const p1 = [points[t1 * 2], points[t1 * 2 + 1]]
-    //     const p2 = [points[t2 * 2], points[t2 * 2 + 1]]
-    //
-    //     if (dist_squ(p0, p1) < alpha_squ && dist_squ(p1, p2) < alpha_squ && dist_squ(p2, p0) < alpha_squ) {
-    //         paths.push(`M ${p0[0]} ${p0[1]} L ${p1[0]} ${p1[1]} L ${p2[0]} ${p2[1]} Z`)
-    //     }
-    // }
-    // return paths;
+    }
+    return paths;
 }
 
 function draw(paths, points){
 
-
-    d3.selectAll('.a-shapes').remove()
+    d3.select('.a-shapes').remove()
 
     // let svg = d3.select("#vis_div")
     //     .append("svg")
@@ -137,39 +100,21 @@ function draw(paths, points){
     //     .attr("height", h)
     //     .attr("class", "a-shapes");
 
-    Object.keys(paths).forEach(d=>{
-        let svg = d3.select("#plot")
-            .append("g")
-            .attr("width", width)
-            .attr("height", height)
-            .attr("transform", `translate(${margin.left}, ${margin.top})`)
-            .attr("class", "a-shapes");
+    let svg = d3.select("#plot")
+        .append("g")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("transform", `translate(${margin.left}, ${margin.top})`)
+        .attr("class", "a-shapes");
 
-        svg.append("g")
-            .selectAll(".a_shape")
-            .data(paths[d])
-            .enter().append('path')
-            .attr('d', e=>e)
-            .attr('fill', ()=> profile_color[d])
-            .attr('stroke', 'black')
-            .attr('class','a-shape-paths')
-    })
-
-    // let svg = d3.select("#plot")
-    //     .append("g")
-    //     .attr("width", width)
-    //     .attr("height", height)
-    //     .attr("transform", `translate(${margin.left}, ${margin.top})`)
-    //     .attr("class", "a-shapes");
-    //
-    // svg.append("g")
-    //     .selectAll(".a_shape")
-    //     .data(paths)
-    //     .enter().append('path')
-    //     .attr('d', d=>d)
-    //     .attr('fill', 'gray')
-    //     .attr('stroke', 'black')
-    //     .attr('class','a-shape-paths')
+    svg.append("g")
+        .selectAll(".a_shape")
+        .data(paths)
+        .enter().append('path')
+        .attr('d', d=>d)
+        .attr('fill', 'gray')
+        .attr('stroke', 'black')
+        .attr('class','a-shape-paths')
 
     // svg.append("g")
     //     .selectAll("circle")
@@ -194,10 +139,7 @@ function make_slider(slider_id, min, max, value, step, width){
         .style('width', `${width}px`)
         .on('input', function(){
             let val = d3.select(this).property("value")
-            //console.log(adjust_values(d_min, d_range, val, max-min))
-            draw(alphashpae_filter(delaunay, val), dots)
-
-            //draw(alphashpae_filter(delaunay,adjust_values(d_min, d_range, val, max-min)), dots)
+            draw(alphashpae_filter(delaunay,adjust_values(d_min, d_range, val, max-min)), dots)
             d3.select(`#${slider_id}_value_text`).text(val)
         });
 
@@ -217,10 +159,13 @@ function load_data(){
         d3.csv('data/R.csv'),
     ]).then(function(files) {
         process_data(files,['L','R'])
-    })//.catch(function(err) {
-    //     console.error(err)
-    // })
+    }).catch(function(err) {
+        console.error(err)
+    })
 }
+
+
+
 
 function process_data(data,profiles){
 
@@ -282,20 +227,21 @@ function plot(data, _x, _y, profiles){
     x_scale.domain([d3.min(data, function(d) { return d[_x]; }), d3.max(data, function(d) { return d[_x]; })])
     y_scale.domain([d3.min(data, function(d) { return d[_y]; }), d3.max(data, function(d) { return d[_y]; })]);
 
+    // Add the scatterplot
     svg.selectAll("dot")
         .data(data)
         .enter().append("circle")
         .attr("class", d=>d.profile)
         .attr("r", 3)
         .attr("cx", function(d) {return x_scale(d[_x]); })
-        .attr("cy", function(d) {return y_scale(d[_y]); })
-        .style('fill', d=> profile_color[d.profile]);
+        .attr("cy", function(d) {return y_scale(d[_y]); });
 
+    // Add the X Axis
     svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x_scale));
 
-    svg.append("text")  // text label for the x axis
+    svg.append("text")      // text label for the x axis
         .attr("x", width/2 )
         .attr("y",  height + 40 )
         .style("text-anchor", "middle")
@@ -305,8 +251,8 @@ function plot(data, _x, _y, profiles){
     svg.append("g")
        .call(d3.axisLeft(y_scale));
 
-    svg.append("text")  // text label for the y axis
-        .style("text-anchor", "middle")
+    svg.append("text")
+        .style("text-anchor", "middle")// text label for the x axis
         .attr("x", 0 )
         .attr("y",  0 )
         //.style("text-anchor", "middle")
@@ -315,49 +261,29 @@ function plot(data, _x, _y, profiles){
         //.attr("transform", `translate(0, ${height/2})`)
         .text(_y);
 
-    dots = {}
 
-    profiles.forEach(d=> {
-        dots[d] = data.filter(e=> e.profile===d).map(function(d){
-                return {x: x_scale(d[_x]), y: y_scale(d[_y])}
-        })
+
+
+
+    dots = data.map(function(d){
+
+        return {x: x_scale(d[_x]), y: y_scale(d[_y])}
     })
+
     console.log(dots)
 
-    delaunay = {}
+    delaunay = d3.Delaunay.from(
+        dots,
+        (d) => d.x,
+        (d) => d.y
+    )
 
-    Object.keys(dots).forEach(d=>{
-        delaunay[d] = d3.Delaunay.from(
-            dots[d],
-            (e) => e.x,
-            (e) => e.y
-        )
-    })
+    d_res = find_max_dist(delaunay)
+    d_min = Math.sqrt(d_res[0])
+    d_max = Math.sqrt(d_res[1])
+    d_range = d_max-d_min
+    draw(alphashpae_filter(delaunay,1000), data)
 
-
-    let delaunay_properties = {}
-
-    Object.keys(delaunay).forEach(d=> {
-        delaunay_properties[d] = {}
-        delaunay_properties[d]['d_res'] = find_max_dist(delaunay[d])
-        delaunay_properties[d]['d_min'] = Math.sqrt(delaunay_properties[d]['d_res'][0])
-        delaunay_properties[d]['d_max'] = Math.sqrt(delaunay_properties[d]['d_res'][1])
-        delaunay_properties[d]['d_range'] = delaunay_properties[d]['d_max'] - delaunay_properties[d]['d_min']
-    })
-    // d_res = find_max_dist(delaunay)
-    // d_min = {}
-    // d_max = {}
-    // d_range = {}
-    // Object.keys(delaunay).forEach(d=> )
-    // d_min = d3.min([delaunay_properties[profiles[0]]['d_min'],delaunay_properties[profiles[1]]['d_min']])
-    // d_max = d3.max([delaunay_properties[profiles[0]]['d_min'],delaunay_properties[profiles[1]]['d_min']])
-    // d_range = d_max-d_min
-    //
-    // console.log(d_min)
-    // console.log(d_max)
-
-    draw(alphashpae_filter(delaunay,1000), dots)
-    console.log(delaunay_properties)
 
 }
 
