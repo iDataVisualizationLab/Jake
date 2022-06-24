@@ -11,71 +11,6 @@ let delaunay = d3.Delaunay.from(
     (d) => d.y
 )
 
-// function alphashapefilter(delaunay, alpha) {
-//     const asq = alpha ** 2;
-//     function dist2(p, q) {
-//         return (
-//             (delaunay.points[2 * p] - delaunay.points[2 * q]) ** 2 +
-//             (delaunay.points[2 * p + 1] - delaunay.points[2 * q + 1]) ** 2
-//         );
-//     }
-//     return function(i) {
-//         let t0 = delaunay.triangles[i * 3 + 0],
-//             t1 = delaunay.triangles[i * 3 + 1],
-//             t2 = delaunay.triangles[i * 3 + 2];
-//         return dist2(t0, t1) < asq && dist2(t1, t2) < asq && dist2(t2, t0) < asq;
-//     };
-// }
-
-// function boundary(delaunay, members) {
-//     const counts = {},
-//         edges = {},
-//         result = [];
-//     let r;
-//
-//     // Traverse the edges of all member triangles and discard any edges that appear twice.
-//     members.forEach((member, d) => {
-//         if (!member) return;
-//         for (let i = 0; i < 3; i++) {
-//             var e = [
-//                 delaunay.triangles[3 * d + i],
-//                 delaunay.triangles[3 * d + ((i + 1) % 3)]
-//             ].sort();
-//             (edges[e[0]] = edges[e[0]] || []).push(e[1]);
-//             (edges[e[1]] = edges[e[1]] || []).push(e[0]);
-//             const k = e.join(":");
-//             if (counts[k]) delete counts[k];
-//             else counts[k] = 1;
-//         }
-//     });
-//
-//     while (1) {
-//         let k = null;
-//         // Pick an arbitrary starting point on a boundary.
-//         for (k in counts) break;
-//         if (k == null) break;
-//         result.push((r = k.split(":").map(Number)));
-//         delete counts[k];
-//         let q = r[1];
-//         while (q != r[0]) {
-//             let p = q,
-//                 qs = edges[p],
-//                 n = qs.length;
-//             for (let i = 0; i < n; i++) {
-//                 q = qs[i];
-//                 let edge = [p, q].sort().join(":");
-//                 if (counts[edge]) {
-//                     delete counts[edge];
-//                     r.push(q);
-//                     break;
-//                 }
-//             }
-//         }
-//     }
-//     return result;
-// }
-
-
 function find_max_dist(delaunay){
     function dist_squ(a, b) {
         let dx = a[0] - b[0]
@@ -96,15 +31,9 @@ function find_max_dist(delaunay){
         const p1 = [points[t1 * 2], points[t1 * 2 + 1]]
         const p2 = [points[t2 * 2], points[t2 * 2 + 1]]
 
-        // dists.push(dist_squ(p0, p1))
-        // dists.push(dist_squ(p1, p2))
-        // dists.push(dist_squ(p2, p0))
-
         dists.push(d3.max([dist_squ(p0, p1),dist_squ(p1, p2),dist_squ(p2, p0)]))
-        // if (dist_squ(p0, p1) < alpha_squ && dist_squ(p1, p2) < alpha_squ && dist_squ(p2, p0) < alpha_squ) {
-        //     paths.push(`M ${p0[0]} ${p0[1]} L ${p1[0]} ${p1[1]} L ${p2[0]} ${p2[1]} Z`)
-        // }
     }
+
     return [d3.min(dists),d3.max(dists)]
 }
 
@@ -112,13 +41,7 @@ let d_res = find_max_dist(delaunay)
 let d_min = Math.sqrt(d_res[0])
 let d_max = Math.sqrt(d_res[1])
 let d_range = d_max-d_min
-//
-// console.log(d_max)
-//
-// console.log(Math.sqrt(res[0]))
-// console.log(Math.sqrt(res[1]))
-//
-// console.log(Math.sqrt(res[1])-Math.sqrt(res[0]))
+
 
 function adjust_values(min, range, input, input_range){
     return (input / input_range) * range + min
@@ -163,14 +86,6 @@ function draw(paths, points){
         .attr("height", h)
         .attr("class", "a-shapes");
 
-    // svg.append("g")
-    //     .selectAll("circle")
-    //     .data(points)
-    //     .enter().append("circle")
-    //     .attr("r", 3)
-    //     .attr("cx", function(d) { return d.x; })
-    //     .attr("cy", function(d) { return d.y; });
-
     svg.append("g")
         .selectAll(".a_shape")
         .data(paths)
@@ -204,7 +119,6 @@ function make_slider(slider_id, min, max, value, step, width){
         .on('input', function(){
             let val = d3.select(this).property("value")
             draw(alphashpae_filter(delaunay,adjust_values(d_min, d_range, val, max-min)), data)
-            // console.log(adjust_values(d_min, d_range, val, max-min))
             d3.select(`#${slider_id}_value_text`).text(val)
         });
 
@@ -220,60 +134,95 @@ function make_slider(slider_id, min, max, value, step, width){
 make_slider('s1',0,1000,0,1, 200)
 draw(alphashpae_filter(delaunay,0), data)
 
-// function create_slider(num, _min, _max, _default, _class){
-//     let sliderContainer = d3
-//         .select('#sliders')
-//         .append('div')
-//         .attr('id', 'slider'+num)
-//         .attr('class', '_slider')
-//
-//     let sliderValue = d3.select('#slider'+num)
-//         .append('p')
-//         .attr('id', "heading"+num)
-//         .attr('class', _class)
-//         .append('span')
-//         .text(function(){
-//             if (num === 'Percentage'){
-//                 return 'Heat Exchanger '+num+' Increase : '
-//             }
-//             else{ return num+ ': ' }
-//         })
-//         //.text(num+': ')
-//         .append('span')
-//         .attr("id","value"+num)
-//         .text(function(){
-//             if (num === 'Percentage'){
-//                 return _default+' %'
-//             }
-//             else{ return _default }
-//         });
-//
-//     let sliderSimple = d3
-//         .sliderBottom()
-//         .min(_min)
-//         .max(_max)
-//         .width(300)
-//         //.tickFormat(d3.format('.2%'))
-//         .ticks(5)
-//         .default(_default)
-//         .on('onchange', val => {
-//             console.log(val)
-//         });
-//
-//     let gSimple = d3
-//         .select('#slider'+num)
-//         .append('svg')
-//         .attr("id", "slider"+num+'svg')
-//         // .attr('class', _class)
-//         .attr('width', 400)
-//         .attr('height', 75)
-//         .append('g')
-//         .attr('transform', 'translate(30,30)');
-//
-//     gSimple.call(sliderSimple);
-// }
+function load_data(){
+    Promise.all([
+        d3.csv('data/L.csv'),
+        d3.csv('data/R.csv'),
+    ]).then(function(files) {
+        process_data(files)
+    }).catch(function(err) {
+        console.error(err)
+    })
+}
 
-// draw(alphashpae_filter(delaunay,350), data)
-// draw(alphashpae_filter(delaunay,320), data)
 
-// create_slider(1,1,10,1,'a')
+
+
+function process_data(data){
+
+    let elements = new Array(data.length)
+
+    for (let i = 0 ; i < elements.length; i++){
+        elements[i] = new Array()
+        data[i].columns.forEach(d=> {
+            d.includes("Concentration") ? elements[i].push(d.split(" ")[0]) : null
+        })
+    }
+
+    let el1 = `${elements[0][0]} Concentration`
+    let el2 = `${elements[0][1]} Concentration`
+
+
+    let filtered_data = data[0].map(function (d){
+        let temp_obj = {}
+        temp_obj[el1] = +d[el1]
+        temp_obj[el2] = +d[el2]
+        return temp_obj
+    })
+
+    plot(filtered_data, el1, el2)
+
+}
+
+function plot(data, _x, _y){
+
+    console.log(_x)
+    let margin = {top: 20, right: 20, bottom: 30, left: 50},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    let x = d3.scaleLinear().range([0, width]);
+    let y = d3.scaleLinear().range([height, 0]);
+
+    let svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    //x.domain(d3.extent(data, function(d) { return d[_x]; }));
+    x.domain([d3.min(data, function(d) { return d[_x]; }), d3.max(data, function(d) { return d[_x]; })])
+    y.domain([d3.min(data, function(d) { return d[_y]; }), d3.max(data, function(d) { return d[_y]; })]);
+
+    // Add the scatterplot
+    svg.selectAll("dot")
+        .data(data)
+        .enter().append("circle")
+        .attr("r", 5)
+        .attr("cx", function(d) {
+            console.log(x(d[_x]))
+            return x(d[_x]); })
+        .attr("cy", function(d) {return y(d[_y]); });
+
+    // Add the X Axis
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x))
+
+
+
+    // Add the Y Axis
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+}
+
+
+
+
+load_data()
+
+
+
+

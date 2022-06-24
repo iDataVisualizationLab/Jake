@@ -114,7 +114,6 @@ function start_simulation_workers() {
         if (finished['a'] && finished['b']){
             end_timer_worker(start)
         }
-
     }
 
     myWorker_b.onmessage = function (e) {
@@ -126,9 +125,6 @@ function start_simulation_workers() {
             end_timer_worker(start)
         }
     }
-
-
-
 }
 
 
@@ -170,6 +166,15 @@ function start_simulation(){
     end_timer_original(start)
 
 }
+
+
+let content = []
+function read_csv(){
+    d3.csv('test_data.csv', function (data){
+        content.push(data)
+    })
+}
+read_csv()
 
 
 

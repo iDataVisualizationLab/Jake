@@ -285,7 +285,7 @@ function create_slider(num, _min, _max, _default, _class){
         .append('span')
         .text(function(){
             if (num === 'Percentage'){
-                return 'Heat Exchanger '+num+' Increase : '
+                return 'H.E. Section '+num+' Increase : '
             }
             else{ return num+ ': ' }
         })
@@ -491,7 +491,12 @@ function adjust_perc(perc){
         let CH_scf_diff = CH_scf - CH_scf_result
         let CH_scf_diff_perc = CH_scf_diff / CH_scf
 
+<<<<<<< Updated upstream
         console.log(CH_scf_diff_perc)
+=======
+// <<<<<<< Updated upstream
+//         console.log(CH_scf_diff_perc)
+>>>>>>> Stashed changes
 
         let mbtu_day_result = 835 * (1 - CH_scf_diff_perc)
 
@@ -530,6 +535,10 @@ function adjust_perc(perc){
         //console.log(delta_temp_increase-21.309604301425622)
         //console.log(scf_saved)
 
+<<<<<<< Updated upstream
+=======
+// =======
+>>>>>>> Stashed changes
         console.log(CH_scf)
         console.log(CH_scf_result)
 
@@ -537,6 +546,7 @@ function adjust_perc(perc){
         //console.log(delta_temp_increase-21.309604301425622)
         //console.log(scf_saved)
 
+<<<<<<< Updated upstream
         //scf_saved / 32211.68
         // if (scf_saved > 0 && scf_saved < 32211.68) {
         //     //total_dict['Fuel'] = .774 * (1-(perc/100))
@@ -547,6 +557,22 @@ function adjust_perc(perc){
         // draw_sankey(update_data(data_))
     // }
 
+=======
+// >>>>>>> Stashed changes
+//         //scf_saved / 32211.68
+//         // if (scf_saved > 0 && scf_saved < 32211.68) {
+//         //     //total_dict['Fuel'] = .774 * (1-(perc/100))
+//         //     total_dict['Fuel'] = (32211.68 - scf_saved) / 32211.68
+//         // }
+//         // recalc();
+//         // update_data(data_)
+//         // draw_sankey(update_data(data_))
+// <<<<<<< Updated upstream
+    // }
+// =======
+    //}
+// >>>>>>> Stashed changes
+>>>>>>> Stashed changes
 }
 
 
