@@ -23,6 +23,7 @@ let margin = {top: 20, right: 20, bottom: 50, left: 70},
 
 let delaunay
 let dots
+let delaunay_properties
 
 function find_max_dist(delaunay){
 
@@ -70,9 +71,12 @@ function adjust_values(min, range, input, input_range){
 }
 
 
-function alphashpae_filter(delaunay, alpha) {
+function alphashpae_filter(delaunay, input, input_range) {
 
-    let alpha_squ = alpha * alpha
+
+
+
+    //let alpha_squ = alpha * alpha
 
     function dist_squ(a, b) {
         let dx = a[0] - b[0]
@@ -83,6 +87,10 @@ function alphashpae_filter(delaunay, alpha) {
     let paths_container = {}
 
     Object.keys(delaunay).forEach(d=>{
+
+        let _alpha = (input / input_range) * delaunay_properties[d]['d_range'] + delaunay_properties[d]['d_min']
+
+        let alpha_squ = _alpha * _alpha
 
         let paths = []
         const {points, triangles} = delaunay[d];
@@ -195,7 +203,7 @@ function make_slider(slider_id, min, max, value, step, width){
         .on('input', function(){
             let val = d3.select(this).property("value")
             //console.log(adjust_values(d_min, d_range, val, max-min))
-            draw(alphashpae_filter(delaunay, val), dots)
+            draw(alphashpae_filter(delaunay, val, ((max-min)-1), dots))
 
             //draw(alphashpae_filter(delaunay,adjust_values(d_min, d_range, val, max-min)), dots)
             d3.select(`#${slider_id}_value_text`).text(val)
@@ -208,7 +216,7 @@ function make_slider(slider_id, min, max, value, step, width){
         .text(value)
 }
 
-make_slider('s1',0,1000,0,1, 200)
+make_slider('s1',0,1000,1000,1, 200)
 //draw(alphashpae_filter(delaunay,0), data)
 
 function load_data(){
@@ -335,7 +343,7 @@ function plot(data, _x, _y, profiles){
     })
 
 
-    let delaunay_properties = {}
+    delaunay_properties = {}
 
     Object.keys(delaunay).forEach(d=> {
         delaunay_properties[d] = {}
@@ -356,7 +364,7 @@ function plot(data, _x, _y, profiles){
     // console.log(d_min)
     // console.log(d_max)
 
-    draw(alphashpae_filter(delaunay,1000), dots)
+    draw(alphashpae_filter(delaunay,1000, 1000), dots)
     console.log(delaunay_properties)
 
 }
