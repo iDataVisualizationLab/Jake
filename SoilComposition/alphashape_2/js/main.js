@@ -85,6 +85,9 @@ function alphashpae_filter(delaunay, input, input_range) {
     }
 
     let paths_container = {}
+    let path_verticies_container = {}
+    let path_verticies_container_2 = {}
+
 
     Object.keys(delaunay).forEach(d=>{
 
@@ -94,6 +97,11 @@ function alphashpae_filter(delaunay, input, input_range) {
 
         let paths = []
         const {points, triangles} = delaunay[d];
+
+        let path_vertices = []
+        let path_vertices_2 = []
+
+
 
         for (let i = 0; i < triangles.length; i++) {
             const t0 = triangles[i * 3 + 0];
@@ -106,32 +114,56 @@ function alphashpae_filter(delaunay, input, input_range) {
 
             if (dist_squ(p0, p1) < alpha_squ && dist_squ(p1, p2) < alpha_squ && dist_squ(p2, p0) < alpha_squ) {
                 paths.push(`M ${p0[0]} ${p0[1]} L ${p1[0]} ${p1[1]} L ${p2[0]} ${p2[1]} Z`)
+
+                path_vertices_2.push([
+                    [p0[0], p0[1]],
+                    [p1[0], p1[1]],
+                    [p2[0], p2[1]]
+                ])
+
+                path_vertices.push([
+                    {x:p0[0], y:p0[1]},
+                    {x:p1[0], y:p1[1]},
+                    {x:p2[0], y:p2[1]}
+                ])
+
             }
         }
-        paths_container[d] = (paths);
+
+        path_verticies_container[d] = path_vertices
+        path_verticies_container_2[d] = path_vertices_2
+        paths_container[d] = paths;
     })
 
+    let intersection_area = 0
+
+    let key1 = Object.keys(path_verticies_container)[0]
+    let key2 = Object.keys(path_verticies_container)[1]
+
+    for (let i = 0 ; i < path_verticies_container[key1].length; i++){
+        for (let j = 0 ; j < path_verticies_container[key2].length; j++){
+            let inter = intersect(path_verticies_container[key1][i], path_verticies_container[key2][j])
+            if (inter.length != 0){
+                intersection_area += d3.polygonArea(inter[0].map(function (d){
+                    return [d['x'], d['y']]
+                }))
+            }
+
+        }
+    }
+    console.log('intersection area', intersection_area)
+
+    let area = {}
+
+    Object.keys(path_verticies_container_2).forEach(d=>{
+        area[d] = 0
+        path_verticies_container_2[d].forEach(e=>{
+            area[d] += d3.polygonArea(e)
+        })
+    })
+    console.log('alpha-shape areas', area)
+
     return paths_container
-
-
-
-    // let paths = []
-    // const {points, triangles} = delaunay;
-    //
-    // for (let i = 0; i < triangles.length; i++) {
-    //     const t0 = triangles[i * 3 + 0];
-    //     const t1 = triangles[i * 3 + 1];
-    //     const t2 = triangles[i * 3 + 2];
-    //
-    //     const p0 = [points[t0 * 2], points[t0 * 2 + 1]]
-    //     const p1 = [points[t1 * 2], points[t1 * 2 + 1]]
-    //     const p2 = [points[t2 * 2], points[t2 * 2 + 1]]
-    //
-    //     if (dist_squ(p0, p1) < alpha_squ && dist_squ(p1, p2) < alpha_squ && dist_squ(p2, p0) < alpha_squ) {
-    //         paths.push(`M ${p0[0]} ${p0[1]} L ${p1[0]} ${p1[1]} L ${p2[0]} ${p2[1]} Z`)
-    //     }
-    // }
-    // return paths;
 }
 
 function draw(paths, points){
@@ -159,7 +191,9 @@ function draw(paths, points){
             .enter().append('path')
             .attr('d', e=>e)
             .attr('fill', ()=> profile_color[d])
+            .style('opacity', 0.75)
             .attr('stroke', 'black')
+            .style('stroke-opacity', .125)
             .attr('class','a-shape-paths')
     })
 
@@ -241,8 +275,8 @@ function process_data(data,profiles){
         })
     }
 
-    let el1 = `${elements[0][0]} Concentration`
-    let el2 = `${elements[0][1]} Concentration`
+    let el1 = `${elements[0][1]} Concentration`
+    let el2 = `${elements[0][2]} Concentration`
 
     let filtered_data = []
 

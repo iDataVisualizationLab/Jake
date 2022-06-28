@@ -20,7 +20,6 @@ body{background-color: var(--bg);}
     transform-origin:center center;
     transform: translateY(50%);
 }
-
 #circle1{
     r: 100px;
     fill: var(--loading_circle);
