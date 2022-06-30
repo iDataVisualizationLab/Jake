@@ -86,6 +86,8 @@ async function plot_raw(ordering) {
             });
         });
 
+        console.log(domainByTrait)
+
         xAxis.tickSize(size * n).tickFormat(d3.format('.2s'));
         yAxis.tickSize(-size * n).tickFormat(d3.format('.2s'));
 

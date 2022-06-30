@@ -237,6 +237,8 @@ function make_slider(slider_id, min, max, value, step, width){
         .on('input', function(){
             let val = d3.select(this).property("value")
             //console.log(adjust_values(d_min, d_range, val, max-min))
+
+
             draw(alphashpae_filter(delaunay, val, ((max-min)-1), dots))
 
             //draw(alphashpae_filter(delaunay,adjust_values(d_min, d_range, val, max-min)), dots)
