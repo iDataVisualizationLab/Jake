@@ -410,6 +410,52 @@ function plot(data, _x, _y, profiles){
 
 load_data()
 
+function boundary(delaunay, members) {
+    const counts = {},
+        edges = {},
+        result = [];
+    let r;
 
+    // Traverse the edges of all member triangles and discard any edges that appear twice.
+    members.forEach((member, d) => {
+        if (!member) return;
+        for (let i = 0; i < 3; i++) {
+            var e = [
+                delaunay.triangles[3 * d + i],
+                delaunay.triangles[3 * d + ((i + 1) % 3)]
+            ].sort();
+            (edges[e[0]] = edges[e[0]] || []).push(e[1]);
+            (edges[e[1]] = edges[e[1]] || []).push(e[0]);
+            const k = e.join(":");
+            if (counts[k]) delete counts[k];
+            else counts[k] = 1;
+        }
+    });
+
+    while (1) {
+        let k = null;
+        // Pick an arbitrary starting point on a boundary.
+        for (k in counts) break;
+        if (k == null) break;
+        result.push((r = k.split(":").map(Number)));
+        delete counts[k];
+        let q = r[1];
+        while (q != r[0]) {
+            let p = q,
+                qs = edges[p],
+                n = qs.length;
+            for (let i = 0; i < n; i++) {
+                q = qs[i];
+                let edge = [p, q].sort().join(":");
+                if (counts[edge]) {
+                    delete counts[edge];
+                    r.push(q);
+                    break;
+                }
+            }
+        }
+    }
+    return result;
+}
 
 

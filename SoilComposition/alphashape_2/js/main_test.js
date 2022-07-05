@@ -544,6 +544,13 @@ function add_array_equals(){
     Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 }
 
+//
+// function reduce_points2(p3){
+//
+// }
+
+
+
 function reduce_points(p3, combined){
     console.log(p3)
 
@@ -632,7 +639,7 @@ function reduce_points(p3, combined){
     })
 
     console.log(n2_p3)
-    draw3(n2_p3)
+    //draw3(polySort(n2_p3))
 
 
 }
@@ -644,13 +651,13 @@ function draw3(polygon_points, points) {
 
     //d3.selectAll('.a-shapes').remove()
     let svg = d3.select(".a-shapes")
-
+    //
     // let svg = d3.select("#vis_div")
-        // .append("svg")
-        // .attr("width", width)
-        // .attr("height", height)
-        // .attr("transform", `translate(${margin.left}, ${margin.top})`)
-        // .attr("class", "a-shapes");
+    //     .append("svg")
+    //     .attr("width", width)
+    //     .attr("height", height)
+    //     .attr("transform", `translate(${margin.left}, ${margin.top})`)
+    //     .attr("class", "a-shapes");
 
     //Object.keys(paths).forEach(d => {
     // let svg = d3.select("#vis_div")
@@ -660,13 +667,22 @@ function draw3(polygon_points, points) {
     //     .attr("transform", `translate(${margin.left}, ${margin.top})`)
     //     .attr("class", "a-shapes");
 
+    // polygon_points.forEach(e=>{
+    //    svg.append('polygon')
+    //        .data([e.join(' ')])
+    //        .attr('points', d=>d)
+    //        .attr('stroke', '#f00')
+    //        .attr('fill', 'none')
+    //        .attr('class', 'polygons');
+    // })
+
     polygon_points.forEach(e=>{
-       svg.append('polygon')
-           .data([e.join(' ')])
-           .attr('points', d=>d)
-           .attr('stroke', '#f00')
-           .attr('fill', 'none')
-           .attr('class', 'polygons');
+        svg.append('polygon')
+            .data([polygon_points.join(' ')])
+            .attr('points', d=>d)
+            .attr('stroke', '#f00')
+            .attr('fill', 'none')
+            .attr('class', 'polygons');
     })
 
        // svg.append('polygon')
@@ -839,3 +855,57 @@ function draw3(polygon_points, points) {
 // let check2 = [1,2,3]
 //
 // console.log(check.equals(check2))
+
+
+function squaredPolar(point, centre) {
+    return [
+        Math.atan2(point[1]-centre[1], point[0]-centre[0]),
+        (point[0]-centre[0])**2 + (point[1]-centre[1])**2 // Square of distance
+    ];
+}
+
+// Main algorithm:
+function polySort(points) {
+    // Get "centre of mass"
+    let centre = [points.reduce((sum, p) => sum + p[0], 0) / points.length,
+        points.reduce((sum, p) => sum + p[1], 0) / points.length];
+
+    // Sort by polar angle and distance, centered at this centre of mass.
+    for (let point of points) point.push(...squaredPolar(point, centre));
+    points.sort((a,b) => a[2] - b[2] || a[3] - b[3]);
+    // Throw away the temporary polar coordinates
+    for (let point of points) point.length -= 2;
+    return points
+}
+
+// let points2 = [[10,10],[200,200],[100,400],[400,250],[300,400],[20,300], [300,100]];
+// //
+// //
+// //
+// // //console.log(polySort(points2))
+// //
+// // // draw3(polySort(points2))
+// // // draw3(points2)
+//
+let points3 = []
+//
+points.forEach(d=>{
+    d.forEach(e=> points3.push(e)
+
+        // d.forEach(e=> points3.some(f => (f[0] === e[0] && f[1] === e[1])) ? null : points3.push(e)
+    )
+})
+//
+//
+// points3 = polySort(points3)
+//
+//
+// for (let i = 0; i < points3.length; i++){
+//
+// }
+//
+
+
+
+// console.log(points3)
+draw3(polySort(points3))
