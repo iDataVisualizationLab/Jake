@@ -289,7 +289,7 @@ function polygonate(edges) {
             while ((polygon.length === 0) || (!stop)) {
 
                 //console.log(polygon.length)
-                if(polygon.length > 10000){stop = true}
+                if(polygon.length > 3000){stop = true}
 
                 //add point to polygon
                 polygon.push({x: org.x, y: org.y});

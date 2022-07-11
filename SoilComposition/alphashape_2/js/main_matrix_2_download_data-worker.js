@@ -22,7 +22,7 @@ onmessage = function(e) {
         download_object['alphahull_paths'] = _alphahull_paths
         //download_object['alphahull_points'] = _alphahull_points
         download_object['intersection_polygons'] = _intersections
-        distance_object['intersection_areas'] = intersection_area_object
+        download_object['intersection_areas'] = intersection_area_object
         download_object['distances'] = distance_object
 
         postMessage(download_object)
@@ -36,7 +36,9 @@ onmessage = function(e) {
             if (d.split('_x_')[0] != d.split('_x_')[1]){
                 getAlphaHull(delaunay_container[d], d, input, input_range).then(e=> {
                     console.log(d,e)
-                    find_intersection_and_distance(e,d)
+                    if (!(input === 30 && d === 'Sr_x_U')){
+                        find_intersection_and_distance(e, d)
+                    }
                 })
             }
         })
@@ -178,7 +180,7 @@ onmessage = function(e) {
                     }
                     catch(err) {
                         area_calculation_error = true
-                        //console.error(err)
+                        console.error(err)
                     }
                 })
             })

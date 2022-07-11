@@ -18,6 +18,8 @@ let yAxis = d3.axisLeft()
     .scale(y)
     .ticks(4);
 
+let profiles = ['L', 'R']
+
 let profile_color = {
     'L': d3.schemeCategory10[0],
     'R': d3.schemeCategory10[1],
@@ -31,32 +33,39 @@ let delaunay_properties_container = {}
 let distance_object = {}
 let intersection_area_object = {}
 
+let main_data
 
 function load_data(){
     Promise.all([
         d3.csv('data/L.csv'),
         d3.csv('data/R.csv'),
     ]).then(function(files) {
-        process_data(files,['L','R'])
+        process_data(files,profiles, [])
+        main_data = files
     })//.catch(function(err) {
     //     console.error(err)
     // })
 }
-
-function process_data(data, profiles){
-
-    let elements = new Array(data.length)
-
-    for (let i = 0 ; i < elements.length; i++){
-        elements[i] = new Array()
-        data[i].columns.forEach(d=> {
-            d.includes("Concentration") ? elements[i].push(d.split(" ")[0]) : null
-        })
-    }
+function process_data(data, profiles, ordering){
 
     let properties = []
 
-    elements[0].forEach(d=> properties.push(`${d} Concentration`))
+    if (ordering.length === 0){
+        let elements = new Array(data.length)
+
+        for (let i = 0 ; i < elements.length; i++){
+            elements[i] = new Array()
+            data[i].columns.forEach(d=> {
+                d.includes("Concentration") ? elements[i].push(d.split(" ")[0]) : null
+            })
+        }
+        elements[0].forEach(d=> properties.push(`${d} Concentration`))
+    }
+    else{
+        ordering.forEach(d=> properties.push(`${d} Concentration`))
+    }
+
+
 
     //properties = properties.splice(0,5)
     //properties = properties.splice(0,10)
@@ -256,7 +265,6 @@ async function plot_raw(profiles, filtered_data, elements) {
         var c = [], n = a.length, m = b.length, i, j;
         for (j = -1; ++j < m;) for (i = -1; ++i <= j;) c.push({x: a[i], i: i, y: b[j], j: j});
         //for (i = -1; ++i < n;) for (j = -1; ++j < m;) c.push({x: a[i], i: i, y: b[j], j: j});
-        //console.log(c)
         return c;
     }
 
@@ -296,8 +304,60 @@ load_data()
 function display_precalculated_data(alpha){
 
     d3.json(`../data/calculations/alpha_${alpha}_data.json`).then(d=> {
-        //console.log(d)
+        console.log(d)
         let combinations = Object.keys(d['alphahull_paths'])
+
+        let elements = []
+        let distances = {}
+        let intersection_area = {}
+
+
+        combinations.forEach(d=>{
+            elements.push(d.split('_x_')[0])
+            elements.push(d.split('_x_')[1])
+        })
+        elements = [... new Set(elements)]
+
+        elements.forEach(d=> {
+            distances[d] = 0
+            intersection_area[d] = 0
+        })
+
+
+
+        Object.keys(d['distances']).forEach(e=>{
+            if(d['distances'][e] != Number.MAX_SAFE_INTEGER){
+                distances[e.split('_x_')[0]] += d['distances'][e]
+                distances[e.split('_x_')[1]] += d['distances'][e]
+            }
+        })
+
+        Object.keys(d['intersection_areas']).forEach(e=>{
+            if (d['intersection_areas'][e] != 'error'){
+                intersection_area[e.split('_x_')[0]] += d['intersection_areas'][e]
+                intersection_area[e.split('_x_')[1]] += d['intersection_areas'][e]
+            }
+        })
+
+        let distance_sorted = Object.keys(distances).sort(function(a,b){return distances[b]-distances[a]})
+        let intersection_area_sorted = Object.keys(intersection_area).sort(function(a,b){return intersection_area[b]-intersection_area[a]})
+
+        console.log(distance_sorted)
+        console.log(distances)
+        console.log(intersection_area_sorted)
+        console.log(intersection_area)
+
+
+
+
+
+
+
+
+
+        //process_data(main_data, profiles, distanceSorted)
+
+
 
         combinations.forEach(e=>{
             draw_alphahulls(d['alphahull_paths'][e], e)
