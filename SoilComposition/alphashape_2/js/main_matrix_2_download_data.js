@@ -377,12 +377,10 @@ function download_all_data(){
         }
     }
 
-    start_worker(30)
-
-    // for (let i = 100; i >= 10; i -=5){
-    //     start_worker(i);
-    //     console.log(`Starting worker for alpha: ${i}`)
-    // }
+    for (let i = 100; i >= 10; i -=5){
+        start_worker(i);
+        console.log(`Starting worker for alpha: ${i}`)
+    }
 
 
 
