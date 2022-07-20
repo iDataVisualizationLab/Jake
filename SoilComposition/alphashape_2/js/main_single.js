@@ -1,21 +1,12 @@
-const w = window.innerWidth;
-const h = (w * 9) / 16;
-
-// const data = Array(100)
-//     .fill()
-//     .map((_, i) => ({ x: (i * w) / 100, y: Math.random() * h }));
-
-// let delaunay = d3.Delaunay.from(
-//     data,
-//     (d) => d.x,
-//     (d) => d.y
-// )
+// const w = window.innerWidth;
+// const h = (w * 9) / 16;
 
 let profile_color = {
     'L': d3.schemeCategory10[0],
     'R': d3.schemeCategory10[1],
+    'S': d3.schemeCategory10[2],
 }
-console.log(profile_color)
+//console.log(profile_color)
 
 let margin = {top: 20, right: 20, bottom: 50, left: 70},
     width = 960 - margin.left - margin.right,
@@ -38,7 +29,6 @@ function find_max_dist(delaunay){
 
     const {points, triangles} = delaunay;
 
-    //console.log(delaunay)
 
     for (let i = 0; i < triangles.length; i++) {
         const t0 = triangles[i * 3 + 0];
@@ -54,11 +44,6 @@ function find_max_dist(delaunay){
 
     return [d3.min(dists),d3.max(dists)]
 }
-
-// let d_res = find_max_dist(delaunay)
-// let d_min = Math.sqrt(d_res[0])
-// let d_max = Math.sqrt(d_res[1])
-// let d_range = d_max-d_min
 
 let d_res
 let d_min
@@ -95,13 +80,13 @@ function alphashpae_filter(delaunay, input, input_range) {
 
         let alpha_squ = _alpha * _alpha
 
+        console.log('alpha_squ',alpha_squ)
+
         let paths = []
         const {points, triangles} = delaunay[d];
 
         let path_vertices = []
         let path_vertices_2 = []
-
-
 
         for (let i = 0; i < triangles.length; i++) {
             const t0 = triangles[i * 3 + 0];
@@ -142,6 +127,7 @@ function alphashpae_filter(delaunay, input, input_range) {
 
     for (let i = 0 ; i < path_verticies_container[key1].length; i++){
         for (let j = 0 ; j < path_verticies_container[key2].length; j++){
+            //console.log(path_verticies_container[key1][i])
             let inter = intersect(path_verticies_container[key1][i], path_verticies_container[key2][j])
             if (inter.length != 0){
                 intersection_area += d3.polygonArea(inter[0].map(function (d){
@@ -222,45 +208,16 @@ function draw(paths, points){
     //     .attr("cy", function(d) { return d.y; });
 }
 
-function make_slider(slider_id, min, max, value, step, width){
-    let slider = d3.select("#sliders")
-        .append('g')
-        .attr('class', slider_id)
 
-    slider.append('input')
-        .attr("type", "range")
-        .attr('min', min)
-        .attr('max', max)
-        .attr('value', value)
-        .attr('step', step)
-        .style('width', `${width}px`)
-        .on('input', function(){
-            let val = d3.select(this).property("value")
-            //console.log(adjust_values(d_min, d_range, val, max-min))
-
-
-            draw(alphashpae_filter(delaunay, val, ((max-min)-1), dots))
-
-            //draw(alphashpae_filter(delaunay,adjust_values(d_min, d_range, val, max-min)), dots)
-            d3.select(`#${slider_id}_value_text`).text(val)
-        });
-
-    slider.append('p')
-        .text("Alpha: ")
-        .append('span')
-        .attr('id', `${slider_id}_value_text`)
-        .text(value)
-}
-
-make_slider('s1',0,1000,1000,1, 200)
 //draw(alphashpae_filter(delaunay,0), data)
 
 function load_data(){
     Promise.all([
         d3.csv('data/L.csv'),
         d3.csv('data/R.csv'),
+        d3.csv('data/S.csv'),
     ]).then(function(files) {
-        process_data(files,['L','R'])
+        process_data(files,['L','R','S'])
     })//.catch(function(err) {
     //     console.error(err)
     // })
@@ -293,22 +250,14 @@ function process_data(data,profiles){
         filtered_data = filtered_data.concat(profile_data)
     }
 
-    console.log(filtered_data)
-
-
-    // let filtered_data = data[0].map(function (d){
-    //     let temp_obj = {}
-    //     temp_obj[el1] = +d[el1]
-    //     temp_obj[el2] = +d[el2]
-    //     return temp_obj
-    // })
+    //console.log(filtered_data)
 
     plot(filtered_data, el1, el2, profiles)
 }
 
 function plot(data, _x, _y, profiles){
 
-    console.log(_x)
+    //console.log(_x)
 
 
     let x_scale = d3.scaleLinear().range([0, width]);
@@ -366,7 +315,7 @@ function plot(data, _x, _y, profiles){
                 return {x: x_scale(d[_x]), y: y_scale(d[_y])}
         })
     })
-    console.log(dots)
+    //console.log(dots)
 
     delaunay = {}
 
@@ -378,7 +327,6 @@ function plot(data, _x, _y, profiles){
         )
     })
 
-
     delaunay_properties = {}
 
     Object.keys(delaunay).forEach(d=> {
@@ -388,27 +336,49 @@ function plot(data, _x, _y, profiles){
         delaunay_properties[d]['d_max'] = Math.sqrt(delaunay_properties[d]['d_res'][1])
         delaunay_properties[d]['d_range'] = delaunay_properties[d]['d_max'] - delaunay_properties[d]['d_min']
     })
-    // d_res = find_max_dist(delaunay)
-    // d_min = {}
-    // d_max = {}
-    // d_range = {}
-    // Object.keys(delaunay).forEach(d=> )
-    // d_min = d3.min([delaunay_properties[profiles[0]]['d_min'],delaunay_properties[profiles[1]]['d_min']])
-    // d_max = d3.max([delaunay_properties[profiles[0]]['d_min'],delaunay_properties[profiles[1]]['d_min']])
-    // d_range = d_max-d_min
-    //
-    // console.log(d_min)
-    // console.log(d_max)
 
-    draw(alphashpae_filter(delaunay,1000, 1000), dots)
-    console.log(delaunay_properties)
+    //draw(alphashpae_filter(delaunay,1000, 1000), dots)
+
+    //console.log(delaunay)
+    getAlphaHull(delaunay,10000, 100)
 
 }
 
-
-
-
 load_data()
+
+function make_slider(slider_id, min, max, value, step, width){
+    let slider = d3.select("#sliders")
+        .append('g')
+        .attr('class', slider_id)
+
+    slider.append('input')
+        .attr("type", "range")
+        .attr('min', min)
+        .attr('max', max)
+        .attr('value', value)
+        .attr('step', step)
+        .style('width', `${width}px`)
+        .on('input', function(){
+            let val = d3.select(this).property("value")
+            //console.log(adjust_values(d_min, d_range, val, max-min))
+
+
+            //draw(alphashpae_filter(delaunay, val, ((max-min)-1), dots))
+            // getAlphaHull(delaunay['L'], ((val / ((max-min)-1))) * delaunay_properties['L']['d_range'] + delaunay_properties['L']['d_min'])
+            getAlphaHull(delaunay, val, ((max-min)-1))
+
+            //draw(alphashpae_filter(delaunay,adjust_values(d_min, d_range, val, max-min)), dots)
+            d3.select(`#${slider_id}_value_text`).text(val)
+        });
+
+    slider.append('p')
+        .text("Alpha: ")
+        .append('span')
+        .attr('id', `${slider_id}_value_text`)
+        .text(value)
+}
+
+make_slider('s1',0,1000,1000,1, 200)
 
 function boundary(delaunay, members) {
     const counts = {},
@@ -458,4 +428,224 @@ function boundary(delaunay, members) {
     return result;
 }
 
+
+function alphashapefilter2(delaunay, alphaSquared) {
+    //const asq = alpha * alpha;
+
+    //console.log('asq' , asq)
+    function dist2(p, q) {
+        return (
+            (delaunay.points[2 * p] - delaunay.points[2 * q]) ** 2 +
+            (delaunay.points[2 * p + 1] - delaunay.points[2 * q + 1]) ** 2
+        );
+    }
+    return function(i) {
+        let t0 = delaunay.triangles[i * 3 + 0],
+            t1 = delaunay.triangles[i * 3 + 1],
+            t2 = delaunay.triangles[i * 3 + 2];
+        return dist2(t0, t1) < alphaSquared && dist2(t1, t2) < alphaSquared && dist2(t2, t0) < alphaSquared;
+    };
+}
+
+function getAlphaHull(delaunayObject, input, input_range){
+
+    let alphahullContainer = {}
+
+    let pathContainer = {}
+
+
+    let profiles = Object.keys(delaunayObject)
+
+    profiles.forEach(d=>{
+
+        let alpha = (input / input_range) * delaunay_properties[d]['d_range'] + delaunay_properties[d]['d_min']
+
+        let alphaSquared = alpha ** 2
+
+        const filter = alphashapefilter2(delaunayObject[d], alphaSquared);
+        let alphashape2 = new Uint8Array(delaunayObject[d].triangles.length / 3).map((_, i) => filter(i))
+        let alphahull = boundary(delaunayObject[d], alphashape2)
+
+        function point(i) {
+            return [delaunayObject[d].points[2 * i], delaunayObject[d].points[2 * i + 1]];
+        }
+
+        let alphahull_points = []
+
+        let path = ['']
+        alphahull.forEach(ring => {
+            let hull = []
+            let i = ring[ring.length - 1];
+            path[0] = path[0]+(`M ${point(i)[0]} ${point(i)[1]} `)
+            hull.push({x:+point(i)[0], y:+point(i)[1]})
+            for (const i of ring) {
+                path[0] = path[0]+(`L ${point(i)[0]} ${point(i)[1]} `)
+                hull.push({x:+point(i)[0], y:+point(i)[1]})
+            }
+            alphahull_points.push(hull)
+        })
+
+        //console.log(alphahull_points)
+
+        alphahullContainer[d] = alphahull_points
+        pathContainer[d] = path
+
+    })
+
+
+    //let intersectPath = ['']
+
+    //console.log(alphahullContainer)
+
+    let intersection_polygons = []
+
+    let intersections = []
+
+    alphahullContainer[profiles[0]].forEach(d=>{
+        alphahullContainer[profiles[1]].forEach(e=>{
+            let inter = intersect(d, e)
+            if (inter.length != 0){
+                intersections.push(inter)
+                // intersection_polygons.push(inter[0].map(function (d){
+                //     return [d['x'], d['y']]
+                // }))
+
+            }
+        })
+    })
+
+    alphahullContainer[profiles[2]].forEach(d=>{
+        intersections[0].forEach(e=>{
+            let inter = intersect(d, e)
+            if (inter.length != 0){
+                intersection_polygons.push(inter[0].map(function (d){
+                    return [d['x'], d['y']]
+                }))
+            }
+        })
+    })
+
+    let intersection_area = 0
+
+    intersection_polygons.forEach(d=>{
+        intersection_area += Math.abs(d3.polygonArea(d))
+    })
+
+    console.log(`intersection area: ${intersection_area}`)
+
+    if (intersection_area === 0 ){
+
+        //console.log(alphahullContainer)
+
+        let min_distance = Number.MAX_SAFE_INTEGER
+        alphahullContainer[Object.keys(alphahullContainer)[0]].forEach(d=>{
+            alphahullContainer[Object.keys(alphahullContainer)[1]].forEach(e=>{
+                d.forEach(d2 => {e.forEach(e2=>{
+                    let dist = Math.sqrt(((d2.x - e2.x) ** 2) + ((d2.y - e2.y) ** 2))
+                    dist < min_distance ? min_distance = dist : null
+                })})
+            })
+        })
+
+        console.log(`distance: ${min_distance}`)
+    }
+
+
+    //console.log(Math.abs(d3.polygonArea(intersection_polygons[0])))
+    //console.log(d3.polygonArea(polySort(intersectPolygon[0])))
+    //console.log(intersection_polygons)
+
+
+    //console.log(intersect(alphahullContainer['L'][0], alphahullContainer['R'][0]))
+
+    //console.log(intersection_area)
+
+    draw_alphahulls(pathContainer)
+
+    draw_intersection(intersection_polygons)
+
+    //console.log(pathContainer)
+
+
+    //console.log(intersect(alphahullContainer['L'], alphahullContainer['R']))
+
+
+    //
+    // const filter = alphashapefilter2(delaunay, alpha);
+    // let alphashape2 = new Uint8Array(delaunay.triangles.length / 3).map((_, i) => filter(i))
+    // let alphahull = boundary(delaunay, alphashape2)
+    //
+    // function point(i) {
+    //     return [delaunay.points[2 * i], delaunay.points[2 * i + 1]];
+    // }
+    //
+    // let alphahull_points = []
+    //
+    // let path = ['']
+    // alphahull.forEach(ring => {
+    //     let hull = []
+    //     let i = ring[ring.length - 1];
+    //     path[0] = path[0]+(`M ${point(i)[0]} ${point(i)[1]} `)
+    //     hull.push({x:point(i)[0], y: point(i)[1]})
+    //     for (const i of ring) {
+    //         path[0] = path[0]+(`L ${point(i)[0]} ${point(i)[1]} `)
+    //         hull.push({x:point(i)[0], y: point(i)[1]})
+    //     }
+    //     alphahull_points.push(hull)
+    // })
+    //
+    // console.log(alphahull_points)
+    // draw4(p)
+}
+
+function draw_intersection(polygon_points) {
+
+    let svg = d3.select("#plot")
+        .append("g")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("transform", `translate(${margin.left}, ${margin.top})`)
+        .attr("class", "a-shapes");
+
+    polygon_points.forEach(e=>{
+        svg.append('polygon')
+            .data([e.join(' ')])
+            .attr('points', d=>d)
+            .attr('stroke', '#f00')
+            .attr('stroke-width', 3)
+            .attr('fill', 'none')
+            .attr('class', 'polygons');
+    })
+}
+
+function draw_alphahulls(paths){
+
+    d3.selectAll('.a-shapes').remove()
+    Object.keys(paths).forEach(d=>{
+        let svg = d3.select("#plot")
+            .append("g")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("transform", `translate(${margin.left}, ${margin.top})`)
+            .attr("class", "a-shapes");
+
+        svg.append("g")
+            .selectAll(".a_shape")
+            .data(paths[d])
+            .enter().append('path')
+            .attr('d', e=>e)
+            .attr('fill', ()=> profile_color[d])
+            .style('opacity', 0.75)
+            .attr('stroke', 'black')
+            .style('stroke-opacity', .125)
+            .attr('class','a-shape-paths')
+    })
+
+
+
+}
+
+function change_data(value){
+
+}
 

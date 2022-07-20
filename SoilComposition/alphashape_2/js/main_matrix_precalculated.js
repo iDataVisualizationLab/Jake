@@ -18,11 +18,12 @@ let yAxis = d3.axisLeft()
     .scale(y)
     .ticks(4);
 
-let profiles = ['L', 'R']
+let profiles = ['L', 'R', 'S']
 
 let profile_color = {
     'L': d3.schemeCategory10[0],
     'R': d3.schemeCategory10[1],
+    'S': d3.schemeCategory10[2],
 }
 
 let combinations = []
@@ -33,18 +34,34 @@ let delaunay_properties_container = {}
 let distance_object = {}
 let intersection_area_object = {}
 
-let main_data
+let alphashape_data
+let default_alpha = 100
 
-function load_data(){
-    Promise.all([
-        d3.csv('data/L.csv'),
-        d3.csv('data/R.csv'),
-    ]).then(function(files) {
+function load_data(profiles){
+    let promises = []
+    profiles.forEach(d=>{promises.push(d3.csv(`data/${d}.csv`))})
+
+    Promise.all(promises
+    ).then(function(files) {
         process_data(files,profiles, [])
-        main_data = files
-    })//.catch(function(err) {
+        //main_data = files
+    })
+
+    d3.json(`data/${profiles.sort().join('-')}_calculations.json`).then(d => {
+        alphashape_data = d
+        display_precalculated_data(default_alpha)
+    })
+
+    //.catch(function(err) {
     //     console.error(err)
     // })
+}
+
+function change_data(d){
+    d3.select('#s1').property("value", 100)
+    d3.select(`#s1_value_text`).text(100)
+    create_legend(d.split(' ').sort())
+    load_data(d.split(' ').sort())
 }
 function process_data(data, profiles, ordering){
 
@@ -259,7 +276,7 @@ async function plot_raw(profiles, filtered_data, elements) {
     }
 
     //change_alpha(100,100)
-    display_precalculated_data(100)
+    //display_precalculated_data(100)
 
     function cross(a, b) {
         var c = [], n = a.length, m = b.length, i, j;
@@ -271,7 +288,7 @@ async function plot_raw(profiles, filtered_data, elements) {
     // console.log(dots_container)
 }
 
-function make_slider(slider_id, min, max, value, step, width){
+function make_slider(slider_id, min, max, value, step, width, text_description){
     let slider = d3.select("#sliders")
         .append('g')
         .attr('class', slider_id)
@@ -283,7 +300,12 @@ function make_slider(slider_id, min, max, value, step, width){
         .attr('value', value)
         .attr('step', step)
         .style('width', `${width}px`)
+        .attr('id', `${slider_id}`)
         .on('input', function(){
+            let val = d3.select(this).property("value")
+            d3.select(`#${slider_id}_value_text`).text(val)
+        })
+        .on('change', function(){
             let val = d3.select(this).property("value")
             //change_alpha(val, ((max-min)-1))
             display_precalculated_data(val)
@@ -291,81 +313,134 @@ function make_slider(slider_id, min, max, value, step, width){
         });
 
     slider.append('p')
-        .text("Alpha: ")
+        .text(`${text_description}: `)
         .append('span')
         .attr('id', `${slider_id}_value_text`)
         .text(value)
 }
 
-make_slider('s1',10,100,100,5, 200)
+make_slider('s1',10,100, default_alpha,5, 200, 'Alpha')
 
-load_data()
+load_data(profiles)
+
+// function display_precalculated_data(alpha){
+//
+//     d3.json(`../data/calculations_R-S/alpha_${alpha}_data.json`).then(d=> {
+//         console.log(d)
+//         let combinations = Object.keys(d['alphahull_paths'])
+//
+//         let elements = []
+//         let distances = {}
+//         let intersection_area = {}
+//
+//
+//         combinations.forEach(d=>{
+//             elements.push(d.split('_x_')[0])
+//             elements.push(d.split('_x_')[1])
+//         })
+//         elements = [... new Set(elements)]
+//
+//         elements.forEach(d=> {
+//             distances[d] = 0
+//             intersection_area[d] = 0
+//         })
+//
+//
+//
+//         Object.keys(d['distances']).forEach(e=>{
+//             if(d['distances'][e] != Number.MAX_SAFE_INTEGER){
+//                 distances[e.split('_x_')[0]] += d['distances'][e]
+//                 distances[e.split('_x_')[1]] += d['distances'][e]
+//             }
+//         })
+//
+//         Object.keys(d['intersection_areas']).forEach(e=>{
+//             if (d['intersection_areas'][e] != 'error'){
+//                 intersection_area[e.split('_x_')[0]] += d['intersection_areas'][e]
+//                 intersection_area[e.split('_x_')[1]] += d['intersection_areas'][e]
+//             }
+//         })
+//
+//         let distance_sorted = Object.keys(distances).sort(function(a,b){return distances[b]-distances[a]})
+//         let intersection_area_sorted = Object.keys(intersection_area).sort(function(a,b){return intersection_area[b]-intersection_area[a]})
+//
+//         console.log(distance_sorted)
+//         console.log(distances)
+//         console.log(intersection_area_sorted)
+//         console.log(intersection_area)
+//
+//
+//
+//         combinations.forEach(e=>{
+//             draw_alphahulls(d['alphahull_paths'][e], e)
+//             draw_intersection(d['intersection_polygons'][e], e)
+//         })
+//     })
+// }
 
 function display_precalculated_data(alpha){
 
-    d3.json(`../data/calculations/alpha_${alpha}_data.json`).then(d=> {
-        console.log(d)
-        let combinations = Object.keys(d['alphahull_paths'])
+    let combinations = Object.keys(alphashape_data[alpha]['alphahull_paths'])
 
-        let elements = []
-        let distances = {}
-        let intersection_area = {}
+    combinations.forEach(d=>{
+        draw_alphahulls(alphashape_data[alpha]['alphahull_paths'][d], d)
 
+        alphashape_data[alpha]['intersection_polygons'][d] !== 'error' ? draw_intersection(alphashape_data[alpha]['intersection_polygons'][d], d) : display_calculation_error(d)
 
-        combinations.forEach(d=>{
-            elements.push(d.split('_x_')[0])
-            elements.push(d.split('_x_')[1])
-        })
-        elements = [... new Set(elements)]
-
-        elements.forEach(d=> {
-            distances[d] = 0
-            intersection_area[d] = 0
-        })
-
-
-
-        Object.keys(d['distances']).forEach(e=>{
-            if(d['distances'][e] != Number.MAX_SAFE_INTEGER){
-                distances[e.split('_x_')[0]] += d['distances'][e]
-                distances[e.split('_x_')[1]] += d['distances'][e]
-            }
-        })
-
-        Object.keys(d['intersection_areas']).forEach(e=>{
-            if (d['intersection_areas'][e] != 'error'){
-                intersection_area[e.split('_x_')[0]] += d['intersection_areas'][e]
-                intersection_area[e.split('_x_')[1]] += d['intersection_areas'][e]
-            }
-        })
-
-        let distance_sorted = Object.keys(distances).sort(function(a,b){return distances[b]-distances[a]})
-        let intersection_area_sorted = Object.keys(intersection_area).sort(function(a,b){return intersection_area[b]-intersection_area[a]})
-
-        console.log(distance_sorted)
-        console.log(distances)
-        console.log(intersection_area_sorted)
-        console.log(intersection_area)
-
-
-
-
-
-
-
-
-
-        //process_data(main_data, profiles, distanceSorted)
-
-
-
-        combinations.forEach(e=>{
-            draw_alphahulls(d['alphahull_paths'][e], e)
-            draw_intersection(d['intersection_polygons'][e], e)
-        })
     })
-}
 
+    // d3.json(`../data/calculations_R-S/alpha_${alpha}_data.json`).then(d=> {
+    //     console.log(d)
+    //     let combinations = Object.keys(d['alphahull_paths'])
+    //
+    //     let elements = []
+    //     let distances = {}
+    //     let intersection_area = {}
+    //
+    //
+    //     combinations.forEach(d=>{
+    //         elements.push(d.split('_x_')[0])
+    //         elements.push(d.split('_x_')[1])
+    //     })
+    //     elements = [... new Set(elements)]
+    //
+    //     elements.forEach(d=> {
+    //         distances[d] = 0
+    //         intersection_area[d] = 0
+    //     })
+    //
+    //
+    //
+    //     Object.keys(d['distances']).forEach(e=>{
+    //         if(d['distances'][e] != Number.MAX_SAFE_INTEGER){
+    //             distances[e.split('_x_')[0]] += d['distances'][e]
+    //             distances[e.split('_x_')[1]] += d['distances'][e]
+    //         }
+    //     })
+    //
+    //     Object.keys(d['intersection_areas']).forEach(e=>{
+    //         if (d['intersection_areas'][e] != 'error'){
+    //             intersection_area[e.split('_x_')[0]] += d['intersection_areas'][e]
+    //             intersection_area[e.split('_x_')[1]] += d['intersection_areas'][e]
+    //         }
+    //     })
+    //
+    //     let distance_sorted = Object.keys(distances).sort(function(a,b){return distances[b]-distances[a]})
+    //     let intersection_area_sorted = Object.keys(intersection_area).sort(function(a,b){return intersection_area[b]-intersection_area[a]})
+    //
+    //     console.log(distance_sorted)
+    //     console.log(distances)
+    //     console.log(intersection_area_sorted)
+    //     console.log(intersection_area)
+    //
+    //
+    //
+    //     combinations.forEach(e=>{
+    //         draw_alphahulls(d['alphahull_paths'][e], e)
+    //         draw_intersection(d['intersection_polygons'][e], e)
+    //     })
+    // })
+}
 
 
 
@@ -529,8 +604,8 @@ function draw_intersection(polygon_points, combination) {
 
     let svg = d3.select(`.cell.${combination}`)
         .append("g")
-        .attr("width", width)
-        .attr("height", width)
+        .attr("width", size)
+        .attr("height", size)
         .attr("class", `a-shape ${combination}`);
 
     polygon_points.forEach(e=>{
@@ -553,8 +628,8 @@ function draw_alphahulls(paths, combination){
     Object.keys(paths).forEach(d=>{
         let svg = d3.select(`.cell.${combination}`)
             .append("g")
-            .attr("width", width)
-            .attr("height", width)
+            .attr("width", size)
+            .attr("height", size)
             .attr("class", `a-shape ${combination}`);
 
         svg.append("g")
@@ -569,3 +644,96 @@ function draw_alphahulls(paths, combination){
             .attr('class','a-shape-paths')
     })
 }
+
+function display_calculation_error(combination){
+
+    //console.log(paths)
+
+    let svg = d3.select(`.cell.${combination}`)
+            .append("g")
+            .attr("width", size)
+            .attr("height", size)
+            .attr("class", `a-shape ${combination}`)
+
+    svg.append("text")
+        .attr("x", size - padding)
+        .attr("y", padding)
+        .attr("dy", ".71em")
+        .attr('text-anchor' , 'end')
+        .text('Error')
+        .style('fill', '#f00')
+        .style("font", "10px times");
+
+
+
+    // d3.selectAll(`.a-shape.${combination}`).remove()
+    // Object.keys(paths).forEach(d=>{
+    //     let svg = d3.select(`.cell.${combination}`)
+    //         .append("g")
+    //         .attr("width", width)
+    //         .attr("height", width)
+    //         .attr("class", `a-shape ${combination}`);
+    //
+    //     svg.append("g")
+    //         .selectAll(`.a-shape.${combination}`)
+    //         .data(paths[d])
+    //         .enter().append('path')
+    //         .attr('d', e=>e)
+    //         .attr('fill', ()=> profile_color[d])
+    //         .style('opacity', 0.75)
+    //         .attr('stroke', 'black')
+    //         .style('stroke-opacity', .125)
+    //         .attr('class','a-shape-paths')
+    // })
+}
+
+
+function create_legend(profiles){
+
+    d3.select('.legend').remove()
+
+    let width = 200
+    let height = 50
+
+    let squ_size = 15
+    let group_width = 40
+
+    let padding = 2.5
+
+    let svg = d3.select('#legend')
+        .append('svg')
+        .attr('class', 'legend')
+        .attr('width', width)
+        .attr('height', squ_size)
+        .attr('transform', `translate(20,0)`)
+
+    for (let i = 0; i < profiles.length ; i++){
+
+        let g = svg.append('g')
+            .attr('width', width)
+            .attr('height', squ_size)
+            .attr('transform', `translate(${(padding * i) + (group_width * i)},0)`)
+
+        g.append('rect')
+            .attr('width', squ_size)
+            .attr('height', squ_size)
+            .attr('fill',profile_color[profiles[i]])
+
+        g.append('text')
+            .attr("x", squ_size + padding)
+            .attr("y", squ_size)
+            .attr("dy", "-.125em")
+            .attr('text-anchor' , 'start')
+            .text(profiles[i])
+            //.style('fill', '#000')
+            .style("font", "14px times");
+
+    }
+
+
+
+
+
+
+}
+create_legend(profiles)

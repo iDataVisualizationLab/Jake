@@ -5,21 +5,33 @@
     <title>Alpha-Shape</title>
 </head>
 <body>
-<div id="vis_div">
-    <div id="sliders"></div>
+<div id="vis_div" style="padding-top: 5px">
+    <div style="display: flex; align-items: center; padding-left: 5px">
+        <div style="padding-right: 5px">
+            <span>Profiles:</span>
+        </div>
+        <select name="profiles" id="profiles" onchange="change_data(value)">
+            <optgroup label="Profiles">
+            <option value='L R'>L, R</option>
+            <option value="L S">L, S</option>
+            <option value="R S">R, S</option>
+            <option value="L R S" selected>L, R, S</option>
+            </optgroup>
+        </select>
+        <div id="legend" style="padding-top: 2.5px"></div>
+    </div>
+    <div id="sliders" style="padding-top: 15px"></div>
 </div>
 
 <script src="lib/d3v7.js"></script>
 <script src="js/intersection.js"></script>
 
-<!--<script src="js/main_single_2.js"></script>-->
-<!--<script src="js/main_matrix_2.js"></script>-->
-<!--<script src="js/main_matrix_2_download_data.js"></script>-->
+<!--<script src="js/main_single.js"></script>-->
+
+<!--<script src="js/main_matrix_download_data_2-profiles.js"></script>-->
+<!--<script src="js/main_matrix_download_data_3-profiles.js"></script>-->
 
 <script src="js/main_matrix_precalculated.js"></script>
-
-
-
 
 </body>
 </html>
