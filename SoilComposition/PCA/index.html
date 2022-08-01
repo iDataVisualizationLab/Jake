@@ -9,15 +9,15 @@
 </head>
 <body>
 <script type="module">
-    import * as calc from './js/calc.js';
+    import * as calc_2 from './js/calc_2.js';
     window._checkAll = function (pkg) {
-        calc.checkAll(pkg);
+        calc_2.checkAll(pkg);
     }
     window._verifyChecked = function () {
-        calc.verifyChecked();
+        calc_2.verifyChecked();
     }
     window._selectProfiles= function (){
-        calc.selectProfiles()
+        calc_2.selectProfiles()
     }
 </script>
 
@@ -91,9 +91,15 @@
     <a href="#hide13" class="hide3" id="hide13">>></a>
     <a href="#show13" class="show3" id="show13"><<</a>
     <div class="Pedology">
-        <input type="checkbox" id="All_package2" name="All_package2" checked onclick="_checkAll(2)">
+        <input type="checkbox" id="All_package2" name="All_package2" onclick="_checkAll(2)">
         <label for="All_package2">All</label>
-        <input type="checkbox" id="Rb" name="Rb" checked onclick="_verifyChecked()">
+        <input type="checkbox" id="RI" name="RI" onclick="_verifyChecked()">
+        <label for="RI">RI</label>
+        <input type="checkbox" id="DI" name="DI" onclick="_verifyChecked()">
+        <label for="DI">DI</label>
+        <input type="checkbox" id="SR" name="SR" onclick="_verifyChecked()">
+        <label for="SR">SR</label>
+        <input type="checkbox" id="Rb" name="Rb" onclick="_verifyChecked()">
         <label for="Rb">Rb</label>
     </div>
 </div>
@@ -137,7 +143,7 @@
         <label for="Th">Th</label>
         <input type="checkbox" id="U" name="U" onclick="_verifyChecked()">
         <label for="U">U</label>
-        <input type="checkbox" id="Bi" name="Bi" checked onclick="_verifyChecked()">
+        <input type="checkbox" id="Bi" name="Bi" onclick="_verifyChecked()">
         <label for="Bi">Bi</label>
         <input type="checkbox" id="Mo" name="Mo" onclick="_verifyChecked()">
         <label for="Mo">Mo</label>
@@ -193,8 +199,8 @@
 <script src="https://underscorejs.org/underscore.js"></script>
 <script src="js/colors.js"></script>
 <script src="js/loadData.js"></script>
-<script type="module" src="js/parallel.js"></script>
-<script type="module" src="js/calc.js"></script>
+<script type="module" src="js/parallel_2.js"></script>
+<script type="module" src="js/calc_2.js"></script>
 <script src="lib/threejs/three.js"></script>
 <script src="lib/threejs/OrbitControls.js"></script>
 

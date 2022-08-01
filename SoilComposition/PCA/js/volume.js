@@ -45,7 +45,7 @@ function createScenes(){
             renderers.push(renderer1)
             camera1 = new THREE.PerspectiveCamera( 45, containerArr[0].offsetWidth / containerArr[0].offsetHeight, 1, 10000 );
             controls1 = new THREE.OrbitControls( camera1, renderer1.domElement )
-            camera1.position.z = 500;
+            camera1.position.z = 550;
             cameras.push(camera1)
             controlsArr.push(controls1);
             break;
@@ -62,7 +62,7 @@ function createScenes(){
             renderers.push(renderer2)
             camera2 = new THREE.PerspectiveCamera( 45, containerArr[1].offsetWidth / containerArr[1].offsetHeight, 1, 10000 );
             controls2 = new THREE.OrbitControls( camera2, renderer2.domElement )
-            camera2.position.z = 500;
+            camera2.position.z = 550;
             cameras.push(camera2)
             controlsArr.push(controls2);
             controls1.addEventListener( 'change', () => {
@@ -93,7 +93,7 @@ function createScenes(){
             renderers.push(renderer3)
             camera3 = new THREE.PerspectiveCamera( 45, containerArr[2].offsetWidth / containerArr[2].offsetHeight, 1, 10000 );
             controls3 = new THREE.OrbitControls( camera3, renderer3.domElement )
-            camera3.position.z = 500;
+            camera3.position.z = 550;
             cameras.push(camera3)
             controlsArr.push(controls3);
             controls1.addEventListener( 'change', () => {
@@ -149,7 +149,9 @@ export function initScene(_profiles, chemical, minVal, maxVal){
 
 export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _container, _renderer, _containerInfo) {
 
-    _scene.remove.apply(_scene, _scene.children);
+    // _scene.remove.apply(_scene, _scene.children);
+
+    _scene.clear();
 
     let profile = _profile;
 
@@ -163,7 +165,7 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
         valsArr.push(arr)
     }
 
-    _containerInfo.innerHTML = chemical
+    _containerInfo.innerHTML = `${profile}: ${chemical} `
 
     const particles = 125000;
 
@@ -173,22 +175,42 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
     const colors = [];
 
     for ( let i = 0; i < particles; i ++ ) {
-        for (let j in chemical){
-            if (valsArr[j][i] >= minVal[j] && valsArr[j][i] <= maxVal[j]){
+        if ((Math.pow(pos_x[i] - 25, 2) + Math.pow(pos_z[i] - 25, 2)) < (Math.pow(25, 2))) {
 
-                if ((Math.pow(pos_x[i] - 25, 2) + Math.pow(pos_z[i] - 25, 2)) < (Math.pow(25, 2))) {
-                    const x = (pos_x[i] - 25) * 5;
-                    const y = (pos_y[i] - 25) * 5;
-                    const z = (pos_z[i] - 25) * 5;
+            let p2 = new Array(chemical.length).fill(false)
+            let v2 = []
 
-                    positions.push(x, y, z);
-
-                    let color = new THREE.Color(getColor(valsArr[j][i]));
-                    colors.push(color.r, color.g, color.b);
+            for (let j in chemical){
+                if (valsArr[j][i] >= minVal[j] && valsArr[j][i] <= maxVal[j]){
+                    // if ((Math.pow(pos_x[i] - 25, 2) + Math.pow(pos_z[i] - 25, 2)) < (Math.pow(25, 2))) {
+                    //     const x = (pos_x[i] - 25) * 5;
+                    //     const y = (pos_y[i] - 25) * 5;
+                    //     const z = (pos_z[i] - 25) * 5;
+                    //
+                    //     positions.push(x, y, z);
+                    //
+                    //     let color = new THREE.Color(getColor(valsArr[j][i]));
+                    //     colors.push(color.r, color.g, color.b);
+                    v2.push(valsArr[0][i])
+                    p2[j] = true
+                    //}
                 }
             }
+
+            if (!p2.includes(false)){
+                const x = (pos_x[i] - 25) * 5;
+                const y = (pos_y[i] - 25) * 5;
+                const z = (pos_z[i] - 25) * 5;
+
+                positions.push(x, y, z);
+
+                let color = new THREE.Color(getColor((v2.reduce((a, b) => a + b)) / v2.length ));
+                colors.push(color.r, color.g, color.b);
+            }
+
         }
     }
+
 
     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
     geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
@@ -198,9 +220,90 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
     const material = new THREE.PointsMaterial( { size: 30, vertexColors: true } );
 
     points = new THREE.Points( geometry, material );
-    _scene.add( points );
 
-    console.log(_scene)
+    let height = 255
+    let radius = 130
+    let offset = -3
+
+    const geometry_c = new THREE.CylinderGeometry( radius, radius, height, 32 );
+    //const material_c = new THREE.MeshBasicMaterial( {color: 0x000000} );
+    //const cylinder = new THREE.Mesh( geometry2, material2 );
+
+    const wireframe = new THREE.WireframeGeometry( geometry_c );
+
+    const wire = new THREE.LineSegments( wireframe );
+    wire.material.depthTest = false;
+    wire.material.opacity = 0.025;
+    wire.material.transparent = true;
+    wire.material.color = new THREE.Color(0x000000)
+
+    wire.position.y = offset
+
+    _scene.add( wire );
+
+    _scene.add( points );
+    // _scene.add( cylinder );
+
+//GRADUATIONS
+    const material_l = new THREE.LineBasicMaterial( { color: 0x000000 } );
+    const points_l = [];
+    points_l.push( new THREE.Vector3( radius, -(height/2) + offset, 0 ) );
+    points_l.push( new THREE.Vector3( radius, (height/2) + offset, 0 ) );
+    const geometry_l = new THREE.BufferGeometry().setFromPoints( points_l );
+    const line = new THREE.Line( geometry_l, material_l );
+    _scene.add( line );
+
+    for (let i = 0; i < 11; i++){
+        const points_g = [];
+        points_g.push( new THREE.Vector3( radius, ((height) * (i / 10)) - (height/2) + offset, 0 ) );
+        points_g.push( new THREE.Vector3( radius+10, ((height) * (i / 10)) - (height/2)+ offset, 0 ) );
+        const geometry_g = new THREE.BufferGeometry().setFromPoints( points_g );
+        const line_g = new THREE.Line( geometry_g, material_l );
+
+        _scene.add( line_g );
+    }
+
+    const loader = new THREE.FontLoader();
+    const font = loader.load(
+        // resource URL
+        '../lib/threejs/font.json',
+
+        // onLoad callback
+        function ( font ) {
+            // do something with the font
+            make_text(font);
+        },
+
+        // onProgress callback
+        function ( xhr ) {
+            //console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+        },
+
+        // onError callback
+        function ( err ) {
+            console.log( 'An error happened' );
+        }
+    );
+
+    function make_text(font){
+        let text_y_offset = -6
+        for (let i = 0; i < 11; i++){
+            const geometry_t = new THREE.TextGeometry( `${(10 - i) * 10} cm`, {
+                font: font,
+                size: 7,
+                height: 1,
+            } );
+
+            var textMaterial = new THREE.MeshPhongMaterial(
+                { color: 0xff0000, specular: 0xffffff }
+            );
+
+            var mesh = new THREE.Mesh( geometry_t, textMaterial );
+            mesh.position.x = radius+11
+            mesh.position.y = ((height) * (i / 10)) - (height/2) + text_y_offset
+            _scene.add( mesh );
+        }
+    }
 
     _container.appendChild( _renderer.domElement );
 

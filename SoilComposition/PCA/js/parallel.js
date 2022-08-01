@@ -26,6 +26,13 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
     let dimObject = {};
     dims.forEach(dim => dimObject[dim.name] = dim);
 
+    dimObject['Sample ID'] = {}
+    dimObject['Sample ID']['name'] = 'Sample ID'
+    dimObject['Sample ID']['hide'] = false
+    dimObject['Sample ID']['min'] = 0
+    dimObject['Sample ID']['max'] = 100
+    dimObject['Sample ID']['color'] = '#000000'
+
     var width = document.body.clientWidth,
         height = d3.max([document.body.clientHeight - 580, 240]);
 
@@ -139,16 +146,24 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                 break;
         }
 
+        data.forEach(d=>{d['Sample ID'] = +d['Sample ID'].split('-')[0]+5})
+
         // Extract the list of numerical dimensions and create a scale for each.
         xscale.domain(dimensions = d3.keys(data[0]).filter(function (k) {
                 return (_.isNumber(data[0][k])) && (yscale[k] = d3.scale.linear()
-                    .domain(d3.extent(data, function (d) {
+                    .domain(k === 'Sample ID' ? [0,100] :d3.extent(data, function (d) {
                         return +d[k];
                     }))
                     .range([h, 0]));
             }).sort(function(a, b){
             return sorted_dims.indexOf(a) - sorted_dims.indexOf(b);
         }));
+
+
+
+
+
+
 
 
         // Add a group element for each dimension.
@@ -232,11 +247,13 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
             .attr("class", "label")
             // .text(String)
             .text(function (d) {
-                return d.split(' ')[0]
+                return d == "Sample ID" ? 'Depth' : d.split(' ')[0]
             })
-
             .append("title")
             .text("Click to invert. Drag to reorder");
+
+        let sel = d3.selectAll('.dimension').filter(d=> d == 'Sample ID').select('.axis').selectAll('g').select('text').text(d=> `${d} cm`)
+
 
         // Add and store a brush for each axis.
         g.append("svg:g")
@@ -266,7 +283,7 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                 .each(function (d) {
                     d3.select(this.parentNode)
                         .select('path')
-                        .style('stroke', function (d) {
+                        .style('stroke', function (e) {
                             return dimObject[d].color;
                         })
                 });
@@ -517,7 +534,9 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                 if (_.include(actives, dimension)) {
                     var extent = extents[actives.indexOf(dimension)];
 
-                    elms.push (dimension.split(" ")[0]);
+                    dimension != 'Sample ID' ? elms.push (dimension.split(" ")[0]) : null
+
+                    // elms.push (dimension.split(" ")[0]);
                     vMins.push ((extent[0] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
                     vMaxs.push ((extent[1] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
 
@@ -549,10 +568,12 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
             });
 
         if(isEnd)
-            if (elms.length != 0 )
+           if (elms.length != 0 )
                 initScene(_profiles, elms, vMins, vMaxs)//(_profiles, elms, vMins, vMaxs);
-            else
-                initScene(_profiles, ['Ca'], [0], [1])
+           else{
+               initScene(_profiles, ['Ca'], [0], [1])
+           }
+
 
         // bold dimensions with label
         d3.selectAll('.label')

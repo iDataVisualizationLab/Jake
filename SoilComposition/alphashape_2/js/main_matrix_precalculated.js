@@ -44,7 +44,7 @@ function load_data(profiles){
     Promise.all(promises
     ).then(function(files) {
         process_data(files,profiles, [])
-        //main_data = files
+        profile_correlation_sliders(profiles)
     })
 
     d3.json(`data/${profiles.sort().join('-')}_calculations.json`).then(d => {
@@ -61,6 +61,7 @@ function change_data(d){
     d3.select('#s1').property("value", 100)
     d3.select(`#s1_value_text`).text(100)
     create_legend(d.split(' ').sort())
+    remove_correlation_sliders()
     load_data(d.split(' ').sort())
 }
 function process_data(data, profiles, ordering){
@@ -81,12 +82,6 @@ function process_data(data, profiles, ordering){
     else{
         ordering.forEach(d=> properties.push(`${d} Concentration`))
     }
-
-
-
-    //properties = properties.splice(0,5)
-    //properties = properties.splice(0,10)
-
 
     let filtered_data = []
 
@@ -275,23 +270,30 @@ async function plot_raw(profiles, filtered_data, elements) {
         combinations.push(`${x_el}_x_${y_el}`)
     }
 
-    //change_alpha(100,100)
-    //display_precalculated_data(100)
-
     function cross(a, b) {
         var c = [], n = a.length, m = b.length, i, j;
         for (j = -1; ++j < m;) for (i = -1; ++i <= j;) c.push({x: a[i], i: i, y: b[j], j: j});
         //for (i = -1; ++i < n;) for (j = -1; ++j < m;) c.push({x: a[i], i: i, y: b[j], j: j});
         return c;
     }
-
-    // console.log(dots_container)
+    calculate_correlation(profiles, filtered_data)
 }
 
-function make_slider(slider_id, min, max, value, step, width, text_description){
-    let slider = d3.select("#sliders")
+
+let slider_vals = {}
+
+function make_slider(slider_id, target_div_id, min, max, value, step, width, flip, text_description, on_change, scaled, offset){
+
+     let run = () => {
+         let val = value
+         scaled ? val = (val - offset) / (max-offset-min) : val = (val - offset)
+         flip ? val = -val : null
+         slider_vals[slider_id] = val
+    };run()
+
+    let slider = d3.select(`#${target_div_id}`)
         .append('g')
-        .attr('class', slider_id)
+        .attr('class', `${slider_id}_slider`)
 
     slider.append('input')
         .attr("type", "range")
@@ -300,83 +302,62 @@ function make_slider(slider_id, min, max, value, step, width, text_description){
         .attr('value', value)
         .attr('step', step)
         .style('width', `${width}px`)
+        .style('transform', ()=> flip ? `rotate(180deg)`: null)
         .attr('id', `${slider_id}`)
         .on('input', function(){
             let val = d3.select(this).property("value")
+            scaled ? val = (val - offset) / (max-offset-min) : val = (val - offset)
+            flip ? val = -val : null
             d3.select(`#${slider_id}_value_text`).text(val)
         })
         .on('change', function(){
             let val = d3.select(this).property("value")
-            //change_alpha(val, ((max-min)-1))
-            display_precalculated_data(val)
+            scaled ? val = (val - offset) / (max-offset-min) : val = (val - offset)
+            flip ? val = -val : null
+            slider_vals[slider_id] = val
             d3.select(`#${slider_id}_value_text`).text(val)
+            on_change(val)
         });
 
     slider.append('p')
         .text(`${text_description}: `)
         .append('span')
         .attr('id', `${slider_id}_value_text`)
-        .text(value)
+        .text(()=> {
+            let val = value
+            scaled ? val = (val - offset) / (max-offset-min) : val = (val - offset)
+            flip ? val = -val : null
+            return val
+        })
 }
 
-make_slider('s1',10,100, default_alpha,5, 200, 'Alpha')
+function profile_correlation_sliders(profiles){
+    profiles.forEach(d=>{
+        make_slider(d,'corr_sliders', 0,2000, 2000,1 , 200, true, `${d} Correlation`, filter_correlation, true, 1000)
+    })
+}
 
-load_data(profiles)
+function remove_correlation_sliders(){
+    Object.keys(slider_vals).splice(1).forEach(d=>{
+        d3.select(`.${d}_slider`).remove()
+        delete slider_vals[d]
+    })
+}
 
-// function display_precalculated_data(alpha){
-//
-//     d3.json(`../data/calculations_R-S/alpha_${alpha}_data.json`).then(d=> {
-//         console.log(d)
-//         let combinations = Object.keys(d['alphahull_paths'])
-//
-//         let elements = []
-//         let distances = {}
-//         let intersection_area = {}
-//
-//
-//         combinations.forEach(d=>{
-//             elements.push(d.split('_x_')[0])
-//             elements.push(d.split('_x_')[1])
-//         })
-//         elements = [... new Set(elements)]
-//
-//         elements.forEach(d=> {
-//             distances[d] = 0
-//             intersection_area[d] = 0
-//         })
-//
-//
-//
-//         Object.keys(d['distances']).forEach(e=>{
-//             if(d['distances'][e] != Number.MAX_SAFE_INTEGER){
-//                 distances[e.split('_x_')[0]] += d['distances'][e]
-//                 distances[e.split('_x_')[1]] += d['distances'][e]
-//             }
-//         })
-//
-//         Object.keys(d['intersection_areas']).forEach(e=>{
-//             if (d['intersection_areas'][e] != 'error'){
-//                 intersection_area[e.split('_x_')[0]] += d['intersection_areas'][e]
-//                 intersection_area[e.split('_x_')[1]] += d['intersection_areas'][e]
-//             }
-//         })
-//
-//         let distance_sorted = Object.keys(distances).sort(function(a,b){return distances[b]-distances[a]})
-//         let intersection_area_sorted = Object.keys(intersection_area).sort(function(a,b){return intersection_area[b]-intersection_area[a]})
-//
-//         console.log(distance_sorted)
-//         console.log(distances)
-//         console.log(intersection_area_sorted)
-//         console.log(intersection_area)
-//
-//
-//
-//         combinations.forEach(e=>{
-//             draw_alphahulls(d['alphahull_paths'][e], e)
-//             draw_intersection(d['intersection_polygons'][e], e)
-//         })
-//     })
-// }
+
+function filter_correlation(){
+
+    console.log(d3.selectAll('.cell').style('opacity', 1))
+
+    Object.keys(correlation_object).forEach(d=>{
+        Object.keys(correlation_object[d]).forEach(e=>{
+            if (correlation_object[d][e] < slider_vals[d]){
+                d3.select(`.cell.${e}`).style('opacity', .25)
+            }
+        })
+    })
+}
+
 
 function display_precalculated_data(alpha){
 
@@ -384,221 +365,10 @@ function display_precalculated_data(alpha){
 
     combinations.forEach(d=>{
         draw_alphahulls(alphashape_data[alpha]['alphahull_paths'][d], d)
-
         alphashape_data[alpha]['intersection_polygons'][d] !== 'error' ? draw_intersection(alphashape_data[alpha]['intersection_polygons'][d], d) : display_calculation_error(d)
-
     })
-
-    // d3.json(`../data/calculations_R-S/alpha_${alpha}_data.json`).then(d=> {
-    //     console.log(d)
-    //     let combinations = Object.keys(d['alphahull_paths'])
-    //
-    //     let elements = []
-    //     let distances = {}
-    //     let intersection_area = {}
-    //
-    //
-    //     combinations.forEach(d=>{
-    //         elements.push(d.split('_x_')[0])
-    //         elements.push(d.split('_x_')[1])
-    //     })
-    //     elements = [... new Set(elements)]
-    //
-    //     elements.forEach(d=> {
-    //         distances[d] = 0
-    //         intersection_area[d] = 0
-    //     })
-    //
-    //
-    //
-    //     Object.keys(d['distances']).forEach(e=>{
-    //         if(d['distances'][e] != Number.MAX_SAFE_INTEGER){
-    //             distances[e.split('_x_')[0]] += d['distances'][e]
-    //             distances[e.split('_x_')[1]] += d['distances'][e]
-    //         }
-    //     })
-    //
-    //     Object.keys(d['intersection_areas']).forEach(e=>{
-    //         if (d['intersection_areas'][e] != 'error'){
-    //             intersection_area[e.split('_x_')[0]] += d['intersection_areas'][e]
-    //             intersection_area[e.split('_x_')[1]] += d['intersection_areas'][e]
-    //         }
-    //     })
-    //
-    //     let distance_sorted = Object.keys(distances).sort(function(a,b){return distances[b]-distances[a]})
-    //     let intersection_area_sorted = Object.keys(intersection_area).sort(function(a,b){return intersection_area[b]-intersection_area[a]})
-    //
-    //     console.log(distance_sorted)
-    //     console.log(distances)
-    //     console.log(intersection_area_sorted)
-    //     console.log(intersection_area)
-    //
-    //
-    //
-    //     combinations.forEach(e=>{
-    //         draw_alphahulls(d['alphahull_paths'][e], e)
-    //         draw_intersection(d['intersection_polygons'][e], e)
-    //     })
-    // })
 }
 
-
-
-
-
-
-//
-//
-// function boundary(delaunay, members) {
-//     const counts = {},
-//         edges = {},
-//         result = [];
-//     let r;
-//
-//     // Traverse the edges of all member triangles and discard any edges that appear twice.
-//     members.forEach((member, d) => {
-//         if (!member) return;
-//         for (let i = 0; i < 3; i++) {
-//             var e = [
-//                 delaunay.triangles[3 * d + i],
-//                 delaunay.triangles[3 * d + ((i + 1) % 3)]
-//             ].sort();
-//             (edges[e[0]] = edges[e[0]] || []).push(e[1]);
-//             (edges[e[1]] = edges[e[1]] || []).push(e[0]);
-//             const k = e.join(":");
-//             if (counts[k]) delete counts[k];
-//             else counts[k] = 1;
-//         }
-//     });
-//
-//     while (1) {
-//         let k = null;
-//         // Pick an arbitrary starting point on a boundary.
-//         for (k in counts) break;
-//         if (k == null) break;
-//         result.push((r = k.split(":").map(Number)));
-//         delete counts[k];
-//         let q = r[1];
-//         while (q != r[0]) {
-//             let p = q,
-//                 qs = edges[p],
-//                 n = qs.length;
-//             for (let i = 0; i < n; i++) {
-//                 q = qs[i];
-//                 let edge = [p, q].sort().join(":");
-//                 if (counts[edge]) {
-//                     delete counts[edge];
-//                     r.push(q);
-//                     break;
-//                 }
-//             }
-//         }
-//     }
-//     return result;
-// }
-//
-//
-// function alphashapefilter(delaunay, alphaSquared) {
-//     function dist2(p, q) {
-//         return (
-//             (delaunay.points[2 * p] - delaunay.points[2 * q]) ** 2 +
-//             (delaunay.points[2 * p + 1] - delaunay.points[2 * q + 1]) ** 2
-//         );
-//     }
-//     return function(i) {
-//         let t0 = delaunay.triangles[i * 3 + 0],
-//             t1 = delaunay.triangles[i * 3 + 1],
-//             t2 = delaunay.triangles[i * 3 + 2];
-//         return dist2(t0, t1) < alphaSquared && dist2(t1, t2) < alphaSquared && dist2(t2, t0) < alphaSquared;
-//     };
-// }
-//
-// function change_alpha(input, input_range){
-//     combinations.forEach(d=>{
-//         getAlphaHull(delaunay_container[d], d, input, input_range)
-//     })
-//     console.log('intersection areas:', intersection_area_object)
-//     console.log('distances:', distance_object)
-// }
-//
-// function getAlphaHull(delaunayObject, combination, input, input_range){
-//
-//     if (combination.split('_x_')[0] === combination.split('_x_')[1]){
-//         return
-//     }
-//
-//     let alphahullContainer = {}
-//     let pathContainer = {}
-//     let profiles = Object.keys(delaunayObject)
-//
-//     profiles.forEach(d=>{
-//         let alpha = (input / input_range) * delaunay_properties_container[combination][d]['d_range'] + delaunay_properties_container[combination][d]['d_min']
-//         let alphaSquared = alpha ** 2
-//
-//         const filter = alphashapefilter(delaunayObject[d], alphaSquared);
-//         let alphashape = new Uint8Array(delaunayObject[d].triangles.length / 3).map((_, i) => filter(i))
-//         let alphahull = boundary(delaunayObject[d], alphashape)
-//
-//         function point(i) {
-//             return [delaunayObject[d].points[2 * i], delaunayObject[d].points[2 * i + 1]];
-//         }
-//
-//         let alphahull_points = []
-//
-//         let path = ['']
-//         alphahull.forEach(ring => {
-//             let hull = []
-//             let i = ring[ring.length - 1];
-//             path[0] = path[0]+(`M ${point(i)[0]} ${point(i)[1]} `)
-//             hull.push({x:+point(i)[0], y:+point(i)[1]})
-//             for (const i of ring) {
-//                 path[0] = path[0]+(`L ${point(i)[0]} ${point(i)[1]} `)
-//                 hull.push({x:+point(i)[0], y:+point(i)[1]})
-//             }
-//             alphahull_points.push(hull)
-//         })
-//
-//         alphahullContainer[d] = alphahull_points
-//         pathContainer[d] = path
-//     })
-//
-//     let intersection_polygons = []
-//
-//     alphahullContainer[profiles[0]].forEach(d=>{
-//         alphahullContainer[profiles[1]].forEach(e=>{
-//             let inter = intersect(d, e)
-//             if (inter.length != 0){
-//                 intersection_polygons.push(inter[0].map(function (d){
-//                     return [d['x'], d['y']]
-//                 }))
-//             }
-//         })
-//     })
-//
-//     let intersection_area = 0
-//     intersection_polygons.forEach(d=>{
-//         intersection_area += Math.abs(d3.polygonArea(d))
-//     })
-//     intersection_area_object[combination] = intersection_area
-//
-//     let min_distance = 0
-//     if (intersection_area === 0 ){
-//         min_distance = Number.MAX_SAFE_INTEGER
-//         alphahullContainer[Object.keys(alphahullContainer)[0]].forEach(d=>{
-//             alphahullContainer[Object.keys(alphahullContainer)[1]].forEach(e=>{
-//                 d.forEach(d2 => {e.forEach(e2=>{
-//                     let dist = Math.sqrt(((d2.x - e2.x) ** 2) + ((d2.y - e2.y) ** 2))
-//                     dist < min_distance ? min_distance = dist : null
-//                 })})
-//             })
-//         })
-//     }
-//
-//
-//
-//     draw_alphahulls(pathContainer, combination)
-//     draw_intersection(intersection_polygons, combination)
-// }
 
 function draw_intersection(polygon_points, combination) {
 
@@ -620,9 +390,6 @@ function draw_intersection(polygon_points, combination) {
 }
 
 function draw_alphahulls(paths, combination){
-
-    //console.log(paths)
-
 
     d3.selectAll(`.a-shape.${combination}`).remove()
     Object.keys(paths).forEach(d=>{
@@ -647,8 +414,6 @@ function draw_alphahulls(paths, combination){
 
 function display_calculation_error(combination){
 
-    //console.log(paths)
-
     let svg = d3.select(`.cell.${combination}`)
             .append("g")
             .attr("width", size)
@@ -663,28 +428,6 @@ function display_calculation_error(combination){
         .text('Error')
         .style('fill', '#f00')
         .style("font", "10px times");
-
-
-
-    // d3.selectAll(`.a-shape.${combination}`).remove()
-    // Object.keys(paths).forEach(d=>{
-    //     let svg = d3.select(`.cell.${combination}`)
-    //         .append("g")
-    //         .attr("width", width)
-    //         .attr("height", width)
-    //         .attr("class", `a-shape ${combination}`);
-    //
-    //     svg.append("g")
-    //         .selectAll(`.a-shape.${combination}`)
-    //         .data(paths[d])
-    //         .enter().append('path')
-    //         .attr('d', e=>e)
-    //         .attr('fill', ()=> profile_color[d])
-    //         .style('opacity', 0.75)
-    //         .attr('stroke', 'black')
-    //         .style('stroke-opacity', .125)
-    //         .attr('class','a-shape-paths')
-    // })
 }
 
 
@@ -729,11 +472,33 @@ function create_legend(profiles){
             .style("font", "14px times");
 
     }
-
-
-
-
-
-
 }
+
+let correlation_object
+
+function calculate_correlation(profiles, data){
+
+    let corr = {}
+
+    profiles.forEach(d=>{
+        corr[d] = {}
+
+        let data_p = data.filter(e=> e.profile === d)
+        let keys_p = Object.keys(data_p[0]).filter(d=> d != 'profile')
+
+        for (let i = 0; i < keys_p.length ; i++){
+            for (let j = 1; j < keys_p.length; j++){
+                if (i !== j){
+                    let d1 = data_p.map(e=> +e[keys_p[i]])
+                    let d2 = data_p.map(e=> +e[keys_p[j]])
+                    corr[d][`${keys_p[i].split(' ')[0]}_x_${keys_p[j].split(' ')[0]}`] = (spearson.correlation.pearson(d1, d2, true))
+                }
+            }
+        }
+    })
+    correlation_object = corr
+}
+
+load_data(profiles)
+make_slider('s_1','sliders', 10,100, default_alpha,5,200, false, 'Alpha', display_precalculated_data, false , 0)
 create_legend(profiles)
