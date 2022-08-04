@@ -9,6 +9,16 @@ let soilPackages = {RCRA_8_metals: ['As', 'Ba', 'Cd', 'Cr', 'Pb', 'Hg', 'Se', 'A
 
 let packages = ['RCRA_8_metals', 'Plant_essentials', 'Pedology', 'Other'];
 
+let defaultChecked = {
+    RCRA_8_metals: true,
+    Plant_essentials: true,
+    Pedology: false,
+    Other: false
+}
+
+
+
+
 var graphicPCA={margin: {top: 20, right: 10, bottom: 50, left: 50},
     width : function(){return 700 - this.margin.left - this.margin.right},
     height : function(){return 550 - this.margin.top - this.margin.bottom},
@@ -20,11 +30,90 @@ let colors = {
     "S": "#C20088",
     "L": "#00998F"
 }
+function buildMenu(){
+
+    let count = 0
+
+    for (let i in soilPackages){
+        let sel = document.querySelector(`.${i}`)
+
+        //console.log(defaultChecked[i])
+
+        let newInputAll = document.createElement("input");
+        newInputAll.setAttribute("type", "checkbox");
+        newInputAll.setAttribute("id", `All_package${count}`);
+
+
+        newInputAll.checked = defaultChecked[i]
+        newInputAll.onclick = function () {
+            checkAll(packages.indexOf(i))
+        }
+
+
+        let newLabelAll = document.createElement("label")
+        newLabelAll.setAttribute("for", `All_package${count}`);
+        newLabelAll.innerHTML = 'All'
+
+        sel.appendChild(newInputAll)
+        sel.appendChild(newLabelAll)
+
+
+
+        for(let j in soilPackages[i]){
+
+
+            let newInput = document.createElement("input");
+            newInput.setAttribute("type", "checkbox");
+            newInput.setAttribute("id", soilPackages[i][j]);
+            newInput.checked = defaultChecked[i]
+            newInput.onclick = function (){
+                verifyChecked()
+            }
+
+            let newLabel = document.createElement("label")
+            newLabel.setAttribute("for", soilPackages[i][j]);
+            newLabel.innerHTML = soilPackages[i][j]
+
+            sel.appendChild(newInput)
+            sel.appendChild(newLabel)
+        }
+        count++
+    }
+
+
+
+    // let sel = document.querySelector('.Plant_essentials')
+    //
+    // let newInput = document.createElement("input");
+    // newInput.setAttribute("type", "checkbox");
+    // newInput.setAttribute("id", "Zn");
+    // newInput.checked = true
+    // newInput.onclick = function (){
+    //     verifyChecked()
+    // }
+    //
+    // let newLabel = document.createElement("label")
+    // newLabel.setAttribute("for", "Zn");
+    // newLabel.innerHTML = 'Zn'
+    //
+    // sel.appendChild(newInput)
+    // sel.appendChild(newLabel)
+
+}
+buildMenu()
+
+
+
+
 
 
 init_pca_plot();
 
 export function checkAll(pkg){
+
+    console.log('All_package'+(pkg))
+
+
     if(document.getElementById('All_package'+(pkg)).checked == false){
         for (let i in soilPackages[packages[pkg]]){
             document.getElementById(soilPackages[packages[pkg]][i]).checked = false;
@@ -104,47 +193,75 @@ export function selectProfiles(){
     let selectedIndexes = []
     selectedProfies.forEach(d => selectedIndexes.push(profiles[locationProfies.indexOf(d)]))
 
+    console.log(selectedIndexes)
+
     get_dimensions_3(selectedIndexes);
 }
 
 export async function get_dimensions_3(_profiles){
 
-    let dims_3 = {};
+    let dimensions = new Object()
+    console.log('dims3',dimensions)
+
+    let profile_dims = {}
+    _profiles.forEach(d=> profile_dims[d] = {})
 
     Promise.all(
         Array.from(_profiles, x => d3v5.csv(`./data/new/${x}-processed.csv`))
     ).then(function(files) {
-        for (let i in files){
-            for (let j in files[i][0]){
-                if(j.split(' ')[1] === 'Concentration' && ! dims_3.hasOwnProperty(j)){
-                    let arr = files[i].map(d=> +d[j])
-                    let ext = (d3.extent(arr))
-                    let dim = {name: j, hide: false, min: ext[0], max: ext[1], noShow: false}
+        console.log(files)
+        let allData = []
+        for (let i in files) {
+            allData = allData.concat(files[i])
+        }
+        console.log(allData)
 
-                    dims_3[j] = (dim)
-                }
+        for (let j in allData[0]){
+            if(j.split(' ')[1] === 'Concentration' && ! dimensions.hasOwnProperty(j)){
+                let arr = allData.map(d=> +d[j])
+                let ext = (d3.extent(arr))
+                let dim = {name: j, hide: false, min: ext[0], max: ext[1], noShow: false}
+
+                dimensions[j] = (dim)
             }
         }
 
-        var myColor = d3v5.scaleSequential().domain([1, Object.keys(dims_3).length+1])
+
+        for(let i = 0 ; i < Object.keys(profile_dims).length; i++){
+
+
+            let dim = {min: 0, max: 100}
+            profile_dims[Object.keys(profile_dims)[i]]['Sample ID'] = dim
+
+
+            Object.keys(dimensions).forEach(d=>{
+                let arr = files[i].map(e=> +e[d])
+                let ext = (d3.extent(arr))
+                let dim = {min: ext[0], max: ext[1]}
+
+
+                profile_dims[Object.keys(profile_dims)[i]][d] = dim
+            })
+        }
+        console.log(profile_dims)
+
+        var myColor = d3v5.scaleSequential().domain([1, Object.keys(dimensions).length+1])
             .interpolator(d3v5.interpolateRainbow);
 
-        for (let i = 0; i < Object.keys(dims_3).length; i++){
-            dims_3[Object.keys(dims_3)[i]]["color"] = d3v5.color(myColor(i+1));
+        for (let i = 0; i < Object.keys(dimensions).length; i++){
+            dimensions[Object.keys(dimensions)[i]]["color"] = d3v5.color(myColor(i+1));
         }
 
         let dim_ids
-
-
 
         async function update_dimensions(){
             for (let i in packages){
                 for (let j in soilPackages[packages[i]]){
                     if (document.getElementById(soilPackages[packages[i]][j]).checked == false) {
-                        dims_3[soilPackages[packages[i]][j]+' Concentration'].noShow = true;
+                        dimensions[soilPackages[packages[i]][j]+' Concentration'].noShow = true;
                     }
                     else if (document.getElementById(soilPackages[packages[i]][j]).checked == true) {
-                        dims_3[soilPackages[packages[i]][j]+' Concentration'].noShow = false;
+                        dimensions[soilPackages[packages[i]][j]+' Concentration'].noShow = false;
                     }
                 }
             }
@@ -152,12 +269,12 @@ export async function get_dimensions_3(_profiles){
             dim_ids = [];
 
 
-            for (let i in dims_3){
-                if (!(dims_3[i].noShow)){
-                    dim_ids.push(dims_3[i]["name"]);
+            for (let i in dimensions){
+                if (!(dimensions[i].noShow)){
+                    dim_ids.push(dimensions[i]["name"]);
                 }
-                if (dims_3[i].max === 0) {
-                    dims_3[i].hide = true;
+                if (dimensions[i].max === 0) {
+                    dimensions[i].hide = true;
                 }
             }
 
@@ -169,8 +286,8 @@ export async function get_dimensions_3(_profiles){
                 let PCA_input = [];
                 for (let j in files[i]){
                     let row_readings = []
-                    for (let k in dims_3){
-                        if (!dims_3[k].noShow){
+                    for (let k in dimensions){
+                        if (!dimensions[k].noShow){
                             row_readings.push(parseFloat(files[i][j][k]))
                         }
                     }
@@ -181,7 +298,7 @@ export async function get_dimensions_3(_profiles){
             }
 
             if(PCA_inputs && PCA_inputs[0][0] && PCA_inputs[0][0].length > 1){
-                draw_pca_plot_3(_profiles, PCA_inputs, files, dims_3, dim_ids, false);
+                draw_pca_plot_3(_profiles, PCA_inputs, files, dimensions, dim_ids, false, profile_dims);
             }else{
                 //TODO add message / clear svg
                 //No dimensions selected
@@ -192,7 +309,7 @@ export async function get_dimensions_3(_profiles){
     })
 }
 
-async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
+async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, profile_dims){
 
     let PCA_input = []
     let PCA_input2 = []
@@ -515,8 +632,12 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
         distance([x(0),y(0),x.range()[1],y.range()[1]]),
     ])/d3v5.max(dimsReshape)/2);
 
-    let dim_list = [];//d3.entries(dims_2);
-    Object.keys(dims_3).forEach(dim=> dim_list.push(dims_3[dim]));
+    //let dim_list = [];//d3.entries(dims_2);
+    //Object.keys(dims_3).forEach(dim=> dim_list.push(dims_3[dim]));
+
+    let dim_list = Object.values(dims_3)
+
+    console.log(dim_list)
 
     dim_list.forEach(d => {while (
         d["x"]* multiplyBrands > d3v5.max(x_list) ||
@@ -589,7 +710,7 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
 
         )
 
-    parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data_2, []);
+    parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data_2, [], profile_dims);
 
     // when a selected.length === data.length is completed, filter to the points within the lasso polygon
     function handleLassoEnd(lassoPolygon) {
@@ -619,7 +740,7 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal){
                     .each(d => d["selected"] = false)
                     .style("opacity", 1);
             }
-            parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data_2, sel);
+            parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data_2, sel, profile_dims);
         }
     }
 

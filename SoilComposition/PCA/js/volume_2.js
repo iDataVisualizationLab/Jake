@@ -30,20 +30,19 @@ let controlsArr = [];
 let controls1, controls2, controls3;
 
 
-let volumeData
+let volumeData = {}
 let dataLoaded = false
 let res
 
 
-export async function init_data(resolution, profile){
+export async function init_data(resolution, profiles){
 
     if (!dataLoaded){
 
-        let path = `./data/new/${resolution}x${resolution}x${resolution}/${profile}_element_interpolation.json`
-        volumeData = await fetchData(path)
-        dataLoaded = true
-
-        res = resolution
+        for (const d of profiles) {
+            let path = `./data/new/${resolution}x${resolution}x${resolution}/${d}_element_interpolation.json`
+            volumeData[d] = await fetchData(path)
+        }
     }
 }
 
@@ -161,7 +160,7 @@ export function initScene(_profiles, chemical, minVal, maxVal, resolution){
     }
 
     if(!dataLoaded || res !== resolution){
-        init_data(resolution, 'R').then(()=>{
+        init_data(resolution, _profiles).then(()=>{
             for (let i = 0; i < _profiles.length; i++){
                 initVolume2(_profiles[i], chemical, minVal, maxVal, scenes[i], containerArr[i], renderers[i], containerInfoArr[i], resolution);
             }
@@ -175,9 +174,15 @@ export function initScene(_profiles, chemical, minVal, maxVal, resolution){
     }
 }
 
-export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _container, _renderer, _containerInfo, resolution) {
+export async function initVolume2(_profile, _chemical, _minVal, _maxVal, _scene, _container, _renderer, _containerInfo, resolution) {
+
+    console.log(_minVal)
+    console.log(_maxVal)
 
 
+    let chemical = [..._chemical]
+    let minVal = [..._minVal[_profile]]
+    let maxVal = [..._maxVal[_profile]]
     // _scene.remove.apply(_scene, _scene.children);
 
     _scene.clear();
@@ -187,12 +192,40 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
     //let filePath = "./data/"+profile+"/50_"+chemical+"_Concentration_t.json"
 
     let valsArr = []
+    let depthActive = false
+    let minDepth
+    let maxDepth
+    let depthRange
+
+    if (chemical.includes('Depth')){
+        depthActive = true
+        minDepth = minVal[0]
+        maxDepth = maxVal[0]
+        chemical.splice(0, 1)
+        minVal.splice(0,1)
+        maxVal.splice(0,1)
+        depthRange = (d3.extent(volumeData[profile]['y'])[1] +1) - d3.extent(volumeData[profile]['y'])[0]
+
+
+        minDepth = depthRange - (minDepth * depthRange)
+        maxDepth = depthRange - (maxDepth * depthRange)
+
+    }
+
 
     for (const i of chemical){
         //let path = "./data/"+profile+"/50_"+i+"_Concentration_t.json"
         //let arr = await fetchData(path)
-        valsArr.push(volumeData[`${i} Concentration`])
+        if (Object.keys(volumeData[profile]).includes(`${i} Concentration`)){
+            valsArr.push(volumeData[profile][`${i} Concentration`])
+        }
+        else{
+            let blank = new Array(Math.pow(resolution, 3)).fill(-1)
+            valsArr.push(blank)
+        }
     }
+
+    console.log(volumeData)
 
     _containerInfo.innerHTML = `${profile}: ${chemical} `
 
@@ -204,13 +237,9 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
     const positions = [];
     const colors = [];
 
-    console.log('x',pos_x)
-    console.log('y',pos_y)
-    console.log('z',pos_z)
-    console.log(volumeData)
-
     for ( let i = 0; i < particles; i ++ ) {
-        if ((Math.pow(volumeData['x'][i] - (resolution/2), 2) + Math.pow(volumeData['z'][i] - (resolution/2), 2)) < (Math.pow((resolution/2), 2))) {
+
+        if ((Math.pow(volumeData[profile]['x'][i] - (resolution/2), 2) + Math.pow(volumeData[profile]['z'][i] - (resolution/2), 2)) < (Math.pow((resolution/2), 2))) {
 
             let p2 = new Array(chemical.length).fill(false)
             let v2 = []
@@ -230,21 +259,36 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
                     p2[j] = true
                     //}
                 }
+
             }
 
             if (!p2.includes(false)){
-                const x = (volumeData['x'][i] - (resolution/2)) * 5;
-                const y = (volumeData['y'][i] - (resolution/2)) * 5;
-                const z = (volumeData['z'][i] - (resolution/2)) * 5;
 
-                positions.push(x, y, z);
+                if (depthActive && volumeData[profile]['y'][i] >= maxDepth && volumeData[profile]['y'][i] <= minDepth){
+                    const x = (volumeData[profile]['x'][i] - (resolution/2)) * 5;
+                    const y = (volumeData[profile]['y'][i] - (resolution/2)) * 5;
+                    const z = (volumeData[profile]['z'][i] - (resolution/2)) * 5;
 
-                let color = new THREE.Color(getColor((v2.reduce((a, b) => a + b)) / v2.length ));
-                colors.push(color.r, color.g, color.b);
+                    positions.push(x, y, z);
+
+                    let color = new THREE.Color(getColor((v2.reduce((a, b) => a + b)) / v2.length ));
+                    colors.push(color.r, color.g, color.b);
+                }
+
+                else if(!depthActive){
+                    const x = (volumeData[profile]['x'][i] - (resolution/2)) * 5;
+                    const y = (volumeData[profile]['y'][i] - (resolution/2)) * 5;
+                    const z = (volumeData[profile]['z'][i] - (resolution/2)) * 5;
+
+                    positions.push(x, y, z);
+
+                    let color = new THREE.Color(getColor((v2.reduce((a, b) => a + b)) / v2.length ));
+                    colors.push(color.r, color.g, color.b);
+                }
             }
-
         }
     }
+
 
 
     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
@@ -301,7 +345,7 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
     const loader = new THREE.FontLoader();
     const font = loader.load(
         // resource URL
-        '../lib/threejs/font.json',
+        './lib/threejs/font.json',
 
         // onLoad callback
         function ( font ) {
