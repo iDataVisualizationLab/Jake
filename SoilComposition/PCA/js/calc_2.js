@@ -1,4 +1,5 @@
 import * as parallel from "./parallel_2.js";
+import {buildColorMenu} from "./volume_2.js";
 
 let profiles = ["R", "S", "L"];
 
@@ -7,8 +8,6 @@ let soilPackages = {RCRA_8_metals: ['As', 'Ba', 'Cd', 'Cr', 'Pb', 'Hg', 'Se', 'A
     Pedology: ['RI', 'DI', 'SR', 'Rb'],
     Other: ['Mg', 'Al', 'Si', 'P', 'Ti', 'V', 'Co', 'Ni', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Sn', 'W', 'Bi', 'Th', 'U', 'LE', 'Sb']};
 
-let packages = ['RCRA_8_metals', 'Plant_essentials', 'Pedology', 'Other'];
-
 let defaultChecked = {
     RCRA_8_metals: true,
     Plant_essentials: true,
@@ -16,16 +15,13 @@ let defaultChecked = {
     Other: false
 }
 
-
-
-
 var graphicPCA={margin: {top: 20, right: 10, bottom: 50, left: 50},
     width : function(){return 700 - this.margin.left - this.margin.right},
     height : function(){return 550 - this.margin.top - this.margin.bottom},
     animationTime:1000
 }
 
-let colors = {
+let profile_color = {
     "R": "#8F7C00",
     "S": "#C20088",
     "L": "#00998F"
@@ -33,22 +29,16 @@ let colors = {
 function buildMenu(){
 
     let count = 0
-
     for (let i in soilPackages){
         let sel = document.querySelector(`.${i}`)
-
-        //console.log(defaultChecked[i])
 
         let newInputAll = document.createElement("input");
         newInputAll.setAttribute("type", "checkbox");
         newInputAll.setAttribute("id", `All_package${count}`);
-
-
         newInputAll.checked = defaultChecked[i]
         newInputAll.onclick = function () {
-            checkAll(packages.indexOf(i))
+            checkAll(Object.keys(soilPackages).indexOf(i))
         }
-
 
         let newLabelAll = document.createElement("label")
         newLabelAll.setAttribute("for", `All_package${count}`);
@@ -57,11 +47,7 @@ function buildMenu(){
         sel.appendChild(newInputAll)
         sel.appendChild(newLabelAll)
 
-
-
         for(let j in soilPackages[i]){
-
-
             let newInput = document.createElement("input");
             newInput.setAttribute("type", "checkbox");
             newInput.setAttribute("id", soilPackages[i][j]);
@@ -79,52 +65,24 @@ function buildMenu(){
         }
         count++
     }
-
-
-
-    // let sel = document.querySelector('.Plant_essentials')
-    //
-    // let newInput = document.createElement("input");
-    // newInput.setAttribute("type", "checkbox");
-    // newInput.setAttribute("id", "Zn");
-    // newInput.checked = true
-    // newInput.onclick = function (){
-    //     verifyChecked()
-    // }
-    //
-    // let newLabel = document.createElement("label")
-    // newLabel.setAttribute("for", "Zn");
-    // newLabel.innerHTML = 'Zn'
-    //
-    // sel.appendChild(newInput)
-    // sel.appendChild(newLabel)
-
+    buildColorMenu()
 }
 buildMenu()
-
-
-
-
-
-
 init_pca_plot();
 
 export function checkAll(pkg){
-
     console.log('All_package'+(pkg))
-
-
     if(document.getElementById('All_package'+(pkg)).checked == false){
-        for (let i in soilPackages[packages[pkg]]){
-            document.getElementById(soilPackages[packages[pkg]][i]).checked = false;
+        for (let i in soilPackages[Object.keys(soilPackages)[pkg]]){
+            document.getElementById(soilPackages[Object.keys(soilPackages)[pkg]][i]).checked = false;
         }
     }
     else{
         for (let i in soilPackages[packages[pkg]]){
-            if(document.getElementById(soilPackages[packages[pkg]][i]).disabled == false){
+            if(document.getElementById(soilPackages[Object.keys(soilPackages)[pkg]][i]).disabled == false){
             //if(document.getElementById(soilPackages[packages[pkg]][i]).disabled == false){
                 //document.getElementById(soilPackages[packages[pkg]][i]).checked = true;
-                document.getElementById(soilPackages[packages[pkg]][i]).checked = true;
+                document.getElementById(soilPackages[Object.keys(soilPackages)[pkg]][i]).checked = true;
             }
         }
     }
@@ -133,10 +91,10 @@ export function checkAll(pkg){
 
 
 export function verifyChecked(){
-    for (let i  in packages){
+    for (let i  in Object.keys(soilPackages)){
         let flag = false;
-        for (let j in soilPackages[packages[i]]){
-            if (document.getElementById(soilPackages[packages[i]][j]).disabled == false && document.getElementById(soilPackages[packages[i]][j]).checked == false){
+        for (let j in soilPackages[Object.keys(soilPackages)[i]]){
+            if (document.getElementById(soilPackages[Object.keys(soilPackages)[i]][j]).disabled == false && document.getElementById(soilPackages[Object.keys(soilPackages)[i]][j]).checked == false){
                 flag = true;
                 document.getElementById('All_package'+(i)).checked = false;
                 break;
@@ -192,8 +150,6 @@ export function selectProfiles(){
     })
     let selectedIndexes = []
     selectedProfies.forEach(d => selectedIndexes.push(profiles[locationProfies.indexOf(d)]))
-
-    console.log(selectedIndexes)
 
     get_dimensions_3(selectedIndexes);
 }
@@ -255,13 +211,13 @@ export async function get_dimensions_3(_profiles){
         let dim_ids
 
         async function update_dimensions(){
-            for (let i in packages){
-                for (let j in soilPackages[packages[i]]){
-                    if (document.getElementById(soilPackages[packages[i]][j]).checked == false) {
-                        dimensions[soilPackages[packages[i]][j]+' Concentration'].noShow = true;
+            for (let i in Object.keys(soilPackages)){
+                for (let j in soilPackages[Object.keys(soilPackages)[i]]){
+                    if (document.getElementById(soilPackages[Object.keys(soilPackages)[i]][j]).checked == false) {
+                        dimensions[soilPackages[Object.keys(soilPackages)[i]][j]+' Concentration'].noShow = true;
                     }
-                    else if (document.getElementById(soilPackages[packages[i]][j]).checked == true) {
-                        dimensions[soilPackages[packages[i]][j]+' Concentration'].noShow = false;
+                    else if (document.getElementById(soilPackages[Object.keys(soilPackages)[i]][j]).checked == true) {
+                        dimensions[soilPackages[Object.keys(soilPackages)[i]][j]+' Concentration'].noShow = false;
                     }
                 }
             }
@@ -420,7 +376,7 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
                     data_2[i]["id"] = _profiles[0] + i;
                     data_2[i]["selected"] = false;
                     data_2[i]["profile"] = _profiles[0];
-                    data_2[i]["color"] = colors[_profiles[0]];
+                    data_2[i]["color"] = profile_color[_profiles[0]];
                 }
                 break;
             case 2:
@@ -429,12 +385,12 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
                     if (i < data[0].length){
                         data_2[i]["id"] = _profiles[0] + i;
                         data_2[i]["profile"] = _profiles[0];
-                        data_2[i]["color"] = colors[_profiles[0]];
+                        data_2[i]["color"] = profile_color[_profiles[0]];
                     }
                     else{
                         data_2[i]["id"] = _profiles[1] + (i - data[0].length);
                         data_2[i]["profile"] = _profiles[1];
-                        data_2[i]["color"] = colors[_profiles[1]];
+                        data_2[i]["color"] = profile_color[_profiles[1]];
                     }
                 }
                 break;
@@ -444,17 +400,17 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
                     if (i < data[0].length){
                         data_2[i]["id"] = _profiles[0] + i;
                         data_2[i]["profile"] = _profiles[0];
-                        data_2[i]["color"] = colors[_profiles[0]];
+                        data_2[i]["color"] = profile_color[_profiles[0]];
                     }
                     else if (i >= data[0].length && i < (data[1].length + data[0].length)){
                         data_2[i]["id"] = _profiles[1] + (i - data[0].length);
                         data_2[i]["profile"] = _profiles[1];
-                        data_2[i]["color"] = colors[_profiles[1]];
+                        data_2[i]["color"] = profile_color[_profiles[1]];
                     }
                     else{
                         data_2[i]["id"] = _profiles[2] + (i - (data[0].length + data[1].length));
                         data_2[i]["profile"] = _profiles[2];
-                        data_2[i]["color"] = colors[_profiles[2]];
+                        data_2[i]["color"] = profile_color[_profiles[2]];
                     }
                 }
                 break;

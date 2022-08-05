@@ -1,12 +1,8 @@
-import {initScene, init_data} from "./volume_2.js";
-import {verifyChecked, checkAll} from "./calc_2.js";
-
+import {init_volume_config, update_volume_config} from "./volume_2.js";
 
 export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, sel, profile_dims) {
-
     let resolution = 50
-
-    let elem, vMin, vMax;
+    //let elem, vMin, vMax;
 
     let colors = {
         "R": to_hsl("#8F7C00"),
@@ -525,13 +521,8 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
             });
 
         let elms = [];
-        let vMins = [];
-        let vMaxs = [];
-
         let val_mins = {}
         let val_maxs = {}
-
-        //console.log(_profiles)
 
         _profiles.forEach(d=>{
             val_mins[d] = []
@@ -546,10 +537,6 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                 if (_.include(actives, dimension)) {
                     var extent = extents[actives.indexOf(dimension)];
 
-                    console.log(extent)
-                    console.log(dimObject[dimension])
-                    //console.log(yscale['Ca Concentration'].brush.extent()[0])
-
                     dimension === 'Sample ID' ? elms.push('Depth') : elms.push(dimension.split(" ")[0])
 
                     _profiles.forEach(d=>{
@@ -561,25 +548,7 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                             val_mins[d].push(0)
                             val_maxs[d].push(0)
                         }
-
                     })
-
-                    //console.log(val_mins)
-                    //console.log(val_maxs)
-
-
-                    // elms.push (dimension.split(" ")[0]);
-                    vMins.push((extent[0] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
-                    vMaxs.push((extent[1] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
-
-                    //console.log(dimObject)
-
-                    // elem = dimension.split(" ")[0]
-                    // vMin = ((extent[0] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
-                    // vMax = ((extent[1] - dimObject[dimension]['min']) / (dimObject[dimension]['max'] - dimObject[dimension]['min']));
-
-                    // if(isEnd)
-                    //     buildVolume(_profiles, elem, vMin, vMax);
 
                     d3.select(element)
                         .selectAll('text')
@@ -609,9 +578,9 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                        val_mins[d].push((dimObject['Ca Concentration']['min'] - profile_dims[d]['Ca Concentration']['min']) / (profile_dims[d]['Ca Concentration']['max'] - profile_dims[d]['Ca Concentration']['min']));
                        val_maxs[d].push((dimObject['Ca Concentration']['max'] - profile_dims[d]['Ca Concentration']['min']) / (profile_dims[d]['Ca Concentration']['max'] - profile_dims[d]['Ca Concentration']['min']));
                    })
-                   initScene(_profiles, elms, val_mins, val_maxs, resolution)//(_profiles, elms, vMins, vMaxs);
+                   update_volume_config(_profiles, elms, val_mins, val_maxs, resolution)//(_profiles, elms, vMins, vMaxs);
                }
-               initScene(_profiles, elms, val_mins, val_maxs, resolution)//(_profiles, elms, vMins, vMaxs);
+               update_volume_config(_profiles, elms, val_mins, val_maxs, resolution)//(_profiles, elms, vMins, vMaxs);
            }
            else{
                _profiles.forEach(d=>{
@@ -619,7 +588,7 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
                    val_maxs[d].push((dimObject['Ca Concentration']['max'] - profile_dims[d]['Ca Concentration']['min']) / (profile_dims[d]['Ca Concentration']['max'] - profile_dims[d]['Ca Concentration']['min']));
                })
 
-               initScene(_profiles, ['Ca'], val_mins, val_maxs, resolution)
+               update_volume_config(_profiles, ['Ca'], val_mins, val_maxs, resolution)
            }
 
 
@@ -1014,37 +983,22 @@ export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, se
 
 
     function buildVolume(){
-        //console.log(_profiles)
-        //if(elem){
-        //    initScene(_profiles, elms, vMins, vMaxs)
-            //initScene(_profiles, elem, vMin, vMax);
-        //}
-        //else{
-            //initScene(_profiles, ['Ca'], [0], [1], resolution);
-            //initScene(_profiles, 'Ca', 0, 1);
-        //}
-
         let val_mins = {}
         let val_maxs = {}
-
-        //console.log(_profiles)
 
         _profiles.forEach(d=>{
             val_mins[d] = []
             val_maxs[d] = []
         })
 
-
         _profiles.forEach(d=>{
             val_mins[d].push((dimObject['Ca Concentration']['min'] - profile_dims[d]['Ca Concentration']['min']) / (profile_dims[d]['Ca Concentration']['max'] - profile_dims[d]['Ca Concentration']['min']));
             val_maxs[d].push((dimObject['Ca Concentration']['max'] - profile_dims[d]['Ca Concentration']['min']) / (profile_dims[d]['Ca Concentration']['max'] - profile_dims[d]['Ca Concentration']['min']));
         })
 
-        initScene(_profiles, ['Ca'], val_mins, val_maxs, resolution)
+        init_volume_config(_profiles, ['Ca'], val_mins, val_maxs, resolution)
     }
     buildVolume();
-
-
 
 
 }

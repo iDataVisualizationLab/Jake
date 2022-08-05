@@ -24,29 +24,31 @@ select#framework{
 
 /*}*/
 
-.Profile, .Profile0, .Profile1,  .Profile2, .Profile3{
+.Profile, .Profile0, .Profile1,  .Profile2, .Profile3, .Color{
     position: relative;
     left: 1%;
     top: 2%;
     vertical-align: top;
     height:auto !important;
 }
-.locationProfile, .RCRA_8_metals, .Plant_essentials, .Pedology, .Other {
+
+
+.locationProfile, .RCRA_8_metals, .Plant_essentials, .Pedology, .Other, .VolumeColor {
     display:none;
     height:auto;
     margin:0;
     float: left;
 }
-.show0, .show, .show2, .show3, .show4 {
+.show0, .show, .show2, .show3, .show4, .show5 {
     display: none;
 }
-.hide0:target + .show0, .hide:target + .show, .hide2:target + .show2, .hide3:target + .show3, .hide4:target + .show4 {
+.hide0:target + .show0, .hide:target + .show, .hide2:target + .show2, .hide3:target + .show3, .hide4:target + .show4, .hide5:target + .show5 {
     display: inline;
 }
-.hide0:target, .hide:target, .hide2:target, .hide3:target, .hide4:target {
+.hide0:target, .hide:target, .hide2:target, .hide3:target, .hide4:target, .hide5:target {
     display: none;
 }
-.hide0:target ~ .locationProfile, .hide:target ~ .RCRA_8_metals, .hide2:target ~ .Plant_essentials, .hide3:target ~ .Pedology, .hide4:target ~ .Other {
+.hide0:target ~ .locationProfile, .hide:target ~ .RCRA_8_metals, .hide2:target ~ .Plant_essentials, .hide3:target ~ .Pedology, .hide4:target ~ .Other, .hide5:target ~ .VolumeColor {
     display:inline;
 }
 
@@ -77,12 +79,12 @@ select#framework{
     margin-bottom: 25px;
 }
 
-.locationProfile input, .RCRA_8_metals input, .Plant_essentials input, .Pedology input, .Other input{
+.locationProfile input, .RCRA_8_metals input, .Plant_essentials input, .Pedology input, .Other input, .VolumeColor input{
     height:auto;
     margin-top: 4px;
 }
 
-.locationProfile label, .RCRA_8_metals label, .Plant_essentials label, .Pedology label, .Other label{
+.locationProfile label, .RCRA_8_metals label, .Plant_essentials label, .Pedology label, .Other label, .VolumeColor label{
     height:auto;
     /*top: 100%;*/
     /*margin-bottom: 2px;*/
@@ -101,7 +103,8 @@ select#framework{
     font-size: 14px;
 }
 
-.subLocationProfile{
+
+.subLocationProfile, .subColor{
     float: left;
     height: auto;
     line-height: 20px;
@@ -112,7 +115,7 @@ select#framework{
     font-size: 14px;
 }
 
-.hide0, .show0{
+.hide0, .show0, .hide5, .show5{
     width: auto;
     height: auto;
     /*border-radius: 30px;*/
@@ -129,7 +132,7 @@ select#framework{
     margin-bottom: 25px;
 }
 
-.hide0:hover, .show0:hover{
+.hide0:hover, .show0:hover, .hide5:hover, .show5:hover{
     color: dodgerblue;
     text-shadow: 0 2px 1px #666;
     text-decoration: none;

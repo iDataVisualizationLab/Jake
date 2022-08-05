@@ -10,12 +10,6 @@
 <body>
 <script type="module">
     import * as calc_2 from './js/calc_2.js';
-    window._checkAll = function (pkg) {
-        calc_2.checkAll(pkg);
-    }
-    window._verifyChecked = function () {
-        calc_2.verifyChecked();
-    }
     window._selectProfiles= function (){
         calc_2.selectProfiles()
     }
@@ -32,6 +26,14 @@
         <label for="locS">S</label>
         <input type="checkbox" id="L" name="L" onclick="_selectProfiles()">
         <label for="L">L</label>
+    </div>
+</div>
+
+<div class="Color">
+    <div class="subColor"> Volume Color </div>
+    <a href="#hide15" class="hide5" id="hide15">>></a>
+    <a href="#show15" class="show5" id="show15"><<</a>
+    <div class="VolumeColor">
     </div>
 </div>
 
@@ -66,6 +68,9 @@
     <div class="Other">
     </div>
 </div>
+
+
+
 
 <div id="header">
     <div class="controls">
@@ -117,7 +122,7 @@
 <script src="lib/threejs/OrbitControls.js"></script>
 
 <script type="module" src="js/parallel_2.js"></script>
-<script type="module" src="js/volume.js"></script>
+<script type="module" src="js/volume_2.js"></script>
 
 
 
