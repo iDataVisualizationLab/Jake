@@ -131,8 +131,8 @@ export async function init_data(resolution, profiles){
 
     if (!volume_settings.data_loaded){
         for (const d of profiles) {
-            volume_settings.concentration_data[d] = await fetchData(`./data/new/${resolution}x${resolution}x${resolution}/${d}_element_interpolation.json`)
-            volume_settings.color_data[d] = await fetchData(`./data/new/${resolution}x${resolution}x${resolution}/${d}_color_interpolation.json`)
+            volume_settings.concentration_data[d] = await fetchData(`./data/new/${resolution}x${resolution}x${resolution}/${d}_element_interpolation_2.json`)
+            volume_settings.color_data[d] = await fetchData(`./data/new/${resolution}x${resolution}x${resolution}/${d}_color_interpolation_2.json`)
             volume_settings.profile_data_loaded[d] = true
         }
         volume_settings.data_loaded = true
@@ -142,7 +142,7 @@ export async function init_data(resolution, profiles){
 
 function create_element_color_menu(elements){
 
-    selected_element_color = elements[0]
+    elements.includes('Depth') ? selected_element_color = elements[1] : selected_element_color = elements[0]
 
     if(document.querySelector('.element_color')){
         document.querySelectorAll('.element_color').forEach(d=> d.remove())
@@ -170,10 +170,12 @@ function create_element_color_menu(elements){
     newLabel.innerHTML = 'Color For:'
 
     for (const d of elements){
-        let newOption = document.createElement("option")
-        newOption.setAttribute('value' ,d)
-        newOption.innerHTML = d
-        newMenu.appendChild(newOption)
+        if (d != 'Depth'){
+            let newOption = document.createElement("option")
+            newOption.setAttribute('value' ,d)
+            newOption.innerHTML = d
+            newMenu.appendChild(newOption)
+        }
     }
     sel.appendChild(newLabel)
     sel.appendChild(newMenu)
@@ -302,11 +304,7 @@ export async function initVolume2(profile, volume_config, _scene, _container, _r
     let minVal = [...volume_config.filter_min[profile]]
     let maxVal = [...volume_config.filter_max[profile]]
 
-    //console.log(chemical.indexOf(selected_element_color))
-
     _scene.clear();
-
-    //let profile = _profile;
 
     let valsArr = []
     let depthActive = false
@@ -326,6 +324,9 @@ export async function initVolume2(profile, volume_config, _scene, _container, _r
         maxDepth = depthRange - (maxDepth * depthRange)
     }
 
+
+
+
     for (const i of chemical){
         if (Object.keys(volume_settings.concentration_data[profile]).includes(`${i} Concentration`)){
             valsArr.push(volume_settings.concentration_data[profile][`${i} Concentration`])
@@ -341,6 +342,7 @@ export async function initVolume2(profile, volume_config, _scene, _container, _r
     const geometry = new THREE.BufferGeometry();
     const positions = [];
     const colors = [];
+
 
     if (volume_color_options['selected'] === 'concentration'){
         for ( let i = 0; i < particles; i ++ ) {
@@ -361,8 +363,7 @@ export async function initVolume2(profile, volume_config, _scene, _container, _r
                         const z = (volume_settings.concentration_data[profile]['z'][i] - (volume_config.resolution/2)) * 5;
                         positions.push(x, y, z);
                         // let color = new THREE.Color(getColor((v2.reduce((a, b) => a + b)) / v2.length ));
-                            let color = new THREE.Color(getColor(v2[chemical.indexOf(selected_element_color)+1]));
-
+                        let color = new THREE.Color(getColor(v2[chemical.indexOf(selected_element_color)]));
                         colors.push(color.r, color.g, color.b);
                     }
                     else if(!depthActive){
@@ -370,7 +371,6 @@ export async function initVolume2(profile, volume_config, _scene, _container, _r
                         const y = (volume_settings.concentration_data[profile]['y'][i] - (volume_config.resolution/2)) * 5;
                         const z = (volume_settings.concentration_data[profile]['z'][i] - (volume_config.resolution/2)) * 5;
                         positions.push(x, y, z);
-                        // let color = new THREE.Color(getColor((v2.reduce((a, b) => a + b)) / v2.length ));
                         let color = new THREE.Color(getColor(v2[chemical.indexOf(selected_element_color)]));
                         colors.push(color.r, color.g, color.b);
                     }
