@@ -1,0 +1,15 @@
+#container, #container2, #container3{
+    width: 60vw;
+    height: 40vh;
+}
+#container canvas, #container2 canvas, #container3 canvas {
+    position: unset;
+}
+#containerInfo, #container2Info, #container3Info{
+    position: relative;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+    z-index: 100;
+    display:block;
+}

@@ -1,11 +1,3 @@
-import * as p_x from '../data/50/50_pos_x.js';
-import * as p_y from '../data/50/50_pos_y.js';
-import * as p_z from '../data/50/50_pos_z.js';
-
-const pos_x = p_x.default;
-const pos_y = p_y.default;
-const pos_z = p_z.default;
-
 let points;
 
 let container = document.getElementById( 'container' );
@@ -29,18 +21,218 @@ let camera1, camera2, camera3;
 let controlsArr = [];
 let controls1, controls2, controls3;
 
-function createScenes(){
 
+let volume_settings = {
+    concentration_data: {},
+    color_data: {},
+    profile_data_loaded: {'R': false, 'S': false, 'L': false},
+    data_loaded: null,
+    resolution: null,
+}
+
+// let volume_color_options = {
+//     titles: ['Element Concentration', 'Soil Color'],
+//     ids:  ['concentration', 'soil_color'],
+//     selected: 'concentration',
+//     default_selected: 'concentration'
+// }
+
+let volume_config = {
+    profiles: null,
+    dimensions: null,
+    filter_min: null,
+    filter_max: null,
+    resolution: null,
+    dimension_min_max: null,
+    profile_dimension_min_max: null,
+    dimensions_all: null,
+    selected_element_color: null
+}
+
+export function init_volume_config(_profiles, chemical, minVal, maxVal, resolution, dimension_min_max, profile_dimension_min_max, dimension_list){
+    volume_config.profiles = _profiles
+    volume_config.dimensions = chemical
+    volume_config.filter_min = minVal
+    volume_config.filter_max = maxVal
+    volume_config.resolution = resolution
+    volume_config.dimension_min_max = dimension_min_max
+    volume_config.profile_dimension_min_max = profile_dimension_min_max
+    volume_config.dimensions_all = dimension_list
+
+    create_element_color_menu(volume_config)
+
+    // if(volume_color_options.selected === "concentration"){
+    //     create_element_color_menu(volume_config.dimensions)
+    // }
+    // else if(document.querySelector('.element_color')){
+    //     document.querySelectorAll('.element_color').forEach(d=> d.remove())
+    // }
+    init_scene(volume_config)
+}
+
+export function update_volume_config(_profiles, chemical, minVal, maxVal, resolution, dimension_min_max, profile_dimension_min_max, dimension_list){
+    volume_config.profiles = _profiles
+    volume_config.dimensions = chemical
+    volume_config.filter_min = minVal
+    volume_config.filter_max = maxVal
+    volume_config.resolution = resolution
+    volume_config.dimension_min_max = dimension_min_max
+    volume_config.profile_dimension_min_max = profile_dimension_min_max
+    volume_config.dimensions_all = dimension_list
+
+
+    create_element_color_menu(volume_config)
+
+
+    //  console.log(volume_config)
+
+    // if(volume_color_options.selected === "concentration"){
+    //     create_element_color_menu(volume_config.dimensions)
+    // }
+    // else if(document.querySelector('.element_color')){
+    //     document.querySelectorAll('.element_color').forEach(d=> d.remove())
+    // }
+    init_scene(volume_config)
+}
+
+// export function buildColorMenu() {
+//     let sel = document.querySelector('.VolumeColor')
+//
+//     for (let i in volume_color_options['titles']) {
+//         let newInputAll = document.createElement("input");
+//         newInputAll.setAttribute("type", "checkbox");
+//         newInputAll.setAttribute("id", volume_color_options['ids'][i]);
+//         newInputAll.setAttribute("class", 'volume_color_option');
+//         newInputAll.checked = volume_color_options['ids'][i] === volume_color_options['default_selected']
+//         newInputAll.onclick = function () {
+//             handleVolumeColor(volume_color_options['ids'][i])
+//         }
+//         let newLabelAll = document.createElement("label")
+//         newLabelAll.setAttribute("for", volume_color_options['ids'][i]);
+//         newLabelAll.innerHTML = volume_color_options['titles'][i]
+//
+//         //sel.appendChild(newInputAll)
+//         //sel.appendChild(newLabelAll)
+//     }
+// }
+
+// export function handleVolumeColor(sel){
+//     document.querySelectorAll('.volume_color_option').forEach(d=>{
+//         d.id != sel ? d.checked = false : volume_color_options['selected'] = sel
+//     })
+//
+//     let selection = false
+//     document.querySelectorAll('.volume_color_option').forEach(d=>{
+//         d.checked ? selection = true : null
+//     })
+//     if (!selection){
+//         document.querySelector(`#${sel}`).checked = true;
+//         volume_color_options['selected'] = sel
+//     }
+//
+//     if(volume_color_options.selected === "concentration"){
+//         create_element_color_menu(volume_config.dimensions)
+//     }
+//     else if(document.querySelector('.element_color')){
+//         document.querySelectorAll('.element_color').forEach(d=> d.remove())
+//     }
+//
+//     init_scene(volume_config)
+// }
+
+export async function init_data(resolution, profiles){
+
+    Object.keys(volume_settings.profile_data_loaded).filter(d=> profiles.includes(d)).forEach(e=>{
+        if (!volume_settings.profile_data_loaded[e]){
+            volume_settings.data_loaded = false
+        }
+    })
+
+    if (!volume_settings.data_loaded){
+        for (const d of profiles) {
+            volume_settings.concentration_data[d] = await fetchData(`./data/${resolution}x${resolution}x${resolution}/${d}_element_interpolation.json`)
+            volume_settings.color_data[d] = await fetchData(`./data/${resolution}x${resolution}x${resolution}/${d}_color_interpolation.json`)
+            volume_settings.profile_data_loaded[d] = true
+        }
+        volume_settings.data_loaded = true
+    }
+    volume_settings.resolution = resolution
+}
+
+function create_element_color_menu(volumeConfig){
+    let elements = volumeConfig.dimensions
+    let all_elements = volumeConfig.dimensions_all
+
+    if (volume_config.selected_element_color !== 'soil_color'){
+        elements.includes('Depth') ? volume_config.selected_element_color = elements[1] : volume_config.selected_element_color = elements[0]
+
+    }
+
+    if(document.querySelector('.element_color')){
+        document.querySelectorAll('.element_color').forEach(d=> d.remove())
+    }
+
+    let sel = document.querySelector('.VolumeColor')
+
+    let newMenu = document.createElement("select")
+    newMenu.setAttribute('id', 'element_color')
+    newMenu.setAttribute('class', 'element_color')
+    newMenu.onchange = function (){
+        volume_config.selected_element_color = newMenu.options[newMenu.selectedIndex].value
+        init_scene(volume_config)
+    }
+   // newMenu.style.position = 'absolute'
+    newMenu.style.transform = 'translate( 5px, 0px)'
+
+    let newOption = document.createElement("option")
+    newOption.setAttribute('value' ,'soil_color')
+    newOption.innerHTML = 'Soil Color'
+    //newOption.selected = false
+    newMenu.appendChild(newOption)
+
+
+
+    let optgroup = document.createElement('optgroup')
+    optgroup.setAttribute('label', 'Element Concentrations')
+
+    for (const d of elements){
+        if (d != 'Depth'){
+            let newOption = document.createElement("option")
+            newOption.setAttribute('value' ,d)
+            newOption.innerHTML = d
+            optgroup.appendChild(newOption)
+        }
+    }
+
+    for (const d of all_elements){
+        if (!elements.includes(d)){
+            let newOption = document.createElement("option")
+            newOption.setAttribute('value' ,d)
+            newOption.innerHTML = d
+            optgroup.appendChild(newOption)
+        }
+    }
+
+    newMenu.appendChild(optgroup)
+
+    volume_config.selected_element_color !== 'soil_color' ? newMenu.selectedIndex = 1 : null
+
+    //newMenu.selectedIndex = 1
+    //sel.appendChild(newLabel)
+    sel.appendChild(newMenu)
+    //sel.selectedIndex = 1
+
+}
+
+function create_scenes(){
     switch (scenes.length){
         case 0:
             scene1 = new THREE.Scene();
-            //scene.background = new THREE.Color( 0x050505 );
             scene1.background = new THREE.Color( '#eeeeee' );
             scene1.fog = new THREE.Fog( 0x050505, 2000, 3500 );
             scenes.push(scene1);
             renderer1 = new THREE.WebGLRenderer();
             renderer1.setSize( containerArr[0].offsetWidth, containerArr[0].offsetHeight );
-            // renderer.setSize( window.innerWidth, window.innerHeight );
             renderer1.setPixelRatio( window.devicePixelRatio );
             renderers.push(renderer1)
             camera1 = new THREE.PerspectiveCamera( 45, containerArr[0].offsetWidth / containerArr[0].offsetHeight, 1, 10000 );
@@ -51,13 +243,11 @@ function createScenes(){
             break;
         case 1:
             scene2 = new THREE.Scene();
-            //scene.background = new THREE.Color( 0x050505 );
             scene2.background = new THREE.Color( '#eeeeee' );
             scene2.fog = new THREE.Fog( 0x050505, 2000, 3500 );
             scenes.push(scene2);
             renderer2 = new THREE.WebGLRenderer();
             renderer2.setSize( containerArr[1].offsetWidth, containerArr[1].offsetHeight );
-            // renderer.setSize( window.innerWidth, window.innerHeight );
             renderer2.setPixelRatio( window.devicePixelRatio );
             renderers.push(renderer2)
             camera2 = new THREE.PerspectiveCamera( 45, containerArr[1].offsetWidth / containerArr[1].offsetHeight, 1, 10000 );
@@ -66,29 +256,23 @@ function createScenes(){
             cameras.push(camera2)
             controlsArr.push(controls2);
             controls1.addEventListener( 'change', () => {
-
                 camera2.position.copy( camera1.position );
                 camera2.rotation.copy( camera1.rotation );
                 render();
-
             } );
             controls2.addEventListener( 'change', () => {
-
                 camera1.position.copy( camera2.position );
                 camera1.rotation.copy( camera2.rotation );
                 render();
-
             } );
             break;
         case 2:
             scene3 = new THREE.Scene();
-            //scene.background = new THREE.Color( 0x050505 );
             scene3.background = new THREE.Color( '#eeeeee' );
             scene3.fog = new THREE.Fog( 0x050505, 2000, 3500 );
             scenes.push(scene3);
             renderer3 = new THREE.WebGLRenderer();
             renderer3.setSize( containerArr[2].offsetWidth, containerArr[2].offsetHeight );
-            // renderer.setSize( window.innerWidth, window.innerHeight );
             renderer3.setPixelRatio( window.devicePixelRatio );
             renderers.push(renderer3)
             camera3 = new THREE.PerspectiveCamera( 45, containerArr[2].offsetWidth / containerArr[2].offsetHeight, 1, 10000 );
@@ -97,128 +281,203 @@ function createScenes(){
             cameras.push(camera3)
             controlsArr.push(controls3);
             controls1.addEventListener( 'change', () => {
-
                 camera3.position.copy( camera1.position );
                 camera3.rotation.copy( camera1.rotation );
                 render();
-
             } );
             controls2.addEventListener( 'change', () => {
-
                 camera3.position.copy( camera2.position );
                 camera3.rotation.copy( camera2.rotation );
                 render();
-
             } );
             controls3.addEventListener( 'change', () => {
-
                 camera1.position.copy( camera3.position );
                 camera1.rotation.copy( camera3.rotation );
                 render();
-
             } );
             controls3.addEventListener( 'change', () => {
-
                 camera2.position.copy( camera3.position );
                 camera2.rotation.copy( camera3.rotation );
                 render();
-
             } );
             break;
     }
 }
 
-export function initScene(_profiles, chemical, minVal, maxVal){
+export function init_scene(volume_config){
+    Object.keys(volume_settings.profile_data_loaded).filter(d=> volume_config.profiles.includes(d)).forEach(e=>{
+        if (!volume_settings.profile_data_loaded[e]){
+            volume_settings.data_loaded = false
+        }
+    })
 
-    if (_profiles.length > scenes.length){
-        createScenes()
+    if (volume_config.profiles.length > scenes.length){
+        create_scenes()
     }
-    if(_profiles.length < scenes.length){
-        containerArr[_profiles.length].removeChild(containerArr[_profiles.length].children[1]);
-        containerArr[_profiles.length].children[0].innerHTML = '';
+    if(volume_config.profiles.length < scenes.length){
+        containerArr[volume_config.profiles.length].removeChild(containerArr[volume_config.profiles.length].children[1]);
+        containerArr[volume_config.profiles.length].children[0].innerHTML = '';
         scenes.pop();
         cameras.pop();
         controlsArr.pop();
         renderers.pop();
     }
 
-    for (let i = 0; i < _profiles.length; i++){
-        initVolume2(_profiles[i], chemical, minVal, maxVal, scenes[i], containerArr[i], renderers[i], containerInfoArr[i]);
+
+    if(!volume_settings.data_loaded || volume_settings.resolution !== volume_config.resolution){
+        init_data(volume_config.resolution, volume_config.profiles).then(()=>{
+            for (let i = 0; i < volume_config.profiles.length; i++){
+                initVolume2(volume_config.profiles[i], volume_config, scenes[i], containerArr[i], renderers[i], containerInfoArr[i])//.then(()=>create_element_color_menu(config.dimensions));
+            }
+        })
+
+    }
+    else{
+        for (let i = 0; i < volume_config.profiles.length; i++){
+            initVolume2(volume_config.profiles[i], volume_config, scenes[i], containerArr[i], renderers[i], containerInfoArr[i])//.then(()=> create_element_color_menu(config.dimensions));
+        }
     }
 }
 
-export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _container, _renderer, _containerInfo) {
 
-    // _scene.remove.apply(_scene, _scene.children);
+export async function initVolume2(profile, volume_config, _scene, _container, _renderer, _containerInfo) {
+
+
+
+    let chemical = [...volume_config.dimensions]
+    let minVal = [...volume_config.filter_min[profile]]
+    let maxVal = [...volume_config.filter_max[profile]]
 
     _scene.clear();
 
-    let profile = _profile;
-
-    //let filePath = "./data/"+profile+"/50_"+chemical+"_Concentration_t.json"
-
     let valsArr = []
+    let depthActive = false
+    let minDepth
+    let maxDepth
+    let depthRange
 
-    for (const i of chemical){
-        let path = "./data/"+profile+"/50_"+i+"_Concentration_t.json"
-        let arr = await fetchData(path)
-        valsArr.push(arr)
+    if (chemical.includes('Depth')){
+        depthActive = true
+        minDepth = minVal[0]
+        maxDepth = maxVal[0]
+        chemical.splice(0, 1)
+        minVal.splice(0,1)
+        maxVal.splice(0,1)
+        depthRange = (d3.extent(volume_settings.concentration_data[profile]['y'])[1] +1) - d3.extent(volume_settings.concentration_data[profile]['y'])[0]
+        minDepth = depthRange - (minDepth * depthRange)
+        maxDepth = depthRange - (maxDepth * depthRange)
     }
 
-    _containerInfo.innerHTML = `${profile}: ${chemical} `
+    for (const i of chemical){
+        if (Object.keys(volume_settings.concentration_data[profile]).includes(`${i} Concentration`)){
+            valsArr.push(volume_settings.concentration_data[profile][`${i} Concentration`])
+        }
+        else{
+            let blank = new Array(Math.pow(volume_config.resolution, 3)).fill(-1)
+            valsArr.push(blank)
+        }
+    }
+    _containerInfo.innerHTML = `${profile}: ${volume_config.selected_element_color} `
 
-    const particles = 125000;
-
+    const particles = Math.pow(volume_config.resolution, 3)
     const geometry = new THREE.BufferGeometry();
-
     const positions = [];
     const colors = [];
 
-    for ( let i = 0; i < particles; i ++ ) {
-        if ((Math.pow(pos_x[i] - 25, 2) + Math.pow(pos_z[i] - 25, 2)) < (Math.pow(25, 2))) {
+    //let min =  volume_config.profile_dimension_min_max[profile][chemical[0]][0]
+    //let max =  volume_config.profile_dimension_min_max[profile][chemical[0]][1]
+    //let r = volume_config.profile_dimension_min_max[profile][chemical[0]][1] - volume_config.profile_dimension_min_max[profile][chemical[0]][0]
 
-            let p2 = new Array(chemical.length).fill(false)
-            let v2 = []
+    //console.log( (valsArr[0][0] * r) + min)
 
-            for (let j in chemical){
-                if (valsArr[j][i] >= minVal[j] && valsArr[j][i] <= maxVal[j]){
-                    // if ((Math.pow(pos_x[i] - 25, 2) + Math.pow(pos_z[i] - 25, 2)) < (Math.pow(25, 2))) {
-                    //     const x = (pos_x[i] - 25) * 5;
-                    //     const y = (pos_y[i] - 25) * 5;
-                    //     const z = (pos_z[i] - 25) * 5;
-                    //
-                    //     positions.push(x, y, z);
-                    //
-                    //     let color = new THREE.Color(getColor(valsArr[j][i]));
-                    //     colors.push(color.r, color.g, color.b);
-                    v2.push(valsArr[0][i])
-                    p2[j] = true
-                    //}
+    //let r2 = volume_config.dimension_min_max[chemical[0]][1] - volume_config.dimension_min_max[chemical[0]][0]
+
+    //console.log((( (valsArr[0][0] * r))/ (((volume_config.dimension_min_max[chemical[0]][1] - volume_config.dimension_min_max[chemical[0]][0])))*r2))
+
+
+
+    if (volume_config.selected_element_color !== 'soil_color'){
+        for ( let i = 0; i < particles; i ++ ) {
+            if ((Math.pow(volume_settings.concentration_data[profile]['x'][i] - (volume_config.resolution/2), 2) + Math.pow(volume_settings.concentration_data[profile]['z'][i] - (volume_config.resolution/2), 2)) < (Math.pow((volume_config.resolution/2), 2))) {
+                let p2 = new Array(chemical.length).fill(false)
+                let v2 = []
+                for (let j in chemical){
+                    if (volume_settings.concentration_data[profile][`${chemical[j]} Concentration`][i] >= minVal[j] && volume_settings.concentration_data[profile][`${chemical[j]} Concentration`][i] <= maxVal[j]){
+                    //if (valsArr[j][i] >= minVal[j] && valsArr[j][i] <= maxVal[j]){
+
+                        let r = volume_config.profile_dimension_min_max[profile][chemical[j]][1] - volume_config.profile_dimension_min_max[profile][chemical[j]][0]
+
+                        v2.push((( (valsArr[j][i] * r) )/ ((volume_config.dimension_min_max[chemical[j]][1] - volume_config.dimension_min_max[chemical[j]][0]))))
+
+                        p2[j] = true
+                    }
+
+                }
+                if (!p2.includes(false)){
+                    if (depthActive && volume_settings.concentration_data[profile]['y'][i] >= maxDepth && volume_settings.concentration_data[profile]['y'][i] <= minDepth){
+                        const x = (volume_settings.concentration_data[profile]['x'][i] - (volume_config.resolution/2)) * 5;
+                        const y = (volume_settings.concentration_data[profile]['y'][i] - (volume_config.resolution/2)) * 5;
+                        const z = (volume_settings.concentration_data[profile]['z'][i] - (volume_config.resolution/2)) * 5;
+                        positions.push(x, y, z);
+                        // let color = new THREE.Color(getColor((v2.reduce((a, b) => a + b)) / v2.length ));
+                        //let color = new THREE.Color(getColor(v2[chemical.indexOf(volume_config.selected_element_color)]));
+                        let color = new THREE.Color(getColor(volume_settings.concentration_data[profile][`${volume_config.selected_element_color} Concentration`][i]));
+                        // console.log(volume_settings.concentration_data[profile][`${volume_config.selected_element_color} Concentration`][i])
+
+                        colors.push(color.r, color.g, color.b);
+                    }
+                    else if(!depthActive){
+                        const x = (volume_settings.concentration_data[profile]['x'][i] - (volume_config.resolution/2)) * 5;
+                        const y = (volume_settings.concentration_data[profile]['y'][i] - (volume_config.resolution/2)) * 5;
+                        const z = (volume_settings.concentration_data[profile]['z'][i] - (volume_config.resolution/2)) * 5;
+                        positions.push(x, y, z);
+                        let color = new THREE.Color(getColor(volume_settings.concentration_data[profile][`${volume_config.selected_element_color} Concentration`][i]));
+                        colors.push(color.r, color.g, color.b);
+                    }
                 }
             }
-
-            if (!p2.includes(false)){
-                const x = (pos_x[i] - 25) * 5;
-                const y = (pos_y[i] - 25) * 5;
-                const z = (pos_z[i] - 25) * 5;
-
-                positions.push(x, y, z);
-
-                let color = new THREE.Color(getColor((v2.reduce((a, b) => a + b)) / v2.length ));
-                colors.push(color.r, color.g, color.b);
-            }
-
         }
     }
+    else if (volume_config.selected_element_color === 'soil_color'){
+        for ( let i = 0; i < particles; i ++ ) {
+            if ((Math.pow(volume_settings.concentration_data[profile]['x'][i] - (volume_config.resolution/2), 2) + Math.pow(volume_settings.concentration_data[profile]['z'][i] - (volume_config.resolution/2), 2)) < (Math.pow((volume_config.resolution/2), 2))) {
+                let p2 = new Array(chemical.length).fill(false)
+                let v2 = []
+                for (let j in chemical){
+                    if (valsArr[j][i] >= minVal[j] && valsArr[j][i] <= maxVal[j]){
+                        v2.push(valsArr[0][i])
+                        p2[j] = true
+                    }
 
+                }
+                if (!p2.includes(false)){
+                    if (depthActive && volume_settings.concentration_data[profile]['y'][i] >= maxDepth && volume_settings.concentration_data[profile]['y'][i] <= minDepth){
+                        const x = (volume_settings.concentration_data[profile]['x'][i] - (volume_config.resolution/2)) * 5;
+                        const y = (volume_settings.concentration_data[profile]['y'][i] - (volume_config.resolution/2)) * 5;
+                        const z = (volume_settings.concentration_data[profile]['z'][i] - (volume_config.resolution/2)) * 5;
+                        positions.push(x, y, z);
+                        let color = new THREE.Color(`rgb(${Math.round(volume_settings.color_data[profile]['R'][i]*255)}, ${Math.round(volume_settings.color_data[profile]['G'][i]*255)}, ${Math.round(volume_settings.color_data[profile]['B'][i]*255)})`)
+                        colors.push(color.r, color.g, color.b);
+                    }
+                    else if(!depthActive){
+                        const x = (volume_settings.concentration_data[profile]['x'][i] - (volume_config.resolution/2)) * 5;
+                        const y = (volume_settings.concentration_data[profile]['y'][i] - (volume_config.resolution/2)) * 5;
+                        const z = (volume_settings.concentration_data[profile]['z'][i] - (volume_config.resolution/2)) * 5;
+                        positions.push(x, y, z);
+                        let color = new THREE.Color(`rgb(${Math.round(volume_settings.color_data[profile]['R'][i]*255)}, ${Math.round(volume_settings.color_data[profile]['G'][i]*255)}, ${Math.round(volume_settings.color_data[profile]['B'][i]*255)})`)
+                        colors.push(color.r, color.g, color.b);
+
+                    }
+                }
+            }
+        }
+    }
 
     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
     geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
 
     geometry.computeBoundingSphere();
-
-    const material = new THREE.PointsMaterial( { size: 30, vertexColors: true } );
-
+    const material = new THREE.PointsMaterial( { size: 25, vertexColors: true } );
     points = new THREE.Points( geometry, material );
 
     let height = 255
@@ -226,9 +485,6 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
     let offset = -3
 
     const geometry_c = new THREE.CylinderGeometry( radius, radius, height, 32 );
-    //const material_c = new THREE.MeshBasicMaterial( {color: 0x000000} );
-    //const cylinder = new THREE.Mesh( geometry2, material2 );
-
     const wireframe = new THREE.WireframeGeometry( geometry_c );
 
     const wire = new THREE.LineSegments( wireframe );
@@ -238,11 +494,8 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
     wire.material.color = new THREE.Color(0x000000)
 
     wire.position.y = offset
-
     _scene.add( wire );
-
     _scene.add( points );
-    // _scene.add( cylinder );
 
 //GRADUATIONS
     const material_l = new THREE.LineBasicMaterial( { color: 0x000000 } );
@@ -259,14 +512,13 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
         points_g.push( new THREE.Vector3( radius+10, ((height) * (i / 10)) - (height/2)+ offset, 0 ) );
         const geometry_g = new THREE.BufferGeometry().setFromPoints( points_g );
         const line_g = new THREE.Line( geometry_g, material_l );
-
         _scene.add( line_g );
     }
 
     const loader = new THREE.FontLoader();
     const font = loader.load(
         // resource URL
-        '../lib/threejs/font.json',
+        './lib/threejs/font.json',
 
         // onLoad callback
         function ( font ) {
@@ -276,7 +528,7 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
 
         // onProgress callback
         function ( xhr ) {
-            console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+            //console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
         },
 
         // onError callback
@@ -306,44 +558,26 @@ export async function initVolume2(_profile, chemical, minVal, maxVal, _scene, _c
     }
 
     _container.appendChild( _renderer.domElement );
-
     animate();
 }
 
-function onWindowResize() {
-
-    camera.aspect = container.offsetWidth / container.offsetHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize( container.offsetWidth, container.offsetHeight );
-
-}
+// function onWindowResize() {
+//     camera.aspect = container.offsetWidth / container.offsetHeight;
+//     camera.updateProjectionMatrix();
+//     renderer.setSize( container.offsetWidth, container.offsetHeight );
+// }
 
 
 function animate() {
-
-
-    // setTimeout( function() {
-    //
-    //     requestAnimationFrame( animate );
-    //
-    //     render();
-    //
-    // }, 1000 / 10 );
-
     requestAnimationFrame( animate );
-
     render();
 }
 
 function render() {
-
     const time = Date.now() * 0.0001;
-
     for (let i = 0; i < renderers.length; i++){
         renderers[i].render(scenes[i], cameras[i])
     }
-
 }
 
 
