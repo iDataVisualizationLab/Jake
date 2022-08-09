@@ -1,11 +1,6 @@
 div#my_dataviz{
-    /*position: absolute;*/
-    /*display: inline-block;*/
     left: 0%;
     top: 20%;
-    /*width: 88vw;*/
-    /*z-index: 1;*/
-
 }
 
 select#framework{
@@ -13,16 +8,7 @@ select#framework{
     left: 1%;
     top: 2%;
     width: 4%;
-
 }
-
-/*select#packages{*/
-/*    position: absolute;*/
-/*    left: 5%;*/
-/*    top: 1%;*/
-/*    width: 8%;*/
-
-/*}*/
 
 .Profile, .Profile0, .Profile1,  .Profile2, .Profile3, .Color{
     position: relative;
@@ -31,7 +17,6 @@ select#framework{
     vertical-align: top;
     height:auto !important;
 }
-
 
 .locationProfile, .RCRA_8_metals, .Plant_essentials, .Pedology, .Other, .VolumeColor {
     display:none;

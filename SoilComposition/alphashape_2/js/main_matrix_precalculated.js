@@ -37,6 +37,86 @@ let intersection_area_object = {}
 let alphashape_data
 let default_alpha = 100
 
+let soilPackages = {RCRA_8_metals: ['As', 'Ba', 'Cd', 'Cr', 'Pb', 'Hg', 'Se', 'Ag'],
+    Plant_essentials: ['Ca', 'Cu', 'Fe', 'K', 'Mn', 'S', 'Zn'],
+    Pedology: ['RI', 'DI', 'SR', 'Rb'],
+    Other: ['Mg', 'Al', 'Si', 'P', 'Ti', 'V', 'Co', 'Ni', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Sn', 'W', 'Bi', 'Th', 'U', 'LE', 'Sb']};
+
+let defaultChecked = {
+    RCRA_8_metals: true,
+    Plant_essentials: true,
+    Pedology: false,
+    Other: false
+}
+
+function buildMenu(){
+
+    let count = 0
+    for (let i in soilPackages){
+        let temp_selection = document.querySelector(`.${i}`)
+
+        let newInputAll = document.createElement("input");
+        newInputAll.setAttribute("type", "checkbox");
+        newInputAll.setAttribute("id", `All_package${count}`);
+        newInputAll.checked = defaultChecked[i]
+        newInputAll.onclick = function () {
+            //checkAll(Object.keys(soilPackages).indexOf(i))
+        }
+
+        let newLabelAll = document.createElement("label")
+        newLabelAll.setAttribute("for", `All_package${count}`);
+        newLabelAll.innerHTML = 'All'
+
+        temp_selection.appendChild(newInputAll)
+        temp_selection.appendChild(newLabelAll)
+
+        for(let j in soilPackages[i]){
+            let newInput = document.createElement("input");
+            newInput.setAttribute("type", "checkbox");
+            newInput.setAttribute("id", soilPackages[i][j]);
+            newInput.checked = defaultChecked[i]
+            newInput.onclick = function (){
+                //verifyChecked()
+            }
+
+            let newLabel = document.createElement("label")
+            newLabel.setAttribute("for", soilPackages[i][j]);
+            newLabel.innerHTML = soilPackages[i][j]
+
+            temp_selection.appendChild(newInput)
+            temp_selection.appendChild(newLabel)
+        }
+        count++
+    }
+
+    let temp_selection = document.querySelector(`.locationProfile`)
+
+    Object.keys(profile_color).forEach(d=>{
+        let newInput = document.createElement("input");
+        newInput.setAttribute("type", "checkbox");
+        newInput.setAttribute("id", `loc${d}`);
+        newInput.onclick = function (){
+            //selectProfiles()
+        }
+
+        let newLabel = document.createElement("label")
+        newLabel.setAttribute("for", `loc${d}`);
+        newLabel.innerHTML = d
+
+        temp_selection.appendChild(newInput)
+        temp_selection.appendChild(newLabel)
+    })
+    document.querySelector('#locR').checked = true
+}
+
+buildMenu()
+
+
+
+
+
+
+
 function load_data(profiles){
     let promises = []
     profiles.forEach(d=>{promises.push(d3.csv(`data/${d}.csv`))})

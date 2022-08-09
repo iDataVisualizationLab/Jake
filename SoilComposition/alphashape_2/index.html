@@ -3,23 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <title>Alpha-Shape</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 <body>
-<div id="vis_div" style="padding-top: 5px">
-    <div style="display: flex; align-items: center; padding-left: 5px">
-        <div style="padding-right: 5px">
-            <span>Profiles:</span>
+
+
+<div id="vis_div">
+<!--    <div style="display: flex; align-items: center; padding-left: 5px">-->
+
+    <div id="toolbar">
+
+        <div class="Profile">
+            <div class="subLocationProfile"> Profiles </div>
+            <a href="#hide00" class="hide0" id="hide00">>></a>
+            <a href="#show00" class="show0" id="show00"><<</a>
+            <div class="locationProfile">
+            </div>
         </div>
-        <select name="profiles" id="profiles" onchange="change_data(value)">
-            <optgroup label="Profiles">
-            <option value='L R'>L, R</option>
-            <option value="L S">L, S</option>
-            <option value="R S">R, S</option>
-            <option value="L R S" selected>L, R, S</option>
-            </optgroup>
-        </select>
-        <div id="legend" style="padding-top: 2.5px"></div>
+
+<!--        <div class="Color">-->
+<!--            <div class="subColor"> Volume Color </div>-->
+<!--            <a href="#hide15" class="hide5" id="hide15">>></a>-->
+<!--            <a href="#show15" class="show5" id="show15"><<</a>-->
+<!--            <div class="VolumeColor">-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="Profile0">
+            <div class="subProfile0"> RCRA 8 metals </div>
+            <a href="#hide1" class="hide" id="hide1">>></a>
+            <a href="#show1" class="show" id="show1"><<</a>
+            <div class="RCRA_8_metals">
+            </div>
+        </div>
+
+        <div class="Profile1">
+            <div class="subProfile1"> Plant essentials </div>
+            <a href="#hide12" class="hide2" id="hide12">>></a>
+            <a href="#show12" class="show2" id="show12"><<</a>
+            <div class="Plant_essentials">
+            </div>
+        </div>
+
+        <div class="Profile2">
+            <div class="subProfile2"> Pedology </div>
+            <a href="#hide13" class="hide3" id="hide13">>></a>
+            <a href="#show13" class="show3" id="show13"><<</a>
+            <div class="Pedology">
+            </div>
+        </div>
+
+        <div class="Profile3">
+            <div class="subProfile3"> Other </div>
+            <a href="#hide14" class="hide4" id="hide14">>></a>
+            <a href="#show14" class="show4" id="show14"><<</a>
+            <div class="Other">
+            </div>
+        </div>
+
     </div>
+
+        <div id="header">
+            <div class="controls">
+        <span class="settings">
+        <!--        <button id="hide-ticks">Hide Ticks</button>-->
+        <!--        <button id="show-ticks" disabled="disabled">Show Ticks</button>-->
+        <!--        <button id="light-theme" disabled="disabled">Light</button>-->
+        </span>
+            </div>
+            <div style="clear:both;"></div>
+        </div>
+
+
+
+
+
+
+
+<!--        <div style="padding-right: 5px">-->
+<!--            <span>Profiles:</span>-->
+<!--        </div>-->
+<!--        <select name="profiles" id="profiles" onchange="change_data(value)">-->
+<!--            <optgroup label="Profiles">-->
+<!--            <option value='L R'>L, R</option>-->
+<!--            <option value="L S">L, S</option>-->
+<!--            <option value="R S">R, S</option>-->
+<!--            <option value="L R S" selected>L, R, S</option>-->
+<!--            </optgroup>-->
+<!--        </select>-->
+<!--        <div id="legend" style="padding-top: 2.5px"></div>-->
+<!--    </div>-->
     <div style="display: flex; padding-left: 5px">
         <div id="sliders" style="padding-top: 15px"></div>
         <div id="corr_sliders" style="padding-top: 15px; padding-left: 50px"></div>

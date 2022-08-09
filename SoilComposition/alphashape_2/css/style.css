@@ -1,0 +1,203 @@
+/*div#my_dataviz{*/
+/*    left: 0%;*/
+/*    top: 20%;*/
+/*}*/
+
+/*select#framework{*/
+/*    position: absolute;*/
+/*    left: 1%;*/
+/*    top: 2%;*/
+/*    width: 4%;*/
+/*}*/
+
+#toolbar{
+    transform: translate(0px, 15px);
+}
+
+.Profile, .Profile0, .Profile1,  .Profile2, .Profile3{
+    position: relative;
+    left: 1%;
+    top: 2%;
+    vertical-align: top;
+    height:auto !important;
+}
+
+.locationProfile, .RCRA_8_metals, .Plant_essentials, .Pedology, .Other {
+    display:none;
+    height:auto;
+    margin:0;
+    float: left;
+}
+.show0, .show, .show2, .show3, .show4 {
+    display: none;
+}
+.hide0:target + .show0, .hide:target + .show, .hide2:target + .show2, .hide3:target + .show3, .hide4:target + .show4 {
+    display: inline;
+}
+.hide0:target, .hide:target, .hide2:target, .hide3:target, .hide4:target {
+    display: none;
+}
+.hide0:target ~ .locationProfile, .hide:target ~ .RCRA_8_metals, .hide2:target ~ .Plant_essentials, .hide3:target ~ .Pedology, .hide4:target ~ .Other {
+    display:inline;
+}
+
+/*style the (+) and (-) */
+.hide, .show, .hide2, .show2, .hide3, .show3, .hide4, .show4{
+    width: auto;
+    height: auto;
+    /*border-radius: 30px;*/
+    font-size: 14px;
+    color: indianred;
+    text-shadow: 0 1px 0 #666;
+    text-align: right;
+    text-decoration: none;
+    /*box-shadow: 1px 1px 2px #000;*/
+    /*background: rgba(0, 0, 0, 0.15);*/
+    opacity: .95;
+    margin-right: 0;
+    float: left;
+    margin-bottom: 25px;
+}
+
+.hide:hover, .show:hover, .hide2:hover, .show2:hover, .hide3:hover, .show3:hover, .hide4:hover, .show4:hover {
+    color: indianred;
+    text-shadow: 0 2px 1px #666;
+    text-decoration: none;
+    /*box-shadow: 0 0 4px #222 inset;*/
+    opacity: 1;
+    margin-bottom: 25px;
+}
+
+.locationProfile input, .RCRA_8_metals input, .Plant_essentials input, .Pedology input, .Other input{
+    height:auto;
+    margin-top: 4px;
+}
+
+.locationProfile label, .RCRA_8_metals label, .Plant_essentials label, .Pedology label, .Other label{
+    height:auto;
+    /*top: 100%;*/
+    /*margin-bottom: 2px;*/
+    font-size: 16px;
+}
+
+
+.subProfile0, .subProfile1, .subProfile2, .subProfile3 {
+    float: left;
+    height: auto;
+    line-height: 20px;
+    padding-left: 20px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: indianred;
+    font-size: 14px;
+}
+
+
+.subLocationProfile{
+    float: left;
+    height: auto;
+    line-height: 20px;
+    padding-left: 20px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: dodgerblue;
+    font-size: 14px;
+}
+
+.hide0, .show0{
+    width: auto;
+    height: auto;
+    /*border-radius: 30px;*/
+    font-size: 14px;
+    color: dodgerblue;
+    text-shadow: 0 1px 0 #666;
+    text-align: right;
+    text-decoration: none;
+    /*box-shadow: 1px 1px 2px #000;*/
+    /*background: rgba(0, 0, 0, 0.15);*/
+    opacity: .95;
+    margin-right: 0;
+    float: left;
+    margin-bottom: 25px;
+}
+
+.hide0:hover, .show0:hover{
+    color: dodgerblue;
+    text-shadow: 0 2px 1px #666;
+    text-decoration: none;
+    /*box-shadow: 0 0 4px #222 inset;*/
+    opacity: 1;
+    margin-bottom: 25px;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    overflow: auto;
+}
+body {
+    font-family: Ubuntu, Tahoma, Helvetica, sans-serif;
+    font-size: 16px;
+    line-height: 1.4em;
+    background: #f7f7f7;
+    color: #404040;
+}
+
+#header {
+    border-bottom: 1px solid rgba(100,100,100,0.35);
+    background: #e2e2e2;
+    padding: 6px 24px 4px;
+    line-height: 24px;
+}
+.dark #header {
+    background: #040404;
+    color: #f3f3f3;
+}
+#header h1 {
+    display: inline-block;
+    margin: 0px 14px 0 0;
+}
+#header button {
+    vertical-align: top;
+}
+.controls {
+    float: right;
+    height: 24px;
+    line-height: 24px;
+}
+
+/* Scrollbars */
+
+/*::-webkit-scrollbar {*/
+/*    width: 10px;*/
+/*    height: 10px;*/
+/*}*/
+
+/*::-webkit-scrollbar-track {*/
+/*    background: #ddd;*/
+/*    border-radius: 12px;*/
+/*}*/
+
+/*::-webkit-scrollbar-thumb {*/
+/*    background: #b5b5b5;*/
+/*    border-radius: 12px;*/
+/*}*/
+/*.dark ::-webkit-scrollbar-track {*/
+/*    background: #222;*/
+/*}*/
+/*.dark ::-webkit-scrollbar-thumb {*/
+/*    background: #444;*/
+/*}*/
+
+
+
+
+
+
+
+
+
+
+
