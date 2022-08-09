@@ -8,24 +8,12 @@
     <link type="text/css" rel="stylesheet" href="css/volume.css">
 </head>
 <body>
-<script type="module">
-    import * as calc_2 from './js/calc.js';
-    window._selectProfiles= function (){
-        calc_2.selectProfiles()
-    }
-</script>
 
 <div class="Profile">
     <div class="subLocationProfile"> Profiles </div>
     <a href="#hide00" class="hide0" id="hide00">>></a>
     <a href="#show00" class="show0" id="show00"><<</a>
     <div class="locationProfile">
-        <input type="checkbox" id="R" name="R" checked onclick="_selectProfiles()">
-        <label for="R">R</label>
-        <input type="checkbox" id="locS" name="S"  onclick="_selectProfiles()">
-        <label for="locS">S</label>
-        <input type="checkbox" id="L" name="L" onclick="_selectProfiles()">
-        <label for="L">L</label>
     </div>
 </div>
 
@@ -69,9 +57,6 @@
     </div>
 </div>
 
-
-
-
 <div id="header">
     <div class="controls">
         <span class="settings">
@@ -113,19 +98,15 @@
 </script>
 <script src="lib/d3.v2.js"></script>
 <script src="lib/lasso.js"></script>
-<script src="js/PCA.js"></script>
-<script src="https://underscorejs.org/underscore.js"></script>
-<script src="js/colors.js"></script>
-<script src="js/loadData.js"></script>
-<script type="module" src="js/calc.js"></script>
+<script src="lib/underscore.js"></script>
 <script src="lib/threejs/three.js"></script>
 <script src="lib/threejs/OrbitControls.js"></script>
-
+<script src="js/loadData.js"></script>
+<script src="js/PCA.js"></script>
+<script src="js/colors.js"></script>
+<script type="module" src="js/calc.js"></script>
 <script type="module" src="js/parallel.js"></script>
 <script type="module" src="js/volume.js"></script>
-
-
-
 
 </body>
 </html>

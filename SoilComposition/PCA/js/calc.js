@@ -1,7 +1,4 @@
 import * as parallel from "./parallel.js";
-//import {buildColorMenu} from "./volume.js";
-
-let profiles = ["R", "S", "L"];
 
 let soilPackages = {RCRA_8_metals: ['As', 'Ba', 'Cd', 'Cr', 'Pb', 'Hg', 'Se', 'Ag'],
     Plant_essentials: ['Ca', 'Cu', 'Fe', 'K', 'Mn', 'S', 'Zn'],
@@ -15,7 +12,7 @@ let defaultChecked = {
     Other: false
 }
 
-var graphicPCA={margin: {top: 30, right: 10, bottom: 50, left: 50},
+const graphicPCA={margin: {top: 30, right: 10, bottom: 50, left: 50},
     width : function(){return 700 - this.margin.left - this.margin.right},
     height : function(){return 550 - this.margin.top - this.margin.bottom},
     animationTime:1000
@@ -30,7 +27,7 @@ function buildMenu(){
 
     let count = 0
     for (let i in soilPackages){
-        let sel = document.querySelector(`.${i}`)
+        let temp_selection = document.querySelector(`.${i}`)
 
         let newInputAll = document.createElement("input");
         newInputAll.setAttribute("type", "checkbox");
@@ -44,8 +41,8 @@ function buildMenu(){
         newLabelAll.setAttribute("for", `All_package${count}`);
         newLabelAll.innerHTML = 'All'
 
-        sel.appendChild(newInputAll)
-        sel.appendChild(newLabelAll)
+        temp_selection.appendChild(newInputAll)
+        temp_selection.appendChild(newLabelAll)
 
         for(let j in soilPackages[i]){
             let newInput = document.createElement("input");
@@ -60,13 +57,32 @@ function buildMenu(){
             newLabel.setAttribute("for", soilPackages[i][j]);
             newLabel.innerHTML = soilPackages[i][j]
 
-            sel.appendChild(newInput)
-            sel.appendChild(newLabel)
+            temp_selection.appendChild(newInput)
+            temp_selection.appendChild(newLabel)
         }
         count++
     }
-    //buildColorMenu()
+
+    let temp_selection = document.querySelector(`.locationProfile`)
+
+    Object.keys(profile_color).forEach(d=>{
+        let newInput = document.createElement("input");
+        newInput.setAttribute("type", "checkbox");
+        newInput.setAttribute("id", `loc${d}`);
+        newInput.onclick = function (){
+            selectProfiles()
+        }
+
+        let newLabel = document.createElement("label")
+        newLabel.setAttribute("for", `loc${d}`);
+        newLabel.innerHTML = d
+
+        temp_selection.appendChild(newInput)
+        temp_selection.appendChild(newLabel)
+    })
+    document.querySelector('#locR').checked = true
 }
+
 buildMenu()
 init_pca_plot();
 
@@ -80,8 +96,6 @@ export function checkAll(pkg){
     else{
         for (let i in soilPackages[packages[pkg]]){
             if(document.getElementById(soilPackages[Object.keys(soilPackages)[pkg]][i]).disabled == false){
-            //if(document.getElementById(soilPackages[packages[pkg]][i]).disabled == false){
-                //document.getElementById(soilPackages[packages[pkg]][i]).checked = true;
                 document.getElementById(soilPackages[Object.keys(soilPackages)[pkg]][i]).checked = true;
             }
         }
@@ -142,7 +156,7 @@ export function selectProfiles(){
 
     let profiles = ["R", "S", "L"];
 
-    let locationProfies = ["R", "locS", "L"];
+    let locationProfies = ["locR", "locS", "locL"];
     let selectedProfies = [];
     locationProfies.forEach(function (d){
         if(document.getElementById(d).checked == true){
