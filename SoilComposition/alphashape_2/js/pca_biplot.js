@@ -1,123 +1,7 @@
-import * as parallel from "./parallel.js";
-
-let soilPackages = {RCRA_8_metals: ['As', 'Ba', 'Cd', 'Cr', 'Pb', 'Hg', 'Se', 'Ag'],
-    Plant_essentials: ['Ca', 'Cu', 'Fe', 'K', 'Mn', 'S', 'Zn'],
-    Pedology: ['RI', 'DI', 'SR', 'Rb'],
-    Other: ['Mg', 'Al', 'Si', 'P', 'Ti', 'V', 'Co', 'Ni', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Sn', 'W', 'Bi', 'Th', 'U', 'LE', 'Sb']};
-
-let defaultChecked = {
-    RCRA_8_metals: true,
-    Plant_essentials: true,
-    Pedology: false,
-    Other: false
-}
-
 const graphicPCA={margin: {top: 30, right: 10, bottom: 50, left: 50},
     width : function(){return 700 - this.margin.left - this.margin.right},
     height : function(){return 550 - this.margin.top - this.margin.bottom},
     animationTime:1000
-}
-
-let profile_color = {
-    "R": "#8F7C00",
-    "S": "#C20088",
-    "L": "#00998F"
-}
-
-function buildMenu(){
-
-    let count = 0
-    for (let i in soilPackages){
-        let temp_selection = document.querySelector(`.${i}`)
-
-        let newInputAll = document.createElement("input");
-        newInputAll.setAttribute("type", "checkbox");
-        newInputAll.setAttribute("id", `All_package${count}`);
-        newInputAll.checked = defaultChecked[i]
-        newInputAll.onclick = function () {
-            checkAll(Object.keys(soilPackages).indexOf(i))
-        }
-
-        let newLabelAll = document.createElement("label")
-        newLabelAll.setAttribute("for", `All_package${count}`);
-        newLabelAll.innerHTML = 'All'
-
-        temp_selection.appendChild(newInputAll)
-        temp_selection.appendChild(newLabelAll)
-
-        for(let j in soilPackages[i]){
-            let newInput = document.createElement("input");
-            newInput.setAttribute("type", "checkbox");
-            newInput.setAttribute("id", soilPackages[i][j]);
-            newInput.checked = defaultChecked[i]
-            newInput.onclick = function (){
-                verifyChecked()
-            }
-
-            let newLabel = document.createElement("label")
-            newLabel.setAttribute("for", soilPackages[i][j]);
-            newLabel.innerHTML = soilPackages[i][j]
-
-            temp_selection.appendChild(newInput)
-            temp_selection.appendChild(newLabel)
-        }
-        count++
-    }
-
-    let temp_selection = document.querySelector(`.locationProfile`)
-
-    Object.keys(profile_color).forEach(d=>{
-        let newInput = document.createElement("input");
-        newInput.setAttribute("type", "checkbox");
-        newInput.setAttribute("id", `loc${d}`);
-        newInput.onclick = function (){
-            selectProfiles()
-        }
-
-        let newLabel = document.createElement("label")
-        newLabel.setAttribute("for", `loc${d}`);
-        newLabel.innerHTML = d
-
-        temp_selection.appendChild(newInput)
-        temp_selection.appendChild(newLabel)
-    })
-    document.querySelector('#locR').checked = true
-}
-
-buildMenu()
-init_pca_plot();
-
-export function checkAll(pkg){
-    console.log('All_package'+(pkg))
-    if(document.getElementById('All_package'+(pkg)).checked == false){
-        for (let i in soilPackages[Object.keys(soilPackages)[pkg]]){
-            document.getElementById(soilPackages[Object.keys(soilPackages)[pkg]][i]).checked = false;
-        }
-    }
-    else{
-        for (let i in soilPackages[packages[pkg]]){
-            if(document.getElementById(soilPackages[Object.keys(soilPackages)[pkg]][i]).disabled == false){
-                document.getElementById(soilPackages[Object.keys(soilPackages)[pkg]][i]).checked = true;
-            }
-        }
-    }
-    selectProfiles()
-}
-
-
-export function verifyChecked(){
-    for (let i  in Object.keys(soilPackages)){
-        let flag = false;
-        for (let j in soilPackages[Object.keys(soilPackages)[i]]){
-            if (document.getElementById(soilPackages[Object.keys(soilPackages)[i]][j]).disabled == false && document.getElementById(soilPackages[Object.keys(soilPackages)[i]][j]).checked == false){
-                flag = true;
-                document.getElementById('All_package'+(i)).checked = false;
-                break;
-            }
-        }
-        if (!flag){document.getElementById('All_package'+(i)).checked = true;}
-    }
-    selectProfiles()
 }
 
 function init_pca_plot(){
@@ -126,23 +10,25 @@ function init_pca_plot(){
         width = graphicPCA.width(),
         height = graphicPCA.height();
 
-    var svg = d3v5.select("#my_dataviz").select('svg g.pcachart');
+    var svg = d3v5.select(".plots").select('g.pcachart');
 
     if (svg.empty()) {
         // append the svg object to the body of the page
-        var svg = d3v5.select("#my_dataviz")
-            .append("svg")
+        var svg = d3v5.select(".plots")
+            .append("g")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-            .style('position','unset')
+
+            .attr("transform", `translate(${width * 1.25}, 0 )`)
+            //.style('position','unset')
             .attr('class', 'pca_svg')
             .append("g")
             .attr('class','pcachart')
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("transform", `translate(${margin.left}, ${margin.top})`)
 
         svg.append("g")
             .attr('class','xaxis')
-            .attr("transform", "translate(0," + height + ")")
+            .attr("transform", `translate(0, ${height} )`)
 
         // Add Y axis
         svg.append("g")
@@ -152,25 +38,7 @@ function init_pca_plot(){
     }
 }
 
-get_dimensions_3(["R"]);
-export function selectProfiles(){
-
-    let profiles = ["R", "S", "L"];
-
-    let locationProfiles = ["locR", "locS", "locL"];
-    let selectedProfiles = [];
-    locationProfiles.forEach(function (d){
-        if(document.getElementById(d).checked == true){
-            selectedProfiles.push(d);
-        }
-    })
-    let selectedIndexes = []
-    selectedProfiles.forEach(d => selectedIndexes.push(profiles[locationProfiles.indexOf(d)]))
-
-    get_dimensions_3(selectedIndexes);
-}
-
-export async function get_dimensions_3(_profiles){
+async function get_dimensions_3(_profiles){
 
     let dimensions = new Object()
 
@@ -463,13 +331,13 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
     //     //.attr("transform", "rotate(-90)")
     //     .text("PC2");
 
-
-
-    var lassoInstance = lasso()
-        .on('end', handleLassoEnd)
-        .on('start', handleLassoStart);
-
-    svg.call(lassoInstance);
+    //
+    //
+    // var lassoInstance = lasso()
+    //     .on('end', handleLassoEnd)
+    //     .on('start', handleLassoStart);
+    //
+    // svg.call(lassoInstance);
 
     var dot_groups = svg.selectAll(".dot_group")
         .data(data_2, d=>d.id)
@@ -494,8 +362,8 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
                     .attr("display", "none");
 
                 gdot.on("mouseover", function (){
-                        d3v5.select(this).selectAll("text").attr("display", null);
-                    })
+                    d3v5.select(this).selectAll("text").attr("display", null);
+                })
                     .on("mouseleave", function (){
                         d3v5.select(this).selectAll("text").attr("display", "none");
                     });
@@ -512,45 +380,44 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
 
             exit => exit
                 .call(exit => exit.remove())
-                    //.remove())
+            //.remove())
         );
 
 
-    d3v5.selectAll(".dot_group").on("contextmenu", function (d, i) {
-        d3v5.event.preventDefault();
-        d["hide"] = true;
-        draw_pca_plot_3(_profiles, inputs, data_2, dims_3, dim_ids, true);
+    // d3v5.selectAll(".dot_group").on("contextmenu", function (d, i) {
+    //     d3v5.event.preventDefault();
+    //     d["hide"] = true;
+    //     draw_pca_plot_3(_profiles, inputs, data_2, dims_3, dim_ids, true);
+    // });
 
-    });
-
-    let removedData = [];
-
-    data_2.forEach(d => d.hide ? removedData.push(d) : null)
-
-    let header = document.getElementById("removedHeader");
-    if (removedData.length != 0){
-        header.style.display = null;
-    }else{
-        header.style.display = "none";
-    }
-
-    var table = d3.select("#removed")
-        .html("")
-        .selectAll(".row")
-        .data(removedData)
-        .enter().append("div")
-        .on("click", function (d, i) {
-            d["hide"] = false
-            draw_pca_plot_3(_profiles, inputs, data_2, dims_3, dim_ids, true);
-            })
-
-    table
-        .append("span")
-        .attr("class", "color-block")
-
-    table
-        .append("span")
-        .text(function(d) { return d.id; })
+    // let removedData = [];
+    //
+    // data_2.forEach(d => d.hide ? removedData.push(d) : null)
+    //
+    // let header = document.getElementById("removedHeader");
+    // if (removedData.length != 0){
+    //     header.style.display = null;
+    // }else{
+    //     header.style.display = "none";
+    // }
+    //
+    // var table = d3.select("#removed")
+    //     .html("")
+    //     .selectAll(".row")
+    //     .data(removedData)
+    //     .enter().append("div")
+    //     .on("click", function (d, i) {
+    //         d["hide"] = false
+    //         draw_pca_plot_3(_profiles, inputs, data_2, dims_3, dim_ids, true);
+    //     })
+    //
+    // table
+    //     .append("span")
+    //     .attr("class", "color-block")
+    //
+    // table
+    //     .append("span")
+    //     .text(function(d) { return d.id; })
 
     let defs = svg.select("defs");
 
@@ -611,7 +478,7 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
         d["y"]* multiplyBrands > d3v5.max(y_list) ||
         d["y"]* multiplyBrands < d3v5.min(y_list)
         ){
-            multiplyBrands = multiplyBrands * .99;
+        multiplyBrands = multiplyBrands * .99;
     }})
 
     var line_groups = svg.selectAll(".line_group")
@@ -676,8 +543,6 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
 
         )
 
-    parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data_2, [], profile_dims);
-
     function build_legend(profiles){
         if (d3.select('.legend')){
             d3.select('.legend').remove()
@@ -708,48 +573,4 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
         }
     }
     build_legend(_profiles)
-
-
-
-    // when a selected.length === data.length is completed, filter to the points within the lasso polygon
-    function handleLassoEnd(lassoPolygon) {
-        var selectedPoints = dot_groups.filter(function (d) {
-            var _x = +x(d["PC1"]);
-            var _y = +y(d["PC2"]);
-            return d3v5.polygonContains(lassoPolygon, [_x, _y]);
-        });
-
-        updateSelected(selectedPoints);
-    }
-
-    function updateSelected(selected){
-        d3.selectAll('.dot_group').select('circle')
-            .style("opacity", 1);
-        if (selected['_groups']){
-            d3.selectAll('.dot_group').select('circle')
-                .style("opacity", .25);
-            let sel = []
-            selected['_groups'][0].forEach(d =>{
-                d3.select(d).select('circle').style("opacity", 1);
-                d.__data__["selected"] = true;
-                sel.push(d.__data__.id)
-            })
-            if (!sel.length){
-                d3.selectAll('.dot_group').select('circle')
-                    .each(d => d["selected"] = false)
-                    .style("opacity", 1);
-            }
-            parallel.buildParallelChart(_profiles, dim_list, sorted_dims, data_2, sel, profile_dims);
-
-            console.log(data_2)
-        }
-    }
-
-// reset selected points when starting a new polygon
-    function handleLassoStart(lassoPolygon) {
-        updateSelected([]);
-    }
-
 }
-
-

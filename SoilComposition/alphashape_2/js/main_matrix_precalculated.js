@@ -39,7 +39,8 @@ let default_alpha = 100
 
 let soilPackages = {RCRA_8_metals: ['As', 'Ba', 'Cd', 'Cr', 'Pb', 'Hg', 'Se', 'Ag'],
     Plant_essentials: ['Ca', 'Cu', 'Fe', 'K', 'Mn', 'S', 'Zn'],
-    Pedology: ['RI', 'DI', 'SR', 'Rb'],
+    // Pedology: ['RI', 'DI', 'SR', 'Rb'],
+    Pedology: ['Rb'],
     Other: ['Mg', 'Al', 'Si', 'P', 'Ti', 'V', 'Co', 'Ni', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Sn', 'W', 'Bi', 'Th', 'U', 'LE', 'Sb']};
 
 let defaultChecked = {
@@ -49,7 +50,7 @@ let defaultChecked = {
     Other: false
 }
 
-function buildMenu(){
+async function buildMenu(){
 
     let count = 0
     for (let i in soilPackages){
@@ -60,7 +61,7 @@ function buildMenu(){
         newInputAll.setAttribute("id", `All_package${count}`);
         newInputAll.checked = defaultChecked[i]
         newInputAll.onclick = function () {
-            //checkAll(Object.keys(soilPackages).indexOf(i))
+            checkAll(Object.keys(soilPackages).indexOf(i))
         }
 
         let newLabelAll = document.createElement("label")
@@ -76,7 +77,7 @@ function buildMenu(){
             newInput.setAttribute("id", soilPackages[i][j]);
             newInput.checked = defaultChecked[i]
             newInput.onclick = function (){
-                //verifyChecked()
+                verifyChecked()
             }
 
             let newLabel = document.createElement("label")
@@ -96,8 +97,9 @@ function buildMenu(){
         newInput.setAttribute("type", "checkbox");
         newInput.setAttribute("id", `loc${d}`);
         newInput.onclick = function (){
-            //selectProfiles()
+            selectProfiles()
         }
+        newInput.checked = true
 
         let newLabel = document.createElement("label")
         newLabel.setAttribute("for", `loc${d}`);
@@ -106,16 +108,63 @@ function buildMenu(){
         temp_selection.appendChild(newInput)
         temp_selection.appendChild(newLabel)
     })
-    document.querySelector('#locR').checked = true
+    //document.querySelector('#locR').checked = true
 }
 
-buildMenu()
+buildMenu().then(()=> load_data(profiles))
 
 
 
+function checkAll(pkg){
+    console.log('All_package'+(pkg))
+    if(document.getElementById('All_package'+(pkg)).checked == false){
+        for (let i in soilPackages[Object.keys(soilPackages)[pkg]]){
+            document.getElementById(soilPackages[Object.keys(soilPackages)[pkg]][i]).checked = false;
+        }
+    }
+    else{
+        for (let i in soilPackages[Object.keys(soilPackages)[pkg]]){
+            if(document.getElementById(soilPackages[Object.keys(soilPackages)[pkg]][i]).disabled == false){
+                document.getElementById(soilPackages[Object.keys(soilPackages)[pkg]][i]).checked = true;
+            }
+        }
+    }
+    selectProfiles()
+}
 
 
+function verifyChecked(){
+    for (let i  in Object.keys(soilPackages)){
+        let flag = false;
+        for (let j in soilPackages[Object.keys(soilPackages)[i]]){
+            if (document.getElementById(soilPackages[Object.keys(soilPackages)[i]][j]).disabled == false && document.getElementById(soilPackages[Object.keys(soilPackages)[i]][j]).checked == false){
+                flag = true;
+                document.getElementById('All_package'+(i)).checked = false;
+                break;
+            }
+        }
+        if (!flag){document.getElementById('All_package'+(i)).checked = true;}
+    }
+    selectProfiles()
+}
 
+function selectProfiles(){
+
+    let profiles = ["R", "S", "L"];
+
+    let locationProfiles = ["locR", "locS", "locL"];
+    let selectedProfiles = [];
+    locationProfiles.forEach(function (d){
+        if(document.getElementById(d).checked == true){
+            selectedProfiles.push(d);
+        }
+    })
+    let selectedIndexes = []
+    selectedProfiles.forEach(d => selectedIndexes.push(profiles[locationProfiles.indexOf(d)]))
+
+    get_dimensions_3(selectedIndexes);
+    load_data(selectedIndexes)
+}
 
 function load_data(profiles){
     let promises = []
@@ -124,7 +173,7 @@ function load_data(profiles){
     Promise.all(promises
     ).then(function(files) {
         process_data(files,profiles, [])
-        profile_correlation_sliders(profiles)
+        //profile_correlation_sliders(profiles)
     })
 
     d3.json(`data/${profiles.sort().join('-')}_calculations.json`).then(d => {
@@ -144,6 +193,7 @@ function change_data(d){
     remove_correlation_sliders()
     load_data(d.split(' ').sort())
 }
+
 function process_data(data, profiles, ordering){
 
     let properties = []
@@ -157,7 +207,7 @@ function process_data(data, profiles, ordering){
                 d.includes("Concentration") ? elements[i].push(d.split(" ")[0]) : null
             })
         }
-        elements[0].forEach(d=> properties.push(`${d} Concentration`))
+        elements[0].forEach(d=> document.querySelector(`#${d}`).checked ? properties.push(`${d} Concentration`) : null)
     }
     else{
         ordering.forEach(d=> properties.push(`${d} Concentration`))
@@ -177,6 +227,8 @@ function process_data(data, profiles, ordering){
         filtered_data = filtered_data.concat(profile_data)
     }
     plot_raw(profiles, filtered_data, properties)
+    init_pca_plot();
+    get_dimensions_3(profiles)
 }
 
 function find_max_dist(delaunay){
@@ -219,6 +271,7 @@ async function plot_raw(profiles, filtered_data, elements) {
     });
 
     var svg = d3.select("#vis_div").append("svg")
+
         .attr("class", "plots")
         .attr("width", size * n + (padding*2) + margin.left + margin.right)
         .attr("height", size * n + (padding*2) + margin.top + margin.bottom)
@@ -471,6 +524,8 @@ function draw_intersection(polygon_points, combination) {
 
 function draw_alphahulls(paths, combination){
 
+    console.log(paths)
+
     d3.selectAll(`.a-shape.${combination}`).remove()
     Object.keys(paths).forEach(d=>{
         let svg = d3.select(`.cell.${combination}`)
@@ -579,6 +634,6 @@ function calculate_correlation(profiles, data){
     correlation_object = corr
 }
 
-load_data(profiles)
+
 make_slider('s_1','sliders', 10,100, default_alpha,5,200, false, 'Alpha', display_precalculated_data, false , 0)
 create_legend(profiles)

@@ -168,6 +168,14 @@ body {
     line-height: 24px;
 }
 
+#pca_div {
+    position: static;
+    right: 1vw;
+}
+#vis_div {
+    top: 2vh;
+}
+
 /* Scrollbars */
 
 /*::-webkit-scrollbar {*/

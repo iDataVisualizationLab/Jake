@@ -9,7 +9,6 @@
 
 
 <div id="vis_div">
-<!--    <div style="display: flex; align-items: center; padding-left: 5px">-->
 
     <div id="toolbar">
 
@@ -20,14 +19,6 @@
             <div class="locationProfile">
             </div>
         </div>
-
-<!--        <div class="Color">-->
-<!--            <div class="subColor"> Volume Color </div>-->
-<!--            <a href="#hide15" class="hide5" id="hide15">>></a>-->
-<!--            <a href="#show15" class="show5" id="show15"><<</a>-->
-<!--            <div class="VolumeColor">-->
-<!--            </div>-->
-<!--        </div>-->
 
         <div class="Profile0">
             <div class="subProfile0"> RCRA 8 metals </div>
@@ -94,10 +85,25 @@
 <!--        <div id="legend" style="padding-top: 2.5px"></div>-->
 <!--    </div>-->
     <div style="display: flex; padding-left: 5px">
+        <div id="pca_div">
+            <div id="my_dataviz"></div>
+            <div class="third">
+                <h3 id="removedHeader" style="display: none ">Removed Data</h3>
+                <p id="removed">
+                </p>
+            </div>
+        </div>
         <div id="sliders" style="padding-top: 15px"></div>
         <div id="corr_sliders" style="padding-top: 15px; padding-left: 50px"></div>
     </div>
 </div>
+
+
+<script src="lib/d3.v5.min.js"></script>
+<script>
+    d3v5 = d3
+    window.d3 = null
+</script>
 
 <script src="lib/d3v7.js"></script>
 <script src="js/intersection.js"></script>
@@ -108,6 +114,8 @@
 <!--<script src="js/main_matrix_download_data_2-profiles.js"></script>-->
 <!--<script src="js/main_matrix_download_data_3-profiles.js"></script>-->
 
+<script src="js/PCA.js"></script>
+<script src="js/pca_biplot.js"></script>
 <script src="js/main_matrix_precalculated.js"></script>
 
 </body>
