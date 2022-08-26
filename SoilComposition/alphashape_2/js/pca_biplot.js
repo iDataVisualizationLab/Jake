@@ -18,8 +18,7 @@ function init_pca_plot(){
             .append("g")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-
-            .attr("transform", `translate(${width * 1.125}, 0 )`)
+            .attr("transform", `translate(${width * 1.05}, 0 )`)
             //.style('position','unset')
             .attr('class', 'pca_svg')
             .append("g")

@@ -1,4 +1,4 @@
-let margin = {top:30, bottom:0, left:30, right:0}
+let margin = {top:0, bottom:0, left:30, right:0}
 
 let width = 960,
     size = 120,
@@ -257,16 +257,6 @@ function find_max_dist(delaunay){
 }
 
 async function plot_raw(profiles, filtered_data, elements) {
-    if (d3.select('.plots')){
-
-        let save_this = d3.select('.plots').selectAll('g').filter(".pcachart")
-
-
-        //let selected_nodes = (d3.select('.plots').selectAll('g').nodes().filter(d=> d != d3.select('.plots').selectAll('g').filter(".pcachart").node()))
-        //console.log(selected_nodes.forEach((d)=> d.remove()))
-        d3.select('.plots').remove()
-
-    }
 
     let domainByElements = {}
 
@@ -278,33 +268,33 @@ async function plot_raw(profiles, filtered_data, elements) {
         });
     });
 
-    //var svg = d3v5.select("#vis_div").select('.plots');
 
-    // if (svg.empty()) {
-    //     // append the svg object to the body of the page
-    //     var svg = d3.select("#vis_div").append("svg")
-    //         .attr("class", "plots")
-    //         .attr("width", d3.max([size * n + (padding * 2) + margin.left + margin.right, (graphicPCA.width() * 2.125)]))
-    //         .attr("height", size * n + (padding * 2) + margin.top + margin.bottom)
-    // }
-    //
-    // svg = d3v5.select("#vis_div.plots")
+    let svg
+    let test = d3v5.select('.plots').select('.plots-g')
 
-    // var no = d3.select("#vis_div").append("svg")
-    //     .attr("class", "plots2")
-    //     .attr("width", d3.max([size * n + (padding * 2) + margin.left + margin.right, (graphicPCA.width() * 2.125)]))
-    //     .attr("height", size * n + (padding * 2) + margin.top + margin.bottom)
+    if (test.empty()){
+        svg = d3.select("#vis_div").append("svg")
+            .attr("class", "plots")
+            .attr("width", d3.max([size * n + (padding * 2) + margin.left + margin.right, (graphicPCA.width() * 2.05)]))
+            .attr("height", size * n + (padding * 2) + margin.top + margin.bottom)
+            //.attr("transform", `translate(${margin.left} , ${margin.top})`)
+        console.log('here')
+    }
+    else{
+        svg = d3v5.select('.plots')
+            .attr("width", d3.max([size * n + (padding * 2) + margin.left + margin.right, (graphicPCA.width() * 2.05)]))
+            .attr("height", size * n + (padding * 2) + margin.top + margin.bottom)
+        console.log('there')
+    }
 
-    var svg = d3.select("#vis_div").append("svg")
-        .attr("class", "plots")
-        .attr("width", d3.max([size * n + (padding * 2) + margin.left + margin.right, (graphicPCA.width() * 2.125)]))
-        .attr("height", size * n + (padding * 2) + margin.top + margin.bottom)
+    d3.selectAll(d3.selectAll('.plots').selectChildren().nodes().filter(d=> d.className['baseVal'] != 'pca_svg')).remove()
 
-    svg.append("g")
+    let g = svg.append("g")
+        // .attr("transform", `translate(${margin.left} , ${margin.top})`)
         .attr("transform", `translate(${margin.left} , ${margin.top})`)
         .attr('class', 'plots-g')
 
-    svg.selectAll(".x.axis")
+    g.selectAll(".x.axis")
         .data(elements)
         .enter().append("g")
         .attr("class", "x axis")
@@ -322,7 +312,7 @@ async function plot_raw(profiles, filtered_data, elements) {
             .attr("stroke-opacity", 0.5)
             .attr("stroke-dasharray", "2,2"));
 
-    svg.selectAll(".y.axis")
+    g.selectAll(".y.axis")
         .data(elements)
         .enter().append("g")
         .attr("class", "y axis")
@@ -341,7 +331,7 @@ async function plot_raw(profiles, filtered_data, elements) {
         //     .attr("x", 4)
         //     .attr("dy", -4))
 
-    var cell = svg.selectAll(".cell")
+    var cell = g.selectAll(".cell")
         .data(cross(elements, elements))
         .enter().append("g")
         .attr("class", "cell")
