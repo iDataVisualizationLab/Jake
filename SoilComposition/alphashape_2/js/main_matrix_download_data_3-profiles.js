@@ -303,7 +303,7 @@ make_slider('s1',0,100,100,1, 200)
 function start_download() {
 
     let download_object = {}
-    let seconds_limit = 300
+    let seconds_limit = 30
 
     let timeout_data = {}
     timeout_data['timeout_seconds'] = seconds_limit

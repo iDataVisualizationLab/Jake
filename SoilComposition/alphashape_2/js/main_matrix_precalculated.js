@@ -39,7 +39,7 @@ let default_alpha = 100
 
 let soilPackages = {RCRA_8_metals: ['As', 'Ba', 'Cd', 'Cr', 'Pb', 'Hg', 'Se', 'Ag'],
     Plant_essentials: ['Ca', 'Cu', 'Fe', 'K', 'Mn', 'S', 'Zn'],
-    // Pedology: ['RI', 'DI', 'SR', 'Rb'],
+    //Pedology: ['RI', 'DI', 'SR', 'Rb'],
     Pedology: ['Rb'],
     Other: ['Mg', 'Al', 'Si', 'P', 'Ti', 'V', 'Co', 'Ni', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Sn', 'W', 'Bi', 'Th', 'U', 'LE', 'Sb']};
 
@@ -150,9 +150,9 @@ function verifyChecked(){
 
 function selectProfiles(){
 
-    let profiles = ["R", "S", "L"];
+    let profiles = ["L", "R", "S"];
 
-    let locationProfiles = ["locR", "locS", "locL"];
+    let locationProfiles = ["locL", "locR", "locS"];
     let selectedProfiles = [];
     locationProfiles.forEach(function (d){
         if(document.getElementById(d).checked == true){
@@ -168,6 +168,7 @@ function selectProfiles(){
 
 function load_data(profiles){
     let promises = []
+    //profiles.forEach(d=>{promises.push(d3.csv(`data/${d}-processed.csv`))})
     profiles.forEach(d=>{promises.push(d3.csv(`data/${d}.csv`))})
 
     Promise.all(promises
@@ -256,8 +257,15 @@ function find_max_dist(delaunay){
 }
 
 async function plot_raw(profiles, filtered_data, elements) {
-    if (d3.selectAll('.plots')){
-        d3.selectAll('.plots').remove();
+    if (d3.select('.plots')){
+
+        let save_this = d3.select('.plots').selectAll('g').filter(".pcachart")
+
+
+        //let selected_nodes = (d3.select('.plots').selectAll('g').nodes().filter(d=> d != d3.select('.plots').selectAll('g').filter(".pcachart").node()))
+        //console.log(selected_nodes.forEach((d)=> d.remove()))
+        d3.select('.plots').remove()
+
     }
 
     let domainByElements = {}
@@ -270,13 +278,31 @@ async function plot_raw(profiles, filtered_data, elements) {
         });
     });
 
-    var svg = d3.select("#vis_div").append("svg")
+    //var svg = d3v5.select("#vis_div").select('.plots');
 
+    // if (svg.empty()) {
+    //     // append the svg object to the body of the page
+    //     var svg = d3.select("#vis_div").append("svg")
+    //         .attr("class", "plots")
+    //         .attr("width", d3.max([size * n + (padding * 2) + margin.left + margin.right, (graphicPCA.width() * 2.125)]))
+    //         .attr("height", size * n + (padding * 2) + margin.top + margin.bottom)
+    // }
+    //
+    // svg = d3v5.select("#vis_div.plots")
+
+    // var no = d3.select("#vis_div").append("svg")
+    //     .attr("class", "plots2")
+    //     .attr("width", d3.max([size * n + (padding * 2) + margin.left + margin.right, (graphicPCA.width() * 2.125)]))
+    //     .attr("height", size * n + (padding * 2) + margin.top + margin.bottom)
+
+    var svg = d3.select("#vis_div").append("svg")
         .attr("class", "plots")
-        .attr("width", size * n + (padding*2) + margin.left + margin.right)
-        .attr("height", size * n + (padding*2) + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", `translate(${margin.left} , ${margin.top})`);
+        .attr("width", d3.max([size * n + (padding * 2) + margin.left + margin.right, (graphicPCA.width() * 2.125)]))
+        .attr("height", size * n + (padding * 2) + margin.top + margin.bottom)
+
+    svg.append("g")
+        .attr("transform", `translate(${margin.left} , ${margin.top})`)
+        .attr('class', 'plots-g')
 
     svg.selectAll(".x.axis")
         .data(elements)
@@ -337,6 +363,7 @@ async function plot_raw(profiles, filtered_data, elements) {
         .style("font", "20px times");
 
     function plot(p) {
+        // console.log(filtered_data)
         var cell = d3.select(this);
 
         let _x = x.copy().domain(domainByElements[p.x]);
@@ -366,6 +393,7 @@ async function plot_raw(profiles, filtered_data, elements) {
             })
             .attr("r", 2)
             .style("fill", function (d) {
+                // console.log(d.profile)
                 return profile_color[d.profile];
             });
 
@@ -480,7 +508,7 @@ function remove_correlation_sliders(){
 
 function filter_correlation(){
 
-    console.log(d3.selectAll('.cell').style('opacity', 1))
+    //console.log(d3.selectAll('.cell').style('opacity', 1))
 
     Object.keys(correlation_object).forEach(d=>{
         Object.keys(correlation_object[d]).forEach(e=>{
@@ -524,7 +552,7 @@ function draw_intersection(polygon_points, combination) {
 
 function draw_alphahulls(paths, combination){
 
-    console.log(paths)
+    //console.log(paths)
 
     d3.selectAll(`.a-shape.${combination}`).remove()
     Object.keys(paths).forEach(d=>{
