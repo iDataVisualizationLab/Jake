@@ -18,10 +18,16 @@ const graphicPCA={margin: {top: 30, right: 10, bottom: 50, left: 50},
     animationTime:1000
 }
 
+// let profile_color = {
+//     "R": "#8F7C00",
+//     "S": "#C20088",
+//     "L": "#00998F"
+// }
+
 let profile_color = {
-    "R": "#8F7C00",
-    "S": "#C20088",
-    "L": "#00998F"
+    'L': d3v5.schemeCategory10[0],
+    'R': d3v5.schemeCategory10[1],
+    'S': d3v5.schemeCategory10[2],
 }
 
 function buildMenu(){

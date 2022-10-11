@@ -2,18 +2,30 @@ import {init_volume_config, update_volume_config} from "./volume.js";
 
 export function buildParallelChart(_profiles, dims, sorted_dims, data_passed, point_selection, profile_dims) {
     let resolution = 50
-
+    //
+    // let colors = {
+    //     "R": to_hsl("#8F7C00"),
+    //     "S": to_hsl("#C20088"),
+    //     "L": to_hsl("#00998F")
+    // };
     let colors = {
-        "R": to_hsl("#8F7C00"),
-        "S": to_hsl("#C20088"),
-        "L": to_hsl("#00998F")
+        "R": to_hsl(d3v5.schemeCategory10[1]),
+        "S": to_hsl(d3v5.schemeCategory10[2]),
+        "L": to_hsl(d3v5.schemeCategory10[0])
     };
 
+    // let _colors = {
+    //     "R": "#8F7C00",
+    //     "S": "#C20088",
+    //     "L": "#00998F"
+    // }
+
     let _colors = {
-        "R": "#8F7C00",
-        "S": "#C20088",
-        "L": "#00998F"
+        'L': d3v5.schemeCategory10[0],
+        'R': d3v5.schemeCategory10[1],
+        'S': d3v5.schemeCategory10[2],
     }
+    console.log(_colors)
 
     function to_hsl(color){
         let _color = d3v5.color(color);
