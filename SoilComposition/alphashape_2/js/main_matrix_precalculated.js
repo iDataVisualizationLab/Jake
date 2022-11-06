@@ -641,15 +641,58 @@ function calculate_correlation(profiles, data){
 
         for (let i = 0; i < keys_p.length ; i++){
             for (let j = 1; j < keys_p.length; j++){
-                if (i !== j){
+                if (i !== j && !Object.keys(corr[d]).includes(`${keys_p[j].split(' ')[0]}_x_${keys_p[i].split(' ')[0]}` )){
+
+                    let sorted_keys = [keys_p[i].split(' ')[0], keys_p[j].split(' ')[0]].sort()
+
                     let d1 = data_p.map(e=> +e[keys_p[i]])
                     let d2 = data_p.map(e=> +e[keys_p[j]])
-                    corr[d][`${keys_p[i].split(' ')[0]}_x_${keys_p[j].split(' ')[0]}`] = (spearson.correlation.pearson(d1, d2, true))
+                    !isNaN((spearson.correlation.pearson(d1, d2, true))) ? corr[d][`${sorted_keys[0]}_x_${sorted_keys[1]}`] = (spearson.correlation.pearson(d1, d2, true)) : null
                 }
             }
         }
     })
     correlation_object = corr
+    let sorted_obj = {}
+
+    for (let d of Object.keys(corr)){
+        let sortable = [];
+        for (let e in corr[d]) {
+            sortable.push([e, corr[d][e]]);
+        }
+        sortable = sortable.sort((a, b) => b[1] - a[1]);
+        sorted_obj[d] = sortable
+    }
+
+    let averaged = {}
+
+    for (let d of Object.keys(corr)){
+        for (let e of Object.keys(corr[d])){
+            Object.keys(averaged).includes(e) ? null : averaged[e] = 0;
+            averaged[e] += corr[d][e]
+        }
+    }
+
+    for (let d of Object.keys(averaged)){
+        averaged[d] = averaged[d] / Object.keys(corr).length
+    }
+
+    let sorted_average = []
+
+    for (let d in averaged) {
+        sorted_average.push([d, averaged[d]]);
+    }
+    sorted_average = sorted_average.sort((a, b) => b[1] - a[1]);
+
+    //console.log(sorted_obj)
+
+    console.log(sorted_average)
+
+
+
+
+
+
 }
 
 

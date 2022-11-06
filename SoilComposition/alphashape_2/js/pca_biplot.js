@@ -4,6 +4,10 @@ const graphicPCA={margin: {top: 30, right: 10, bottom: 50, left: 50},
     animationTime:1000
 }
 
+let pedology_elements = ['RI', 'DI', 'SR', 'Rb']
+// //FOR CORRELATION DEMO PICTURE
+// let display_title = ['Zn', 'Pb']
+
 function init_pca_plot(){
     // set the dimensions and margins of the graph
     var margin = graphicPCA.margin,
@@ -99,6 +103,13 @@ async function get_dimensions_3(_profiles){
                         dimensions[soilPackages[Object.keys(soilPackages)[i]][j]+' Concentration'].noShow = false;
                     }
                 }
+            }
+
+            for (let d of pedology_elements){
+                // console.log(d)
+                // console.log(dimensions)
+                dimensions[`${d} Concentration`].noShow = true;
+
             }
 
             dim_ids = [];
@@ -349,13 +360,6 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
                 gdot.append("text")
                     .attr('text-anchor', 'left')
                     .attr("x", "20")
-                    .attr("y", "0")
-                    .text(function (d) {return 'Location: ' + d["Location"].toString()})
-                    .attr("display", "none");
-
-                gdot.append("text")
-                    .attr('text-anchor', 'left')
-                    .attr("x", "20")
                     .attr("y", "15")
                     .text(function (d) {return 'Depth: ' + d["Sample ID"].toString()})
                     .attr("display", "none");
@@ -370,6 +374,16 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
                 gdot.append("circle")
                     .attr("r", 3)
                     .style("fill", d => d.color)
+                    // //FOR CORRELATION DEMO PICTURE
+                    .style("opacity", .85)
+
+                gdot.append("text")
+                    .attr('text-anchor', 'left')
+                    .attr("x", "20")
+                    .attr("y", "0")
+                    .text(function (d) {return 'Location: ' + d["Location"].toString()})
+                    .attr("display", "none");
+
                 return gdot;
             },
             update => update
@@ -488,15 +502,22 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
                     .attr("class", "line_group")
                     .style('display',d=>(d.noShow || d.hide || d.y===undefined || d.x===undefined)?'none':null);
 
-                gline.append("text")
-                    .attr('display', 'none')
-                    .attr('text-anchor', 'left')
-                    .attr("x", function (d){return x(d.x * multiplyBrands)})
-                    .attr("y", function (d){return y(d.y * multiplyBrands)})
-                    .text(function (d) {return d["name"].toString()});
+                // gline.append("text")
+                //     .attr('display', 'none')
+                //     .attr('text-anchor', 'left')
+                //     .attr("x", function (d){return x(d.x * multiplyBrands)})
+                //     .attr("y", function (d){return y(d.y * multiplyBrands)})
+                //     .text(function (d) {return d["name"].toString()});
 
                 gline.append("line")
                     .style("stroke-width", 1)
+                    // //FOR CORRELATION DEMO PICTURE
+                    // .style("stroke-width", function (d) {
+                    //     if (display_title.includes(d["name"].toString().split(' ')[0])){
+                    //         return 3
+                    //     }
+                    //     else return 1
+                    // })
                     .attr("x1", function (d){
                         return x(0);
                     })
@@ -513,10 +534,49 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
                         d3v5.select(this).style("stroke", function(d) {return d.color})
                             .attr("marker-end", function (d) { return marker(d.color.formatHex())})
                     })
+                    // //FOR CORRELATION DEMO PICTURE
+                    // .each(function(d) {
+                    //     d3v5.select(this)
+                    //         .style("stroke", function(d) {
+                    //             if (display_title.includes(d["name"].toString().split(' ')[0])){
+                    //                 return [d3v5.color('red'), d3v5.color('green')][display_title.indexOf(d["name"].toString().split(' ')[0])]
+                    //             }
+                    //             else return d.color
+                    //         })
+                    //         .attr("marker-end", function (d) {
+                    //             if (display_title.includes(d["name"].toString().split(' ')[0])){
+                    //                 return marker([d3v5.color('red'), d3v5.color('green')][display_title.indexOf(d["name"].toString().split(' ')[0])].formatHex())
+                    //             }
+                    //             else return marker(d.color.formatHex())
+                    //         })
+                    //         .style("opacity", function(d) {
+                    //             if (display_title.includes(d["name"].toString().split(' ')[0])){
+                    //                 return 1
+                    //             }
+                    //             else return .5
+                    //         })
+                    // })
                     .on('mouseover', function(){
                         d3v5.select(this.parentNode).select('text').attr("display", null)
                     })
                     .on('mouseleave', function (){d3v5.select(this.parentNode).select('text').attr("display", "none")});
+
+                gline.append("text")
+                    .attr('display', 'none')
+                    // //FOR CORRELATION DEMO PICTURE
+                    // .attr('display', (d) => display_title.includes(d["name"].toString().split(' ')[0]) ? null: 'none')
+                    .attr('text-anchor', 'left')
+                    .attr("x", function (d){return x(d.x * multiplyBrands)+5})
+                    .attr("y", function (d){return y(d.y * multiplyBrands)+5})
+                    // //FOR CORRELATION DEMO PICTURE
+                    // .style('fill', (d) =>{
+                    //     if (display_title.includes(d["name"].toString().split(' ')[0])){
+                    //         return [d3v5.color('red'), d3v5.color('green')][display_title.indexOf(d["name"].toString().split(' ')[0])]
+                    //     }
+                    // })
+                    .text(function (d) {return d["name"].toString()})
+                    // //FOR CORRELATION DEMO PICTURE
+                    // .style("font-size", "24px");
             },
             update => update
                 .call(update => update.style('display',d=>(d.noShow || d.hide || d.y===undefined || d.x===undefined)?'none':null)
@@ -533,8 +593,8 @@ async function draw_pca_plot_3(_profiles, inputs, data, dims_3, dim_ids, reCal, 
                 .call(update => update.style('display',d=>(d.noShow || d.hide || d.y===undefined || d.x===undefined)?'none':null)
                     .transition().duration(graphicPCA.animationTime)
                     .select('text')
-                    .attr("x", function (d){return x(d.x * multiplyBrands)})
-                    .attr("y", function (d){return y(d.y * multiplyBrands)})
+                    .attr("x", function (d){return x(d.x * multiplyBrands)+5})
+                    .attr("y", function (d){return y(d.y * multiplyBrands)+5})
                 ),
             exit => exit
                 .call(exit => exit.transition().duration(graphicPCA.animationTime)
