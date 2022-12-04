@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<svg width="960" height="500"></svg>
+<script src="lib/d3v7.js"></script>
+<script>
+    
+    let dims = ['Zr']
+    let bins = 20
+
+    var svg = d3.select("svg"),
+        margin = {top: 20, right: 20, bottom: 30, left: 50},
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom,
+        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    let profiles = ['L', 'R', 'S']
+
+    function load_data(profiles){
+        let promises = []
+        profiles.forEach(d=>{promises.push(d3.csv(`data/${d}.csv`))})
+        Promise.all(promises
+        ).then(function(files) {
+            process_data(files,profiles)
+        })
+    }
+
+    load_data(profiles)
+
+    function process_data(data,profiles){
+
+        let restructured_data = {}
+
+        for (let i = 0; i < data.length; i++){
+            restructured_data[profiles[i]] = {}
+            for (let d of dims){
+                restructured_data[profiles[i]][d] = data[i].map(e=> +e[`${d} Concentration`])
+            }
+        }
+
+        let extent = {}
+
+        for (let d of dims){
+            extent[d] = []
+            for (let e of Object.keys(restructured_data)){
+                extent[d] = extent[d].concat(restructured_data[e][d])
+            }
+            extent[d] = d3.extent(extent[d])
+        }
+
+        let colors = {}
+        for (let i = 0; i < profiles.length; i++){
+            colors[profiles[i]] = d3.schemeCategory10[i]
+        }
+
+        let x = d3.scaleLinear().range([0, width]),
+            y = d3.scaleLinear().range([height, 0])
+
+        let data2 = [];
+
+        for (let i = 0; i < data.length; i++){
+            data2 = data2.concat(data[i].map(function (e){
+                return{
+                    id: profiles[i],
+                    d1: +e[`${dims[0]} Concentration`]
+                }
+            }))
+        }
+
+        data2.sort((a,b) => a.d1 - b.d1)
+
+        let min = extent[dims[0]][0]
+        let max = extent[dims[0]][1]+1
+        let range = max-min
+
+
+        let bin_data2 = {}
+        for (let d of [...new Set(data2.map(e=> e.id))]){
+            bin_data2[d] = {}
+            for (let i = 0; i < bins; i++){
+                bin_data2[d][i] = 0
+            }
+        }
+
+        for (let d of data2){
+            let b = Math.floor((d.d1-min) / range * bins)
+
+            bin_data2[d.id][b] += 1
+        }
+
+        let bin_data = []
+        for (let i of Object.keys(bin_data2)){
+            for (let j of Object.keys(bin_data2[i])){
+                bin_data.push({
+                    id: i,
+                    bin: +j,
+                    count_: bin_data2[i][j]
+                })
+            }
+        }
+
+        let bin_data3 = {}
+        for (let i of Object.keys(bin_data2)){
+            bin_data3[i] = []
+            for (let j of Object.keys(bin_data2[i])){
+                bin_data3[i].push({
+                    id: i,
+                    bin: +j,
+                    count_: bin_data2[i][j]
+                })
+            }
+        }
+
+        x.domain(d3.extent(bin_data.map(d=> d.bin)));
+        y.domain(d3.extent(bin_data.map(d=> d.count_)));
+        g.append("g")
+            .attr("class", "axis axis--x")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        g.append("g")
+            .attr("class", "axis axis--y")
+            .call(d3.axisLeft(y))
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", "0.71em")
+            .attr("fill", "#000")
+
+        let area = d3.area()
+            .curve(d3.curveMonotoneX)
+            .x(function(d) { return x(d.bin); })
+            .y0(function() { return y(0); })
+            .y1(function(d) { return y(d.count_); });
+
+        let source = g.selectAll(".area")
+            .data(profiles)
+            .enter().append("g")
+            .attr("class", function(d) { return `area ${d}`; })
+            .append("path")
+            .attr("d", function(d) { return area(bin_data3[d]); })
+            .style("fill", function(d) { return colors[d]; })
+            .style('opacity', .5)
+    }
+
+</script>
+</body>
+</html>
