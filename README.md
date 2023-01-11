@@ -8,15 +8,19 @@ https://idatavisualizationlab.github.io/Jake/SoilComposition/PCA/index.html
 
 
 ### Parallel Coordinates
-#C02 Emissions
+##C02 Emissions
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/emissions/parallel.html
-#Unemployment
+
+##Unemployment
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/unemployment/parallel.html
-#Life Expectancy
+
+##Life Expectancy
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/life_expectancy/parallel.html
-#Mortality Rate
+
+##Mortality Rate
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/mortality_rate/parallel.html
-#HPC
+
+##HPC
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/HPC/parallel.html
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/parallel_chart/parallel.html
 https://idatavisualizationlab.github.io/Jake/OutlierDetection/multiLine5.html (sorted bar charts)
