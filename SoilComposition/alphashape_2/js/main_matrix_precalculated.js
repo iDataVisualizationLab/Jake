@@ -278,7 +278,6 @@ async function plot_raw(profiles, filtered_data, elements) {
             .attr("width", d3.max([size * n + (padding * 2) + margin.left + margin.right, (graphicPCA.width() * 2.05)]))
             .attr("height", size * n + (padding * 2) + margin.top + margin.bottom)
             //.attr("transform", `translate(${margin.left} , ${margin.top})`)
-        console.log('here')
     }
     else{
         svg = d3v5.select('.plots')
@@ -363,6 +362,7 @@ async function plot_raw(profiles, filtered_data, elements) {
         let y_el = p.y.split(" ")[0]
 
         cell.attr('class' , `cell ${x_el}_x_${y_el}`)
+
 
         cell.append("rect")
             .attr("class", "frame")
@@ -578,7 +578,7 @@ function display_calculation_error(combination){
         .attr("y", padding)
         .attr("dy", ".71em")
         .attr('text-anchor' , 'end')
-        .text('Error')
+        // .text('Error')
         .style('fill', '#f00')
         .style("font", "10px times");
 }
@@ -684,9 +684,7 @@ function calculate_correlation(profiles, data){
     }
     sorted_average = sorted_average.sort((a, b) => b[1] - a[1]);
 
-    //console.log(sorted_obj)
-
-    console.log(sorted_average)
+    //console.log(sorted_average)
 
 
 
