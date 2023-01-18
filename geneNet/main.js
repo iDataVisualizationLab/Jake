@@ -4,26 +4,47 @@ const main = async function(){
     let _data = await d3.tsv('data/hgnc_complete_set.txt')
 
     _data.forEach(d=>{
-        d['Previous Symbols'] = d['prev_symbol'].split('|');
-        d['Synonyms'] = d['alias_symbol'].split('|');
+        d['Previous Symbols'] = d['prev_symbol'].split('|').filter(d=> d !== '');
+        d['Synonyms'] = d['alias_symbol'].split('|').filter(d=> d !== '');
         d['Approved Symbol'] = d['symbol'];
         return d;
     });
 
-
-    // console.log(_data)
-    //
-    // console.log(_data.filter(d=> d['Previous Symbols'].length > 1))
-    //
-    // console.log(new Set(_data.map(d=> d.status)))
+    console.log(_data.filter(d=> d['Previous Symbols'].length > 0))
 
     let nodes1 = {}
     let nodes2 = {}
     let nodes3 = {}
 
+
+    let nodes_rem = {}
+
     _data.forEach(d=>{
         nodes1[d['Approved Symbol']] = {id:d['Approved Symbol'], data:d}
     })
+
+    let prev = []
+
+    _data.filter(d=> d['Previous Symbols'].length > 0).forEach(d=> prev = prev.concat(d['Previous Symbols']))
+
+    console.log(prev)
+
+    prev = [...new Set(prev)]
+
+    console.log(prev)
+
+
+    let nodes4 = {}
+    prev.forEach(d=> {
+        if (!nodes1[d]){
+            nodes4[d] = {
+                'Approved Symbol': d,
+                'color': 'red'
+            }
+        }
+    })
+
+
 
     Object.keys(nodes1).forEach(d=>{
         nodes1[d]['data']['Synonyms'].forEach(e=>{
@@ -34,6 +55,7 @@ const main = async function(){
                 nodes2[e] = nodes1[e]
                 nodes2[e]['synNodes'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes1[f])
                 nodes2[e]['prevNodes'] = nodes1[e]['data']['Previous Symbols'].filter(f=> nodes1[f])
+                nodes2[e]['color'] = 'black'
             }
         })
         nodes1[d]['data']['Previous Symbols'].forEach(e=>{
@@ -44,6 +66,7 @@ const main = async function(){
                 nodes3[e] = nodes1[e]
                 nodes3[e]['synNodes'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes1[f])
                 nodes3[e]['prevNodes'] = nodes1[e]['data']['Previous Symbols'].filter(f=> nodes1[f])
+                nodes3[e]['color'] = 'black'
             }
         })
     })
@@ -134,26 +157,14 @@ const main = async function(){
     console.log(links_)
     let links = links_
 
-    console.log(links.filter(d=> d.target == 'NAT1'))
-
-    console.log(nodes.find(d=> d.id =='EIF4G2'))
-    console.log(nodes.find(d=> d.id =='NAT1'))
-
-
-
-
-
-
-
-    // let links = Object.values(linksObject)
-
-    // console.log(linksObject_)
-    // links = links.concat(Object.values(linksObject_))
-    // nodes = nodes.concat(Object.values(nodes3))
     nodes = nodes.concat(Object.values(nodes3).filter(d=> !nodes.includes(d)))
 
+    // nodes = nodes.concat(Object.values(nodes4))
 
-    console.log(nodes.filter(d=> d.synNodes.length > 0 || d.prevNodes.length > 0))
+    // console.log(nodes4)
+
+
+    // console.log(nodes.filter(d=> d.synNodes.length > 0 || d.prevNodes.length > 0))
 
 
 
@@ -283,12 +294,17 @@ function ForceGraph({
         .on("tick", ticked);
 
 
+    const zoom = d3.zoom()
+        .scaleExtent([1, 8])
+        .on("zoom", zoomed);
+
     const div = d3.select("#div_main")
     const svg = div.append('svg')
         .attr("width", width)
         .attr("height", height)
         .attr("viewBox", [-width / 2, -height / 2, width, height])
-        .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+        .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
+        .on("click", reset);;
 
 
 
@@ -405,6 +421,22 @@ function ForceGraph({
 
     // Handle invalidation.
     if (invalidation != null) invalidation.then(() => simulation.stop());
+
+    svg.call(zoom);
+
+    function reset() {
+        svg.transition().duration(750).call(
+            zoom.transform,
+            d3.zoomIdentity,
+            d3.zoomTransform(svg.node()).invert([width / 2, height / 2])
+        );
+    }
+
+    function zoomed(event) {
+        const {transform} = event;
+        svg.attr("transform", transform);
+        svg.attr("stroke-width", 1 / transform.k);
+    }
 
     function intern(value) {
         return value !== null && typeof value === "object" ? value.valueOf() : value;
