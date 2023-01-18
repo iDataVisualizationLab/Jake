@@ -10,7 +10,9 @@ const main = async function(){
         return d;
     });
 
-    console.log(_data.filter(d=> d['Previous Symbols'].length > 0))
+    //console.log(_data.filter(d=> d['Previous Symbols'].length > 0))
+
+    console.log(_data)
 
     let nodes1 = {}
     let nodes2 = {}
@@ -22,6 +24,8 @@ const main = async function(){
     _data.forEach(d=>{
         nodes1[d['Approved Symbol']] = {id:d['Approved Symbol'], data:d}
     })
+
+    console.log(Object.values(nodes1).length)
 
     let prev = []
 
