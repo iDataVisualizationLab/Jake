@@ -33,6 +33,11 @@ const main = async function(){
 
     console.log(prev)
 
+    let dates = _data.map(d=> d.date_symbol_changed).filter(d=> d != '').sort()
+
+    let first_date = dates[0]
+    let last_date = dates[dates.length-1]
+
 
     let nodes4 = {}
     prev.forEach(d=> {
