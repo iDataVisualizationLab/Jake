@@ -42,6 +42,24 @@ const main = async function(){
     let first_date = dates[0]
     let last_date = dates[dates.length-1]
 
+    // console.log(new Date(Date.parse(first_date)+ (1* (1000 * 60 * 60 * 24))).toDateString())
+    // console.log(first_date)
+    //
+    // console.log(new Date(Date.parse(last_date)+ (1* (1000 * 60 * 60 * 24))).toDateString())
+    // console.log(last_date)
+    //
+    // console.log(Date.parse(last_date)-Date.parse(first_date))
+
+    const date1 = new Date(first_date);
+    const date2 = new Date(last_date);
+    const diffTime = Math.abs(date2 - date1);
+    // const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    // console.log(diffTime + " milliseconds");
+    // console.log(diffDays + " days");
+
+    slider_init(0, diffTime, Date.parse(first_date)+ (1* (1000 * 60 * 60 * 24)), Date.parse(last_date)+ (1* (1000 * 60 * 60 * 24)))
+
+
 
     let nodes4 = {}
     prev.forEach(d=> {
