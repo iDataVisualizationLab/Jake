@@ -233,6 +233,7 @@ const main = async function(){
                     source: d['id'],
                     target: t_nodes[e]['id'],
                     type: 'synonym',
+                    change_date: null,
                     color:'blue',
                     // bidirectional: outside_checker([d['id'],nodes2[e]['id']], Object.keys(linksObject))
                 })
@@ -410,6 +411,7 @@ function ForceGraph({
                         linkTarget = ({target}) => target, // given d in links, returns a node identifier string
                         linkType = ({type}) => type,
                         linkStroke = ({color}) => color,
+                        linkChangeDate = ({change_date}) => change_date,
                         // linkBidirectional = ({bidirectional}) => bidirectional,
                         // linkStroke = "#999", // link stroke color
                         linkStrokeOpacity = 0.6, // link stroke opacity
@@ -428,6 +430,7 @@ function ForceGraph({
     const LT = d3.map(links, linkTarget).map(intern);
     const LType = d3.map(links, linkType).map(intern);
     const LC = d3.map(links, linkStroke).map(intern);
+    const LChD = d3.map(links, linkChangeDate).map(intern);
     // const LD = d3.map(links, linkBidirectional).map(intern);
     if (nodeTitle === undefined) nodeTitle = (_, i) => N[i];
     const T = nodeTitle == null ? null : d3.map(nodes, nodeTitle);
@@ -438,7 +441,7 @@ function ForceGraph({
     // Replace the input nodes and links with mutable objects for the simulation.
     // nodes = d3.map(nodes, (_, i) => ({id: N[i]}));
     nodes = d3.map(nodes, (_, i) => ({id: N[i], fill: NF[i]}));
-    links = d3.map(links, (_, i) => ({source: LS[i], target: LT[i], type: LType[i], color: LC[i]}));
+    links = d3.map(links, (_, i) => ({source: LS[i], target: LT[i], type: LType[i], color: LC[i], change_date: LChD[i]}));
     console.log(links)
 
     // Compute default domains.
@@ -528,6 +531,7 @@ function ForceGraph({
         .data(links)
         .join("line")
         .attr("stroke", d=>d.color)
+        // .attr("display", 'none')
         .attr("stroke-opacity", linkStrokeOpacity)
         .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
         .attr("stroke-linecap", linkStrokeLinecap)
