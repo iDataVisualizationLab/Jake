@@ -25,17 +25,16 @@ const main = async function(){
         nodes1[d['Approved Symbol']] = {id:d['Approved Symbol'], data:d}
     })
 
-    console.log(Object.values(nodes1).length)
-
     let prev = []
+
 
     _data.filter(d=> d['Previous Symbols'].length > 0).forEach(d=> prev = prev.concat(d['Previous Symbols']))
 
-    console.log(prev)
+    prev = prev.concat(prev)
+    prev = prev.concat(Object.keys(nodes1))
+    const map = prev.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
 
-    prev = [...new Set(prev)]
-
-    console.log(prev)
+    prev = [...map.entries()].filter(d=> d[1] == 2).map(e=> e[0])
 
     let dates = _data.map(d=> d.date_symbol_changed).filter(d=> d != '').sort()
 
@@ -63,14 +62,16 @@ const main = async function(){
 
     let nodes4 = {}
     prev.forEach(d=> {
-        if (!nodes1[d]){
             nodes4[d] = {
+                'id': d,
                 'Approved Symbol': d,
-                'color': 'red'
-            }
+                'fill': 'red',
+                'hide': true
         }
     })
-
+    //
+    // console.log(nodes4)
+    // console.log(nodes1)
 
 
     Object.keys(nodes1).forEach(d=>{
@@ -78,22 +79,35 @@ const main = async function(){
             if(nodes1[e]){
                 nodes2[d] = nodes1[d]
                 nodes2[d]['synNodes'] = nodes1[d]['data']['Synonyms'].filter(f=> nodes1[f])
+                nodes2[d]['synNodes_old'] = nodes1[d]['data']['Synonyms'].filter(f=> nodes4[f])
                 nodes2[d]['prevNodes'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes1[f])
+                nodes2[d]['prevNodes_old'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes4[f])
+                nodes2[d]['date_symbol_changed'] = nodes1[d]['data']['date_symbol_changed']
+
                 nodes2[e] = nodes1[e]
                 nodes2[e]['synNodes'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes1[f])
+                nodes2[e]['synNodes_old'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes4[f])
                 nodes2[e]['prevNodes'] = nodes1[e]['data']['Previous Symbols'].filter(f=> nodes1[f])
-                nodes2[e]['color'] = 'black'
+                nodes2[e]['prevNodes_old'] = nodes1[e]['data']['Previous Symbols'].filter(f=> nodes4[f])
+                nodes2[e]['date_symbol_changed'] = nodes1[e]['data']['date_symbol_changed']
+                nodes2[e]['fill'] = 'black'
             }
         })
         nodes1[d]['data']['Previous Symbols'].forEach(e=>{
             if(nodes1[e]){
                 nodes3[d] = nodes1[d]
                 nodes3[d]['synNodes'] = nodes1[d]['data']['Synonyms'].filter(f=> nodes1[f])
+                nodes3[d]['synNodes_old'] = nodes1[d]['data']['Synonyms'].filter(f=> nodes4[f])
                 nodes3[d]['prevNodes'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes1[f])
+                nodes3[d]['prevNodes_old'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes4[f])
+                nodes3[d]['date_symbol_changed'] = nodes1[d]['data']['date_symbol_changed']
                 nodes3[e] = nodes1[e]
                 nodes3[e]['synNodes'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes1[f])
+                nodes3[e]['synNodes_old'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes4[f])
                 nodes3[e]['prevNodes'] = nodes1[e]['data']['Previous Symbols'].filter(f=> nodes1[f])
-                nodes3[e]['color'] = 'black'
+                nodes3[e]['prevNodes_old'] = nodes1[e]['data']['Previous Symbols'].filter(f=> nodes4[f])
+                nodes3[e]['date_symbol_changed'] = nodes1[e]['data']['date_symbol_changed']
+                nodes3[e]['fill'] = 'black'
             }
         })
     })
@@ -110,11 +124,22 @@ const main = async function(){
     //     })
     // })
 
+    let t_nodes = {
+        ... nodes2,
+        ... nodes3
+    }
+
 
 
     let nodes_ = (Object.values(nodes3))
 
     let nodes = Object.values(nodes2)
+
+    // console.log(nodes.length)
+    // console.log(nodes_.length)
+    console.log(nodes_.concat(nodes).length)
+
+    let __nodes = [... new Set(nodes_.concat(nodes))]
 
     //check if two arrays are identical
     let inside_checker = (arr, target) => target.every(v => arr.includes(v));
@@ -173,25 +198,137 @@ const main = async function(){
                     source: nodes3[e]['id'],
                     target: d['id'],
                     type: 'prev',
+                    change_date: d['date_symbol_changed'],
                     color: 'red',
                     // bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
                 })
             }
-
         })
     })
+
+    // let nodes__ = Object.values(nodes4)
+
+    nodes_.forEach(d=>{
+        d.prevNodes_old.forEach(e=>{
+            if (d['id'] !== e){
+                links_.push({
+                    // source: d['id'],
+                    // target: nodes3[e]['id'],
+                    source: nodes4[e]['id'],
+                    target: d['id'],
+                    type: 'prev',
+                    change_date: d['date_symbol_changed'],
+                    color: 'red',
+                    // bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
+                })
+            }
+        })
+    })
+
+    let __links = []
+    __nodes.forEach(d=>{
+        d.synNodes.forEach(e=>{
+            if (d['id'] !== e){
+                __links.push({
+                    source: d['id'],
+                    target: t_nodes[e]['id'],
+                    type: 'synonym',
+                    color:'blue',
+                    // bidirectional: outside_checker([d['id'],nodes2[e]['id']], Object.keys(linksObject))
+                })
+            }
+        })
+        d.prevNodes.forEach(e=>{
+            if (d['id'] !== e){
+                __links.push({
+                    // source: d['id'],
+                    // target: nodes3[e]['id'],
+                    source: t_nodes[e]['id'],
+                    target: d['id'],
+                    type: 'prev',
+                    change_date: d['date_symbol_changed'],
+                    color: 'red',
+                    // bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
+                })
+            }
+        })
+        d.synNodes_old.forEach(e=>{
+            if (d['id'] !== e){
+                __links.push({
+                    // source: d['id'],
+                    // target: nodes3[e]['id'],
+                    source: nodes4[e]['id'],
+                    target: d['id'],
+                    type: 'prev_synonym',
+                    change_date: d['date_symbol_changed'],
+                    color: 'orange',
+                    // bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
+                })
+            }
+        })
+        d.prevNodes_old.forEach(e=>{
+            if (d['id'] !== e){
+                __links.push({
+                    // source: d['id'],
+                    // target: nodes3[e]['id'],
+                    source: nodes4[e]['id'],
+                    target: d['id'],
+                    type: 'prev',
+                    change_date: d['date_symbol_changed'],
+                    color: 'red',
+                    // bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
+                })
+            }
+        })
+
+    })
+
+
+    let nodes_w_links = []
+
+    nodes_w_links = nodes_w_links.concat(links_.map(d=> d.source))
+    nodes_w_links = nodes_w_links.concat(links_.map(d=> d.target))
+    nodes_w_links = [...new Set(nodes_w_links)]
+
+    console.log(nodes_w_links)
+
+    let __nodes_w_links = []
+
+    __nodes_w_links = __nodes_w_links.concat(__links.map(d=> d.source))
+    __nodes_w_links = __nodes_w_links.concat(__links.map(d=> d.target))
+    __nodes_w_links = [...new Set(__nodes_w_links)]
+
+    let _t_nodes = {
+        ... nodes4,
+        ... __nodes
+    }
+
+    let new_nodes = Object.values(_t_nodes).filter(d=> __nodes_w_links.includes(d['id']))
+
+    // console.log(new_nodes)
+
+
+
+
 
     console.log(links_)
     let links = links_
 
     nodes = nodes.concat(Object.values(nodes3).filter(d=> !nodes.includes(d)))
 
-    // nodes = nodes.concat(Object.values(nodes4))
+    console.log(nodes)
 
-    // console.log(nodes4)
+    nodes = nodes.concat(Object.values(nodes4))
+
+    nodes = nodes.filter(d=> nodes_w_links.includes(d['id']))
+
+        // console.log(nodes4)
 
 
     // console.log(nodes.filter(d=> d.synNodes.length > 0 || d.prevNodes.length > 0))
+
+    nodes = new_nodes
+    links = __links
 
 
 
@@ -262,7 +399,8 @@ function ForceGraph({
                         nodeGroup, // given d in nodes, returns an (ordinal) value for color
                         nodeGroups, // an array of ordinal values representing the node groups
                         nodeTitle, // given d in nodes, a title string
-                        nodeFill = "currentColor", // node stroke fill (if not using a group color encoding)
+                        // nodeFill = "currentColor", // node stroke fill (if not using a group color encoding)
+                        nodeFill = ({fill}) => fill,
                         nodeStroke = "#fff", // node stroke color
                         nodeStrokeWidth = 1.5, // node stroke width, in pixels
                         nodeStrokeOpacity = 1, // node stroke opacity
@@ -285,6 +423,7 @@ function ForceGraph({
                     } = {}) {
     // Compute values.
     const N = d3.map(nodes, nodeId).map(intern);
+    const NF = d3.map(nodes, nodeFill).map(intern);
     const LS = d3.map(links, linkSource).map(intern);
     const LT = d3.map(links, linkTarget).map(intern);
     const LType = d3.map(links, linkType).map(intern);
@@ -297,7 +436,8 @@ function ForceGraph({
     // const C = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
 
     // Replace the input nodes and links with mutable objects for the simulation.
-    nodes = d3.map(nodes, (_, i) => ({id: N[i]}));
+    // nodes = d3.map(nodes, (_, i) => ({id: N[i]}));
+    nodes = d3.map(nodes, (_, i) => ({id: N[i], fill: NF[i]}));
     links = d3.map(links, (_, i) => ({source: LS[i], target: LT[i], type: LType[i], color: LC[i]}));
     console.log(links)
 
@@ -423,14 +563,18 @@ function ForceGraph({
     if (W) link.attr("stroke-width", ({index: i}) => W[i]);
 
     const node = svg.append("g")
-        .attr("fill", nodeFill)
-        .attr("stroke", nodeStroke)
-        .attr("stroke-opacity", nodeStrokeOpacity)
-        .attr("stroke-width", nodeStrokeWidth)
         .selectAll("circle")
         .data(nodes)
         .join("circle")
+        .attr("fill", d => d.fill)
+        .attr("stroke", nodeStroke)
+        .attr("stroke-opacity", nodeStrokeOpacity)
+        .attr("stroke-width", nodeStrokeWidth)
+        // .selectAll("circle")
+        // .data(nodes)
+        // .join("circle")
         .attr("r", nodeRadius)
+        // //Drag feature
         .call(drag(simulation));
 
     // const link = svg.append("g")
@@ -449,7 +593,9 @@ function ForceGraph({
     // Handle invalidation.
     if (invalidation != null) invalidation.then(() => simulation.stop());
 
-    svg.call(zoom);
+
+    // //Zoom Feature
+    // svg.call(zoom);
 
     function reset() {
         svg.transition().duration(750).call(
