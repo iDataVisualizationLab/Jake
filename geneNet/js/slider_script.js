@@ -2,7 +2,6 @@ let wrapper, container, sliderTrack, sliderOne, sliderTwo, minGap, sliderMaxValu
 
 let display_wrapper, display_min, display_max, display_dash
 
-
 let min_date, max_date
 
 function slider_init(min, max, min_date_, max_date_) {

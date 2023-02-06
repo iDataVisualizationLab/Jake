@@ -323,13 +323,18 @@ const main = async function(){
 
     nodes = nodes.filter(d=> nodes_w_links.includes(d['id']))
 
-        // console.log(nodes4)
+    // console.log(nodes4)
 
 
     // console.log(nodes.filter(d=> d.synNodes.length > 0 || d.prevNodes.length > 0))
 
     nodes = new_nodes
     links = __links
+
+
+    autocomplete(document.getElementById("_input"), nodes.map(d=>d['id']));
+
+
 
 
 

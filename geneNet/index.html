@@ -4,15 +4,32 @@
     <meta charset="UTF-8">
     <title>GeneNet</title>
     <link rel="stylesheet" href="css/slider_style.css">
+    <link rel="stylesheet" href="css/autofill_style.css">
+    <link rel="stylesheet" href="css/main_style.css">
 </head>
 <body>
 <script src="https://d3js.org/d3.v7.min.js"></script>
-
+<!--<div display="block">-->
 <div id = "sliders" display="inline-block"></div>
+<div id = "gene_search">
+    <form id="_form" autocomplete="off">
+        <div class="autocomplete" style="width:300px;">
+            <input id="_input" type="text" name="Gene" placeholder="Gene">
+        </div>
+        <input type="submit">
+    </form>
+<!--</div>-->
+
+
+</div>
+
 <div id="div_main">
-    <svg id="svg_main"></svg>
+<!--    <svg id="svg_main"></svg>-->
+
 </div>
 </body>
 <script src="js/slider_script.js"></script>
 <script src="js/main.js"></script>
+<script src="js/autofill_script.js"></script>
+
 </html>

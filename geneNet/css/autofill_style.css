@@ -47,3 +47,9 @@ input[type=submit] {
     background-color: DodgerBlue !important;
     color: #ffffff;
 }
+
+#gene_search{
+    position: absolute;
+    left: 35vw;
+    top: 0.5vh;
+}
