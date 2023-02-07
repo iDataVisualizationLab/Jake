@@ -7,17 +7,17 @@ body {
     position: relative;
     display: inline-block;
 }
-input {
+#_input,#_input_submit {
     border: 1px solid transparent;
     background-color: #f1f1f1;
     padding: 10px;
     font-size: 16px;
 }
-input[type=text] {
+#_input[type=text] {
     background-color: #f1f1f1;
     width: 100%;
 }
-input[type=submit] {
+#_input_submit[type=submit] {
     background-color: DodgerBlue;
     color: #fff;
 }
