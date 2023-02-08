@@ -26,7 +26,6 @@ const main = async function(){
     const prev_map = prev.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
     prev = [...prev_map.entries()].filter(d=> d[1] == 2).map(e=> e[0])
 
-
     let old_syn = []
     _data.filter(d=> d['Synonyms'].length > 0).forEach(d=> old_syn = old_syn.concat(d['Synonyms']))
     old_syn = [... new Set(old_syn)]
@@ -36,9 +35,6 @@ const main = async function(){
     old_syn = [...old_syn_map.entries()].filter(d=> d[1] == 2).map(e=> e[0])
 
     let all_old = [... new Set(old_syn.concat(prev))]
-    // console.log(all_old.length)
-
-
 
     let dates = _data.map(d=> d.date_symbol_changed).filter(d=> d != '').sort()
 
@@ -146,84 +142,6 @@ const main = async function(){
     //check if identical array is in 2D array
     let outside_checker = (arr, target) => target.some(r => inside_checker(r, arr))
 
-    // let linksObject = {}
-    // let linksObject_ = {}
-
-    // nodes.forEach(d=>{
-    //     d.synNodes.forEach(e=>{
-    //         linksObject[([d['id'],nodes2[e]['id']]).sort()] = {
-    //             source: d['id'],
-    //             target: nodes2[e]['id'],
-    //             type: 'synonym',
-    //             color:'blue',
-    //             bidirectional: outside_checker([d['id'],nodes2[e]['id']], Object.keys(linksObject))
-    //         }
-    //     })
-    // })
-    //
-    // nodes_.forEach(d=>{
-    //     d.prevNodes.forEach(e=>{
-    //         linksObject_[([d['id'],nodes3[e]['id']]).sort()] = {
-    //             source: d['id'],
-    //             target: nodes3[e]['id'],
-    //             type: 'prev',
-    //             color: 'red',
-    //             bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
-    //         }
-    //     })
-    // })
-
-    // let links_ = []
-    //
-    // nodes.forEach(d=>{
-    //     d.synNodes.forEach(e=>{
-    //         if (d['id'] !== e){
-    //             links_.push({
-    //                 source: d['id'],
-    //                 target: nodes2[e]['id'],
-    //                 type: 'synonym',
-    //                 color:'blue',
-    //                 // bidirectional: outside_checker([d['id'],nodes2[e]['id']], Object.keys(linksObject))
-    //             })
-    //         }
-    //     })
-    // })
-    //
-    // nodes_.forEach(d=>{
-    //     d.prevNodes.forEach(e=>{
-    //         if (d['id'] !== e){
-    //             links_.push({
-    //                 // source: d['id'],
-    //                 // target: nodes3[e]['id'],
-    //                 source: nodes3[e]['id'],
-    //                 target: d['id'],
-    //                 type: 'prev',
-    //                 change_date: d['date_symbol_changed'],
-    //                 color: 'red',
-    //                 // bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
-    //             })
-    //         }
-    //     })
-    // })
-    //
-    // // let nodes__ = Object.values(nodes4)
-    //
-    // nodes_.forEach(d=>{
-    //     d.prevNodes_old.forEach(e=>{
-    //         if (d['id'] !== e){
-    //             links_.push({
-    //                 // source: d['id'],
-    //                 // target: nodes3[e]['id'],
-    //                 source: nodes4[e]['id'],
-    //                 target: d['id'],
-    //                 type: 'prev',
-    //                 change_date: d['date_symbol_changed'],
-    //                 color: 'red',
-    //                 // bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
-    //             })
-    //         }
-    //     })
-    // })
 
     let __links = []
     __nodes.forEach(d=>{
@@ -288,13 +206,6 @@ const main = async function(){
 
     })
 
-
-    // let nodes_w_links = []
-    //
-    // nodes_w_links = nodes_w_links.concat(links_.map(d=> d.source))
-    // nodes_w_links = nodes_w_links.concat(links_.map(d=> d.target))
-    // nodes_w_links = [...new Set(nodes_w_links)]
-
     let __nodes_w_links = []
     __nodes_w_links = __nodes_w_links.concat(__links.map(d=> d.source))
     __nodes_w_links = __nodes_w_links.concat(__links.map(d=> d.target))
@@ -311,15 +222,6 @@ const main = async function(){
     else{
         console.error('Non-identical objects with same key')
     }
-
-    // console.log(links_)
-    // let links = links_
-    // nodes = nodes.concat(Object.values(nodes3).filter(d=> !nodes.includes(d)))
-    // console.log(nodes)
-    // nodes = nodes.concat(Object.values(nodes4))
-    // nodes = nodes.filter(d=> nodes_w_links.includes(d['id']))
-    // console.log(nodes4)
-    // console.log(nodes.filter(d=> d.synNodes.length > 0 || d.prevNodes.length > 0))
 
     let nodes = Object.values(_t_nodes).filter(d=> __nodes_w_links.includes(d['id']))
     // console.log(nodes.length)
@@ -477,31 +379,7 @@ function ForceGraph({
         return `url(#${color}_arrow)`
     }
 
-    // <marker
-    //     id="arrow"
-    //     markerUnits="strokeWidth"
-    //     markerWidth="12"
-    //     markerHeight="12"
-    //     viewBox="0 0 12 12"
-    //     refX="6"
-    //     refY="6"
-    //     orient="auto">
-    //     <path d="M2,2 L10,6 L2,10 L6,6 L2,2" style="fill: #f00;"></path>
-    // </marker>
-
-    // const link = svg.append("g")
-    //     .selectAll("line")
-    //     .data(links)
-    //     .join("line")
-    //     .attr("stroke", d=>d.color)
-    //     // .attr("display", 'none')
-    //     .attr("stroke-opacity", linkStrokeOpacity)
-    //     .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
-    //     .attr("stroke-linecap", linkStrokeLinecap)
-    //     .attr("marker-end",(d)=>m(d.color));
-
     const link = svg.append("g")
-        // .selectAll("line")
         .selectAll(".links")
         .data(links, d=> d.id)
         .join(
@@ -521,67 +399,28 @@ function ForceGraph({
                     .remove())
         );
 
-
-
-
-    // .each(function() {
-        //      d3.select(this).style("stroke", function(d) {return d.color})
-        //     .attr("marker-end", function (d) { return marker(d.color.formatHex())})
-        // });
-
-    // d3.selectAll("line")
-    //     .each(function() {
-    //          d3.select(this).style("stroke", function(d) {return d.color})
-    //         .attr("marker-end", function (d) { return marker(d.color.formatHex())})
-    //     });
-
-    // svg.append("svg:defs").append("svg:marker")
-    //     .attr("id", "triangle")
-    //     .attr("refX", 15)
-    //     .attr("refY", -1.5)
-    //     .attr("markerWidth", 6)
-    //     .attr("markerHeight", 6)
-    //     .attr("orient", "auto")
-    //     .append("path")
-    //     .attr("d", "M 0 -5 10 10")
-    //     .style("stroke", "black");
-
     if (W) link.attr("stroke-width", ({index: i}) => W[i]);
 
     const node = svg.append("g")
-        // .selectAll("circle")
         .selectAll(".nodes")
-
         .data(nodes, d=> d.id)
-        .join("circle")
-        .attr('class', 'nodes')
-        .attr("fill", d => d.fill)
-        .attr("stroke", nodeStroke)
-        .attr("stroke-opacity", nodeStrokeOpacity)
-        .attr("stroke-width", nodeStrokeWidth)
-        // .selectAll("circle")
-        // .data(nodes)
-        // .join("circle")
-        .attr("r", nodeRadius)
+        .join(
+            enter => enter.append('circle')
+                .attr('class', 'nodes')
+                .attr("fill", d => d.fill)
+                .attr("stroke", nodeStroke)
+                .attr("stroke-opacity", nodeStrokeOpacity)
+                .attr("stroke-width", nodeStrokeWidth)
+                .attr("r", nodeRadius)
+        )
         // //Drag feature
         .call(drag(simulation));
-
-    // const link = svg.append("g")
-    //     .selectAll("line")
-    //     .data(links)
-    //     .join("line")
-    //     .attr("stroke", d=>d.color)
-    //     .attr("stroke-opacity", linkStrokeOpacity)
-    //     .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
-    //     .attr("stroke-linecap", linkStrokeLinecap)
-    //     .attr("marker-end",()=>m());
 
     if (G) node.attr("fill", ({index: i}) => color(G[i]));
     if (T) node.append("title").text(({index: i}) => T[i]);
 
     // Handle invalidation.
     if (invalidation != null) invalidation.then(() => simulation.stop());
-
 
     // //Zoom Feature
     // svg.call(zoom);
