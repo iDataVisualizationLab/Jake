@@ -1,4 +1,4 @@
-let wrapper, container, sliderTrack, sliderOne, sliderTwo, minGap, sliderMaxValue, button, button_div, outer
+let wrapper, container, sliderTrack, sliderOne, sliderTwo, minGap, sliderMaxValue, button, button_div, outer, button2, button_div2
 
 let display_wrapper, display_min, display_max, display_dash
 
@@ -21,13 +21,9 @@ function slider_init(min, max, min_date_, max_date_) {
     display_dash.style.padding = '0 10px'
     display_wrapper.appendChild(display_dash)
 
-
-
     display_max = document.createElement('span')
     display_max.innerHTML = new Date(max_date).toLocaleDateString()
     display_wrapper.appendChild(display_max)
-
-
 
     outer = document.createElement('div')
     outer.style.display = 'flex'
@@ -61,6 +57,18 @@ function slider_init(min, max, min_date_, max_date_) {
     }
     button_div.appendChild(button)
 
+    button_div2 = document.createElement('div')
+    button_div2.style.padding = '0 3px'
+    outer.appendChild(button_div2)
+
+    button2 = document.createElement('button')
+    button2.style.padding = '0 10px'
+    button2.innerHTML = 'Draw'
+    button2.onclick = function (){
+        filter_links(new Date(min_date + +sliderOne.value),new Date(min_date + +sliderTwo.value))
+    }
+    button_div2.appendChild(button2)
+
     container = document.createElement('div')
     container.className = 'container'
     wrapper.appendChild(container)
@@ -81,7 +89,7 @@ function slider_init(min, max, min_date_, max_date_) {
     sliderOne.type = 'range'
     sliderOne.min = min
     sliderOne.max = max
-    sliderOne.value = max
+    sliderOne.value = min
     sliderOne.id = "slider-1"
     sliderOne.style.zIndex ='1'
     sliderMaxValue = sliderOne.max;
@@ -120,4 +128,8 @@ function fillColor(){
     let percent1 = (sliderOne.value / sliderMaxValue) * 100;
     let percent2 = (sliderTwo.value / sliderMaxValue) * 100;
     sliderTrack.style.background = `linear-gradient(to right, #dadae5 ${percent1}% , #3264fe ${percent1}% , #3264fe ${percent2}%, #dadae5 ${percent2}%)`;
+
+    // console.log(new Date(min_date + +sliderOne.value).toLocaleDateString())
+    // console.log(new Date(min_date + +sliderTwo.value).toLocaleDateString())
+
 }

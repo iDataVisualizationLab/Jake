@@ -1,4 +1,7 @@
 
+let all_links
+let all_nodes
+
 
 const main = async function(){
     let _data = await d3.tsv('data/hgnc_complete_set.txt')
@@ -53,12 +56,11 @@ const main = async function(){
     let nodes4 = {}
     prev.forEach(d=> {
     // all_old.forEach(d=> {
-            nodes4[d] = {
+            nodes4[d]={
                 'id': d,
                 'Approved Symbol': d,
-                'fill': 'red',
-                'hide': true
-        }
+                'fill': 'red'
+            }
     })
 
     Object.keys(nodes1).forEach(d=>{
@@ -70,7 +72,7 @@ const main = async function(){
                 nodes2[d]['prevNodes'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes1[f])
                 nodes2[d]['prevNodes_old'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes4[f])
                 nodes2[d]['date_symbol_changed'] = nodes1[d]['data']['date_symbol_changed']
-
+                nodes2[d]['fill'] = 'black'
                 nodes2[e] = nodes1[e]
                 nodes2[e]['synNodes'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes1[f])
                 nodes2[e]['synNodes_old'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes4[f])
@@ -88,6 +90,7 @@ const main = async function(){
                 nodes3[d]['prevNodes'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes1[f])
                 nodes3[d]['prevNodes_old'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes4[f])
                 nodes3[d]['date_symbol_changed'] = nodes1[d]['data']['date_symbol_changed']
+                nodes3[d]['fill'] = 'black'
                 nodes3[e] = nodes1[e]
                 nodes3[e]['synNodes'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes1[f])
                 nodes3[e]['synNodes_old'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes4[f])
@@ -182,7 +185,7 @@ const main = async function(){
                     source: nodes4[e]['id'],
                     target: d['id'],
                     type: 'prev_synonym',
-                    change_date: d['date_symbol_changed'],
+                    change_date: nodes4[e]['date_symbol_changed'],
                     color: 'orange',
                     // bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
                 })
@@ -203,8 +206,8 @@ const main = async function(){
                 })
             }
         })
-
     })
+    __links.forEach(d=> d['set'] = 1)
 
     let __nodes_w_links = []
     __nodes_w_links = __nodes_w_links.concat(__links.map(d=> d.source))
@@ -224,30 +227,57 @@ const main = async function(){
     }
 
     let nodes = Object.values(_t_nodes).filter(d=> __nodes_w_links.includes(d['id']))
-    // console.log(nodes.length)
+
     let links = __links
 
+    all_links = links
+    all_nodes = nodes
+    console.log(all_nodes)
+
+
     autocomplete(document.getElementById("_input"), nodes.map(d=>d['id']));
+
+    draw(nodes, links)
+
+    // setTimeout(draw, 5000, nodes, links.slice(0,links.length/2),{init:false});
+    // setTimeout(draw, 10000, nodes, links,{init:false});
+
+}
+
+main()
+function draw(nodes, links, {init=true} = {}){
 
     ForceGraph({nodes, links}, {
         // nodeId: d => d.id,
         //nodeGroup: d => d.group,
         //nodeTitle: d => `${d.id} (${d.group})`,
-        width: 1500,
-        height: 1500,
+        init: init,
+        width: 2500,
+        height: 2500,
         invalidation: null // a promise to stop the simulation when the cell is re-run
     })
-
-    // return [nodes, links]
 }
 
-main()
+
+function filter_links(date1,date2){
+    if(all_links){
+        let l1 = [...all_links].filter(d=> d.change_date == null || d.change_date == "")
+        let l2 = [...all_links].filter(d=> d.change_date && d.change_date != "")
+
+        l1 = l1.concat(l2.filter(d=> new Date(Date.parse(d.change_date)) >= date1 &&  new Date(Date.parse(d.change_date)) <= date2))
+        // l1 = l2.filter(d=> new Date(Date.parse(d.change_date)) >= date1 &&  new Date(Date.parse(d.change_date)) <= date2)
+
+        draw(all_nodes, l1, {init:false})
+
+    }
+}
 
 
 function ForceGraph({
                         nodes, // an iterable of node objects (typically [{id}, …])
                         links // an iterable of link objects (typically [{source, target}, …])
                     }, {
+                        init = true,
                         nodeId = d => d.id, // given d in nodes, returns a unique identifier (string)
                         nodeGroup, // given d in nodes, returns an (ordinal) value for color
                         nodeGroups, // an array of ordinal values representing the node groups
@@ -264,6 +294,7 @@ function ForceGraph({
                         linkType = ({type}) => type,
                         linkStroke = ({color}) => color,
                         linkChangeDate = ({change_date}) => change_date,
+                        linkId = ({id}) => id,
                         // linkBidirectional = ({bidirectional}) => bidirectional,
                         // linkStroke = "#999", // link stroke color
                         linkStrokeOpacity = 0.6, // link stroke opacity
@@ -274,6 +305,7 @@ function ForceGraph({
                         width = 640, // outer width, in pixels
                         height = 400, // outer height, in pixels
                         invalidation // when this promise resolves, stop the simulation
+
                     } = {}) {
     // Compute values.
     const N = d3.map(nodes, nodeId).map(intern);
@@ -283,17 +315,19 @@ function ForceGraph({
     const LType = d3.map(links, linkType).map(intern);
     const LC = d3.map(links, linkStroke).map(intern);
     const LChD = d3.map(links, linkChangeDate).map(intern);
-    // const LD = d3.map(links, linkBidirectional).map(intern);
+    const LId = d3.map(links, linkId).map(intern);
     if (nodeTitle === undefined) nodeTitle = (_, i) => N[i];
     const T = nodeTitle == null ? null : d3.map(nodes, nodeTitle);
     const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
     const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, linkStrokeWidth);
     // const C = typeof linkStroke !== "function" ? null : d3.map(links, linkStroke);
 
+    let _links = [...links]
+    let _nodes = init ? [...nodes] : [... new Set(_links.map(d=> d.target).concat(_links.map(d=> d.source)))]
+
     // Replace the input nodes and links with mutable objects for the simulation.
-    // nodes = d3.map(nodes, (_, i) => ({id: N[i]}));
-    nodes = d3.map(nodes, (_, i) => ({id: N[i], fill: NF[i]}));
-    links = d3.map(links, (_, i) => ({source: LS[i], target: LT[i], type: LType[i], color: LC[i], change_date: LChD[i]}));
+    // nodes = d3.map(nodes, (_, i) => ({id: N[i], fill: NF[i]}));
+    // links = d3.map(links, (_, i) => ({id: LId[i], source: LS[i], target: LT[i], type: LType[i], color: LC[i], change_date: LChD[i]}));
 
     // Compute default domains.
     if (G && nodeGroups === undefined) nodeGroups = d3.sort(G);
@@ -303,11 +337,11 @@ function ForceGraph({
 
     // Construct the forces.
     const forceNode = d3.forceManyBody();
-    const forceLink = d3.forceLink(links).id(({index: i}) => N[i]);
+    const forceLink = d3.forceLink(_links).id(({index: i}) => N[i]);
     if (nodeStrength !== undefined) forceNode.strength(nodeStrength);
     if (linkStrength !== undefined) forceLink.strength(linkStrength);
 
-    const simulation = d3.forceSimulation(nodes)
+    const simulation = d3.forceSimulation(_nodes)
         .force("link", forceLink)
         .force("charge", forceNode)
         .force("x", d3.forceX())
@@ -379,31 +413,56 @@ function ForceGraph({
         return `url(#${color}_arrow)`
     }
 
-    const link = svg.append("g")
-        .selectAll(".links")
-        .data(links, d=> d.id)
-        .join(
-            enter => enter.append("line")
-                .attr('class', 'links')
-                .attr("stroke", d=>d.color)
-                // .attr("display", 'none')
-                .attr("stroke-opacity", linkStrokeOpacity)
-                .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
-                .attr("stroke-linecap", linkStrokeLinecap)
-                .attr("marker-end",(d)=>m(d.color)),
+    // const link = svg.append("g")
+    //     .selectAll(".links")
+    //     .data(links, d=> d.id)
+    //     .join(
+    //         enter => enter.append("line")
+    //             .attr('class', 'links')
+    //             .attr("stroke", d=>d.color)
+    //             // .attr("display", 'none')
+    //             .attr("stroke-opacity", linkStrokeOpacity)
+    //             .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
+    //             .attr("stroke-linecap", linkStrokeLinecap)
+    //             .attr("marker-end",(d)=>m(d.color)),
+    //
+    //         exit => exit
+    //             .call(exit => exit.transition()
+    //                 .attr("stroke", "green")
+    //                 .duration(750)
+    //                 .remove())
+    //     );
 
-            exit => exit
-                .call(exit => exit.transition()
-                    .attr("stroke", "green")
-                    .duration(750)
-                    .remove())
-        );
+
+    let link = svg.selectAll('.links')
+        .data(_links, d => d.id)
+        .join(
+            enter => {
+                let l = enter.append('line')
+                    .attr('class', 'links')
+                    .attr("stroke", d=>d.color)
+                    // .attr("display", 'none')
+                    .attr("stroke-opacity", linkStrokeOpacity)
+                    .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
+                    .attr("stroke-linecap", linkStrokeLinecap)
+                    .attr("marker-end",(d)=>m(d.color));
+                return l
+            },
+            update => update,
+
+
+            exit => exit.remove()
+                // .call(exit => exit.transition()
+                //     // .attr("stroke", "green")
+                //     // .duration(2500)
+                //     .remove())
+      );
+
 
     if (W) link.attr("stroke-width", ({index: i}) => W[i]);
 
-    const node = svg.append("g")
-        .selectAll(".nodes")
-        .data(nodes, d=> d.id)
+    const node = svg.selectAll(".nodes")
+        .data(_nodes, d=> d.id)
         .join(
             enter => enter.append('circle')
                 .attr('class', 'nodes')
@@ -411,10 +470,22 @@ function ForceGraph({
                 .attr("stroke", nodeStroke)
                 .attr("stroke-opacity", nodeStrokeOpacity)
                 .attr("stroke-width", nodeStrokeWidth)
-                .attr("r", nodeRadius)
+                .attr("r", nodeRadius),
+            update => update,
+
+
+            exit => exit.remove()
+                // .call(exit => exit.transition()
+                //     // .attr("stroke", "green")
+                //     // .duration(2500)
+                //     .remove())
         )
         // //Drag feature
         .call(drag(simulation));
+
+
+    d3.selectAll('.links').lower()
+    d3.selectAll('.nodes').raise()
 
     if (G) node.attr("fill", ({index: i}) => color(G[i]));
     if (T) node.append("title").text(({index: i}) => T[i]);
