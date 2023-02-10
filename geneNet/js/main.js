@@ -39,7 +39,7 @@ const main = async function(){
 
     let all_old = [... new Set(old_syn.concat(prev))]
 
-    let dates = _data.map(d=> d.date_symbol_changed).filter(d=> d != '').sort()
+    let dates = _data.map(d=> d.date_symbol_changed).filter(d=> d != '').concat(_data.map(d=> d.date_name_changed).filter(d=> d != '')).concat(_data.map(d=> d.date_modified).filter(d=> d != '')).sort()
 
     let first_date = dates[0]
     let last_date = dates[dates.length-1]
@@ -52,33 +52,45 @@ const main = async function(){
     // console.log(diffDays + " days");
 
     slider_init(0, diffTime, Date.parse(first_date)+ (1* (1000 * 60 * 60 * 24)), Date.parse(last_date)+ (1* (1000 * 60 * 60 * 24)))
+    let d_l = new Date(Date.parse(last_date)+ (1* (1000 * 60 * 60 * 24)))
+    let d_f = new Date(Date.parse(last_date)+ (1* (1000 * 60 * 60 * 24)))
+    d_f.setMonth(d_f.getMonth() - 1)
+
 
     let nodes4 = {}
-    prev.forEach(d=> {
-    // all_old.forEach(d=> {
-            nodes4[d]={
-                'id': d,
-                'Approved Symbol': d,
-                'fill': 'red'
-            }
+    // prev.forEach(d=> {
+    all_old.forEach(d=> {
+        nodes4[d]={
+            'id': d,
+            'Approved Symbol': d,
+            'fill': 'red',
+            'approved': false
+        }
     })
 
     Object.keys(nodes1).forEach(d=>{
         nodes1[d]['data']['Synonyms'].forEach(e=>{
             if(nodes1[e]){
                 nodes2[d] = nodes1[d]
+                nodes2[d]['approved'] = true
                 nodes2[d]['synNodes'] = nodes1[d]['data']['Synonyms'].filter(f=> nodes1[f])
                 nodes2[d]['synNodes_old'] = nodes1[d]['data']['Synonyms'].filter(f=> nodes4[f])
                 nodes2[d]['prevNodes'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes1[f])
                 nodes2[d]['prevNodes_old'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes4[f])
                 nodes2[d]['date_symbol_changed'] = nodes1[d]['data']['date_symbol_changed']
+                nodes2[d]['date_name_changed'] = nodes1[d]['data']['date_name_changed']
+                // nodes1[d]['data']['date_approved_reversed'] == '' ? nodes2[d]['fill'] = 'black' : nodes2[d]['fill'] = 'orange'
                 nodes2[d]['fill'] = 'black'
                 nodes2[e] = nodes1[e]
+                nodes2[e]['approved'] = true
                 nodes2[e]['synNodes'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes1[f])
                 nodes2[e]['synNodes_old'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes4[f])
                 nodes2[e]['prevNodes'] = nodes1[e]['data']['Previous Symbols'].filter(f=> nodes1[f])
                 nodes2[e]['prevNodes_old'] = nodes1[e]['data']['Previous Symbols'].filter(f=> nodes4[f])
                 nodes2[e]['date_symbol_changed'] = nodes1[e]['data']['date_symbol_changed']
+                nodes2[e]['date_name_changed'] = nodes1[e]['data']['date_name_changed']
+                // nodes1[e]['data']['date_approved_reversed'] == '' ? nodes2[e]['fill'] = 'black' : nodes2[e]['fill'] = 'orange'
+
                 nodes2[e]['fill'] = 'black'
             }
         })
@@ -90,17 +102,32 @@ const main = async function(){
                 nodes3[d]['prevNodes'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes1[f])
                 nodes3[d]['prevNodes_old'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes4[f])
                 nodes3[d]['date_symbol_changed'] = nodes1[d]['data']['date_symbol_changed']
+                nodes3[d]['date_name_changed'] = nodes1[d]['data']['date_name_changed']
+                // nodes1[d]['data']['date_approved_reversed'] == '' ? nodes3[d]['fill'] = 'black' : nodes3[d]['fill'] = 'orange'
                 nodes3[d]['fill'] = 'black'
+                nodes3[d]['approved'] = true
                 nodes3[e] = nodes1[e]
                 nodes3[e]['synNodes'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes1[f])
                 nodes3[e]['synNodes_old'] = nodes1[e]['data']['Synonyms'].filter(f=> nodes4[f])
                 nodes3[e]['prevNodes'] = nodes1[e]['data']['Previous Symbols'].filter(f=> nodes1[f])
                 nodes3[e]['prevNodes_old'] = nodes1[e]['data']['Previous Symbols'].filter(f=> nodes4[f])
                 nodes3[e]['date_symbol_changed'] = nodes1[e]['data']['date_symbol_changed']
+                nodes3[e]['date_name_changed'] = nodes1[e]['data']['date_name_changed']
+                // nodes1[e]['data']['date_approved_reversed'] == '' ? nodes3[e]['fill'] = 'black' : nodes3[e]['fill'] = 'orange'
                 nodes3[e]['fill'] = 'black'
+                nodes3[e]['approved'] = true
             }
         })
     })
+
+    Object.keys(nodes1).forEach(d =>{
+        nodes1[d]['synNodes'] = nodes1[d]['data']['Synonyms'].filter(f=> nodes1[f])
+        nodes1[d]['synNodes_old'] = nodes1[d]['data']['Synonyms'].filter(f=> nodes4[f])
+        nodes1[d]['prevNodes'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes1[f])
+        nodes1[d]['prevNodes_old'] = nodes1[d]['data']['Previous Symbols'].filter(f=> nodes4[f])
+        nodes1[d]['date_symbol_changed'] = nodes1[d]['data']['date_symbol_changed']
+        nodes1[d]['date_name_changed'] = nodes1[d]['data']['date_name_changed']
+    });
 
     function isEqual(obj1, obj2) {
         let props1 = Object.getOwnPropertyNames(obj1);
@@ -134,11 +161,34 @@ const main = async function(){
             ... nodes2,
             ... nodes3
         }
-        __nodes = [... new Set(Object.values(nodes2).concat(Object.values(nodes3)))]
+        // __nodes = [... new Set(Object.values(nodes2).concat(Object.values(nodes3)))]
+        __nodes = [... new Set(Object.values(t_nodes))]
     }
     else{
         console.error('Non-identical objects with same key')
     }
+
+
+    let t_nodes_
+    // let ___nodes
+    // if (check_duplicates(t_nodes, nodes1)){
+    //     t_nodes_ = {
+    //         ... t_nodes,
+    //         ... nodes1
+    //     }
+    //     __nodes = [... new Set(Object.values(t_nodes_))]
+    // }
+    // else{
+    //     console.error('Non-identical objects with same key')
+    // }
+
+
+
+    // console.log(___nodes.length)
+
+
+
+
 
     //check if two arrays are identical
     let inside_checker = (arr, target) => target.every(v => arr.includes(v));
@@ -151,11 +201,13 @@ const main = async function(){
         d.synNodes.forEach(e=>{
             if (d['id'] !== e){
                 __links.push({
-                    id: __links.length-1,
+                    id: __links.length,
                     source: d['id'],
                     target: t_nodes[e]['id'],
                     type: 'synonym',
-                    change_date: null,
+                    symbol_change_date: null,
+                    name_change_date: null,
+                    date_modified: d['date_modified'],
                     color:'blue',
                     // bidirectional: outside_checker([d['id'],nodes2[e]['id']], Object.keys(linksObject))
                 })
@@ -166,11 +218,13 @@ const main = async function(){
                 __links.push({
                     // source: d['id'],
                     // target: nodes3[e]['id'],
-                    id: __links.length-1,
+                    id: __links.length,
                     source: t_nodes[e]['id'],
                     target: d['id'],
                     type: 'prev',
-                    change_date: d['date_symbol_changed'],
+                    symbol_change_date: d['date_symbol_changed'],
+                    name_change_date: d['date_name_changed'],
+                    date_modified: d['date_modified'],
                     color: 'red',
                     // bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
                 })
@@ -181,11 +235,13 @@ const main = async function(){
                 __links.push({
                     // source: d['id'],
                     // target: nodes3[e]['id'],
-                    id: __links.length-1,
+                    id: __links.length,
                     source: nodes4[e]['id'],
                     target: d['id'],
                     type: 'prev_synonym',
-                    change_date: nodes4[e]['date_symbol_changed'],
+                    symbol_change_date: d['date_symbol_changed'],
+                    name_change_date: d['date_name_changed'],
+                    date_modified: d['date_modified'],
                     color: 'orange',
                     // bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
                 })
@@ -196,11 +252,13 @@ const main = async function(){
                 __links.push({
                     // source: d['id'],
                     // target: nodes3[e]['id'],
-                    id: __links.length-1,
+                    id: __links.length,
                     source: nodes4[e]['id'],
                     target: d['id'],
                     type: 'prev',
-                    change_date: d['date_symbol_changed'],
+                    symbol_change_date: d['date_symbol_changed'],
+                    name_change_date: d['date_name_changed'],
+                    date_modified: d['date_modified'],
                     color: 'red',
                     // bidirectional: outside_checker([d['id'],nodes3[e]['id']], Object.keys(linksObject_))
                 })
@@ -216,10 +274,10 @@ const main = async function(){
 
 
     let _t_nodes
-    if (check_duplicates(nodes4, __nodes)){
+    if (check_duplicates(nodes4, t_nodes)){
         _t_nodes = {
             ... nodes4,
-            ... __nodes
+            ... t_nodes
         }
     }
     else{
@@ -227,21 +285,27 @@ const main = async function(){
     }
 
     let nodes = Object.values(_t_nodes).filter(d=> __nodes_w_links.includes(d['id']))
-
     let links = __links
 
+    // let links = await initial_filter_links(__links, d_f, d_l ,Object.values(_t_nodes))
+
+    //
+    //
+    //
+    // let nodes = Object.values(_t_nodes).filter(d=> [... new Set(links.map(d=> d.target).concat(links.map(d=> d.source)))].includes(d.id))
+    //
+    //
+    //
+    //
+    // console.log([... new Set(links.map(d=> d.target).concat(links.map(d=> d.source)))])
+    //
+    // let initial_data = await initial_filter_links(__links, d_f, d_l)
     all_links = links
     all_nodes = nodes
-    console.log(all_nodes)
-
 
     autocomplete(document.getElementById("_input"), nodes.map(d=>d['id']));
 
     draw(nodes, links)
-
-    // setTimeout(draw, 5000, nodes, links.slice(0,links.length/2),{init:false});
-    // setTimeout(draw, 10000, nodes, links,{init:false});
-
 }
 
 main()
@@ -260,16 +324,46 @@ function draw(nodes, links, {init=true} = {}){
 
 
 function filter_links(date1,date2){
-    if(all_links){
-        let l1 = [...all_links].filter(d=> d.change_date == null || d.change_date == "")
-        let l2 = [...all_links].filter(d=> d.change_date && d.change_date != "")
 
-        l1 = l1.concat(l2.filter(d=> new Date(Date.parse(d.change_date)) >= date1 &&  new Date(Date.parse(d.change_date)) <= date2))
-        // l1 = l2.filter(d=> new Date(Date.parse(d.change_date)) >= date1 &&  new Date(Date.parse(d.change_date)) <= date2)
+    if(all_links){
+        let l1 = [...all_links].filter(d=> (d.type != 'prev_synonym') && (d.symbol_change_date == null || d.symbol_change_date == "") && (d.name_change_date == null || d.name_change_date == ""))
+        let l2 = [...all_links].filter(d=> d.type != 'prev_synonym' && (d.symbol_change_date && d.symbol_change_date != ""))
+        let l3 = [...all_links].filter(d=> d.type != 'prev_synonym' && (d.symbol_change_date == null || d.symbol_change_date == "") && d.name_change_date && d.name_change_date != "")
+        let l4 = [...all_links].filter(d=> d.type == 'prev_synonym')
+        let l5 = [...all_links].filter(d=> d.type == 'prev' && d.date_modified != "" && (d.symbol_change_date == null || d.symbol_change_date == "") && (d.name_change_date == null || d.name_change_date == ""))
+        l1 = l1.filter(d=> !l5.includes(d))
+        // console.log(l3)
+
+        l1 = l1.concat(l2.filter(d=> new Date(Date.parse(d.symbol_change_date)) >= date1 &&  new Date(Date.parse(d.symbol_change_date)) <= date2))
+        l1 = l1.concat(l3.filter(d=> new Date(Date.parse(d.name_change_date)) >= date1 &&  new Date(Date.parse(d.name_change_date)) <= date2))
+        l1 = l1.concat(l4.filter(d=> new Date(Date.parse(d.date_modified)) >= date1 &&  new Date(Date.parse(d.date_modified)) <= date2))
+        l1 = l1.concat(l5.filter(d=> new Date(Date.parse(d.date_modified)) >= date1 &&  new Date(Date.parse(d.date_modified)) <= date2))
+
+
+        // l1 = l2.filter(d=> new Date(Date.parse(d.symbol_change_date)) >= date1 &&  new Date(Date.parse(d.symbol_change_date)) <= date2)
 
         draw(all_nodes, l1, {init:false})
 
     }
+}
+
+
+async function initial_filter_links(links,date1,date2, nodes){
+    let l1 = [...links].filter(d=> (d.type != 'prev_synonym') && (d.symbol_change_date == null || d.symbol_change_date == "") && (d.name_change_date == null || d.name_change_date == ""))
+    let l2 = [...links].filter(d=> d.type != 'prev_synonym' && (d.symbol_change_date && d.symbol_change_date != ""))
+    let l3 = [...links].filter(d=> d.type != 'prev_synonym' && (d.symbol_change_date == null || d.symbol_change_date == "") && d.name_change_date && d.name_change_date != "")
+    let l4 = [...links].filter(d=> d.type == 'prev_synonym')
+    let l5 = [...links].filter(d=> d.type == 'prev' && d.date_modified != "" && (d.symbol_change_date == null || d.symbol_change_date == "") && (d.name_change_date == null || d.name_change_date == ""))
+    l1 = l1.filter(d=> !l5.includes(d))
+
+    l1 = l1.concat(l2.filter(d=> new Date(Date.parse(d.symbol_change_date)) >= date1 &&  new Date(Date.parse(d.symbol_change_date)) <= date2))
+    l1 = l1.concat(l3.filter(d=> new Date(Date.parse(d.name_change_date)) >= date1 &&  new Date(Date.parse(d.name_change_date)) <= date2))
+    l1 = l1.concat(l4.filter(d=> new Date(Date.parse(d.date_modified)) >= date1 &&  new Date(Date.parse(d.date_modified)) <= date2))
+    l1 = l1.concat(l5.filter(d=> new Date(Date.parse(d.date_modified)) >= date1 &&  new Date(Date.parse(d.date_modified)) <= date2))
+
+    let n1 = nodes.filter(d=> [... new Set(l1.map(d=> d.target).concat(l1.map(d=> d.source)))].includes(d.id))
+
+    return [n1, l1]
 }
 
 
@@ -293,7 +387,7 @@ function ForceGraph({
                         linkTarget = ({target}) => target, // given d in links, returns a node identifier string
                         linkType = ({type}) => type,
                         linkStroke = ({color}) => color,
-                        linkChangeDate = ({change_date}) => change_date,
+                        linkChangeDate = ({symbol_change_date}) => symbol_change_date,
                         linkId = ({id}) => id,
                         // linkBidirectional = ({bidirectional}) => bidirectional,
                         // linkStroke = "#999", // link stroke color
@@ -325,9 +419,13 @@ function ForceGraph({
     let _links = [...links]
     let _nodes = init ? [...nodes] : [... new Set(_links.map(d=> d.target).concat(_links.map(d=> d.source)))]
 
+
+
+
+
     // Replace the input nodes and links with mutable objects for the simulation.
     // nodes = d3.map(nodes, (_, i) => ({id: N[i], fill: NF[i]}));
-    // links = d3.map(links, (_, i) => ({id: LId[i], source: LS[i], target: LT[i], type: LType[i], color: LC[i], change_date: LChD[i]}));
+    // links = d3.map(links, (_, i) => ({id: LId[i], source: LS[i], target: LT[i], type: LType[i], color: LC[i], symbol_change_date: LChD[i]}));
 
     // Compute default domains.
     if (G && nodeGroups === undefined) nodeGroups = d3.sort(G);

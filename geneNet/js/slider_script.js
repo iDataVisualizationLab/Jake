@@ -89,7 +89,7 @@ function slider_init(min, max, min_date_, max_date_) {
     sliderOne.type = 'range'
     sliderOne.min = min
     sliderOne.max = max
-    sliderOne.value = min
+    sliderOne.value = max
     sliderOne.id = "slider-1"
     sliderOne.style.zIndex ='1'
     sliderMaxValue = sliderOne.max;
