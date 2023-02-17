@@ -1,6 +1,9 @@
 # Jake
 https://idatavisualizationlab.github.io/Jake/
 
+### GeneNet
+https://idatavisualizationlab.github.io/Jake/genenet/index.html
+
 ### Soil Composition
 Alphashape - https://idatavisualizationlab.github.io/Jake/SoilComposition/alphashape_2/index.html
 
